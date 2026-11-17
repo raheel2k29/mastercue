@@ -67,13 +67,22 @@ function getPgPool(): Pool | null {
   if (!rawUrl) return null;
 
   if (!pgPool) {
-    const cleanUrl = rawUrl.replace(/[?&]channel_binding=[^&]+/g, '');
+    // Strip channel_binding and sslmode query params; pg handles SSL via ssl: { rejectUnauthorized: false }
+    const cleanUrl = rawUrl
+      .replace(/[?&]channel_binding=[^&]+/g, '')
+      .replace(/[?&]sslmode=[^&]+/g, '');
+
     pgPool = new Pool({
       connectionString: cleanUrl,
       ssl: { rejectUnauthorized: false },
-      max: 10,
-      idleTimeoutMillis: 60000,
-      connectionTimeoutMillis: 8000,
+      max: 5,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    });
+
+    pgPool.on('error', (err) => {
+      console.error('PostgreSQL idle client disconnected, resetting pool:', err);
+      pgPool = null;
     });
   }
   return pgPool;
@@ -163,17 +172,33 @@ function getLocalUsers(): AdminUserRecord[] {
 // Public Database Interface
 // -------------------------------------------------------------
 
-export function getDatabaseStatus(): {
+export async function getDatabaseStatus(): Promise<{
   type: 'postgresql' | 'local';
   connected: boolean;
   hasEnvUrl: boolean;
-} {
-  const isPg = Boolean(process.env.DATABASE_URL);
-  return {
-    type: isPg ? 'postgresql' : 'local',
-    connected: true,
-    hasEnvUrl: isPg,
-  };
+  error?: string;
+}> {
+  const isPg = Boolean(process.env.DATABASE_URL || process.env.POSTGRES_URL);
+  if (!isPg) {
+    return { type: 'local', connected: false, hasEnvUrl: false };
+  }
+
+  const pool = getPgPool();
+  if (!pool) {
+    return { type: 'postgresql', connected: false, hasEnvUrl: true, error: 'Connection string missing' };
+  }
+
+  try {
+    await pool.query('SELECT 1');
+    return { type: 'postgresql', connected: true, hasEnvUrl: true };
+  } catch (err: any) {
+    return {
+      type: 'postgresql',
+      connected: false,
+      hasEnvUrl: true,
+      error: err?.message || 'Failed connecting to PostgreSQL',
+    };
+  }
 }
 
 export async function findAdminByEmail(email: string): Promise<AdminUserRecord | null> {
@@ -215,7 +240,9 @@ export async function loadPricingFromDB(): Promise<PricingConfig> {
     try {
       const res = await pool.query('SELECT config FROM pricing_configs WHERE id = $1', ['active']);
       if (res.rows.length > 0 && res.rows[0].config) {
-        memoryPricing = res.rows[0].config as PricingConfig;
+        let parsed = res.rows[0].config;
+        if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+        memoryPricing = parsed as PricingConfig;
         return memoryPricing;
       }
     } catch (err: any) {
@@ -223,7 +250,9 @@ export async function loadPricingFromDB(): Promise<PricingConfig> {
         await initPgTables(pool);
         const retryRes = await pool.query('SELECT config FROM pricing_configs WHERE id = $1', ['active']);
         if (retryRes.rows.length > 0 && retryRes.rows[0].config) {
-          memoryPricing = retryRes.rows[0].config as PricingConfig;
+          let parsed = retryRes.rows[0].config;
+          if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+          memoryPricing = parsed as PricingConfig;
           return memoryPricing;
         }
       }
@@ -285,6 +314,7 @@ export async function savePricingToDB(config: PricingConfig): Promise<boolean> {
         return true;
       }
       console.error('Failed saving to PostgreSQL database:', err);
+      throw new Error(`Cloud database save error: ${err?.message || 'PostgreSQL connection failed'}`);
     }
   }
 
