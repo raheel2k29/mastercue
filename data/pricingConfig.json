@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "lastUpdated": "2026-11-16T17:39:29.530Z",
+  "version": 5,
+  "lastUpdated": "2026-11-17T01:46:20.214Z",
   "surcharges": {
     "buttJointFittingPrice": 12,
     "domeJointPrice": 31,
@@ -16,7 +16,7 @@
     {
       "id": "4242380b-f55f-e711-9417-901b0e53171f",
       "name": "Ash Grade P80",
-      "price": 575,
+      "price": 580,
       "enabled": true
     },
     {

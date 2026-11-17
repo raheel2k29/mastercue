@@ -59,10 +59,17 @@ let pgPool: Pool | null = null;
 let pgInitialized = false;
 
 function getPgPool(): Pool | null {
-  if (!process.env.DATABASE_URL) return null;
+  const rawUrl =
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL_UNPOOLED;
+
+  if (!rawUrl) return null;
+
   if (!pgPool) {
+    const cleanUrl = rawUrl.replace(/[?&]channel_binding=[^&]+/g, '');
     pgPool = new Pool({
-      connectionString: process.env.DATABASE_URL,
+      connectionString: cleanUrl,
       ssl: { rejectUnauthorized: false },
     });
   }
