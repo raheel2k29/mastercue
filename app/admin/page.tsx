@@ -46,7 +46,13 @@ export default function AdminPricingPage() {
   const loadConfig = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/pricing', { cache: 'no-store' });
+      const res = await fetch(`/api/admin/pricing?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+        },
+      });
       const data = await res.json();
       if (data.success && data.config) {
         setConfig(data.config);
@@ -102,7 +108,10 @@ export default function AdminPricingPage() {
 
       const res = await fetch('/api/admin/pricing', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
         body: JSON.stringify(config),
       });
 
@@ -114,6 +123,13 @@ export default function AdminPricingPage() {
       setConfig(data.config);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 4000);
+
+      // Instant cross-tab real-time sync with storefront/customizer
+      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        const channel = new BroadcastChannel('mastercue-pricing');
+        channel.postMessage({ type: 'PRICING_UPDATED', timestamp: Date.now() });
+        channel.close();
+      }
     } catch (err: any) {
       setSaveError(err.message || 'Error saving configuration');
     } finally {
@@ -135,7 +151,10 @@ export default function AdminPricingPage() {
       setSaving(true);
       const res = await fetch('/api/admin/pricing', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
         body: JSON.stringify({ action: 'reset' }),
       });
       const data = await res.json();
@@ -143,6 +162,13 @@ export default function AdminPricingPage() {
         setConfig(data.config);
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
+
+        // Instant cross-tab real-time sync with storefront/customizer
+        if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+          const channel = new BroadcastChannel('mastercue-pricing');
+          channel.postMessage({ type: 'PRICING_UPDATED', timestamp: Date.now() });
+          channel.close();
+        }
       }
     } catch (err: any) {
       setSaveError(err.message || 'Failed to reset pricing');

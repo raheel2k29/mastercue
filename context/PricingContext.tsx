@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { PricingConfig } from '@/types/admin';
 import { getDefaultPricingConfig } from '@/lib/defaultPricing';
 import {
@@ -25,7 +25,7 @@ import {
   CueMiniButt,
   CueConfiguration,
 } from '@/types/cue';
-import { calculatePrice } from '@/lib/cueEngine';
+import { calculatePrice, getButtTimberAsset, isLargeSplicesAllowed } from '@/lib/cueEngine';
 
 interface DynamicCatalog {
   shafts: CueShaft[];
@@ -57,11 +57,17 @@ export const PricingProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [config, setConfig] = useState<PricingConfig>(() => getDefaultPricingConfig());
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Fetch dynamic pricing from backend
-  const refreshPricing = async () => {
+  // Fetch dynamic pricing directly from PostgreSQL backed API with zero caching
+  const refreshPricing = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/pricing', { cache: 'no-store' });
+      const res = await fetch(`/api/admin/pricing?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+        },
+      });
       if (!res.ok) throw new Error('Failed to fetch pricing config');
       const data = await res.json();
       if (data.success && data.config) {
@@ -72,13 +78,26 @@ export const PricingProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     refreshPricing();
-  }, []);
 
-  // Construct dynamic catalog by merging original static items with admin prices & statuses
+    // Cross-tab real-time sync when Admin updates pricing in another window/tab
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      const channel = new BroadcastChannel('mastercue-pricing');
+      channel.onmessage = (event) => {
+        if (event.data?.type === 'PRICING_UPDATED') {
+          refreshPricing();
+        }
+      };
+      return () => {
+        channel.close();
+      };
+    }
+  }, [refreshPricing]);
+
+  // Construct dynamic catalog by merging original static items with active DB prices & statuses
   const catalog = useMemo<DynamicCatalog>(() => {
     // 1. Shafts
     const shaftPriceMap = new Map(config.shafts.map((s) => [s.id, s]));
@@ -151,8 +170,7 @@ export const PricingProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return {
         ...p,
         price: adminItem ? adminItem.price : p.price,
-        engravingPrice: adminItem?.engravingPrice ?? p.engravingPrice,
-        allowEngraving: adminItem ? adminItem.allowEngraving : p.allowEngraving,
+        engravingPrice: adminItem ? adminItem.engravingPrice : p.engravingPrice,
         enabled: adminItem?.enabled !== false,
       };
     });
@@ -192,12 +210,158 @@ export const PricingProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, [config]);
 
-  const calculateDynamicPrice = (targetCue: CueConfiguration) => {
-    return calculatePrice(targetCue, {
-      buttJointFittingPrice: catalog.surcharges.buttJointFittingPrice,
-      domeJointPrice: catalog.surcharges.domeJointPrice,
-    });
-  };
+  // Robust, 100% reactive price calculation resolving against the active database configuration
+  const calculateDynamicPrice = useCallback(
+    (targetCue: CueConfiguration) => {
+      // 1. Shaft price lookup from dynamic catalog
+      const shaftItem = catalog.shafts.find((s) => s.id === targetCue.shaft?.id);
+      const shaftPrice = shaftItem ? shaftItem.price : (targetCue.shaft?.price || 0);
+
+      // 2. Length price lookup from dynamic catalog
+      const lengthItem = catalog.lengths.find((l) => l.id === targetCue.length?.id);
+      const lengthPrice = lengthItem ? lengthItem.price : (targetCue.length?.price || 0);
+
+      // 3. Butt Timber
+      const timberAsset = getButtTimberAsset(targetCue);
+      const buttTimberPrice = timberAsset?.price || 0;
+
+      // 4. Splices & Veneers
+      const spliceCheck = isLargeSplicesAllowed(targetCue);
+      let largeSplicePrice = 0;
+      let smallSplicePrice = 0;
+      let largeVeneersPrice = 0;
+      let smallVeneersPrice = 0;
+
+      if (spliceCheck.allowed) {
+        if (targetCue.largeSpliceMaterial) {
+          const sp = catalog.splices.find((s) => s.id === targetCue.largeSpliceMaterial?.id);
+          if (targetCue.largeSplices === 1) {
+            largeSplicePrice = sp ? sp.onePrice : (targetCue.largeSpliceMaterial.onePrice || 0);
+          } else if (targetCue.largeSplices === 4) {
+            largeSplicePrice = sp ? sp.fourPrice : (targetCue.largeSpliceMaterial.fourPrice || 0);
+          }
+        }
+
+        if (targetCue.smallSpliceMaterial) {
+          const sp = catalog.splices.find((s) => s.id === targetCue.smallSpliceMaterial?.id);
+          if (targetCue.smallSplices === 1) {
+            smallSplicePrice = sp ? sp.onePrice : (targetCue.smallSpliceMaterial.onePrice || 0);
+          } else if (targetCue.smallSplices === 4) {
+            smallSplicePrice = sp ? sp.fourPrice : (targetCue.smallSpliceMaterial.fourPrice || 0);
+          }
+        }
+
+        if (targetCue.largeSplices > 0 && targetCue.largeVeneers?.length) {
+          for (const v of targetCue.largeVeneers) {
+            if (v.name === 'None') continue;
+            const vCat = catalog.veneers.find((cv) => cv.id === v.veneer_Id || cv.name === v.name);
+            const assetDef =
+              vCat?.assets?.find((a) => a.layer === v.layer) ||
+              v.asset?.assets?.find((a) => a.layer === v.layer);
+            if (assetDef) {
+              largeVeneersPrice +=
+                targetCue.largeSplices === 4 ? (assetDef.fourPrice || 0) : (assetDef.price || 0);
+            }
+          }
+        }
+
+        if (targetCue.smallSplices > 0 && targetCue.smallVeneers?.length) {
+          for (const v of targetCue.smallVeneers) {
+            if (v.name === 'None') continue;
+            const vCat = catalog.veneers.find((cv) => cv.id === v.veneer_Id || cv.name === v.name);
+            const assetDef =
+              vCat?.assets?.find((a) => a.layer === v.layer) ||
+              v.asset?.assets?.find((a) => a.layer === v.layer);
+            if (assetDef) {
+              smallVeneersPrice +=
+                targetCue.smallSplices === 4 ? (assetDef.fourPrice || 0) : (assetDef.price || 0);
+            }
+          }
+        }
+      }
+
+      // 5. Joint & Dome fittings
+      const endButtJoinPrice = targetCue.endButtJoin ? catalog.surcharges.buttJointFittingPrice : 0;
+      const domeJointPrice = targetCue.dome ? catalog.surcharges.domeJointPrice : 0;
+
+      // 6. Ferrule
+      const ferruleItem = catalog.ferrules.find((f) => f.id === targetCue.ferruleType?.id);
+      const ferrulePrice = ferruleItem ? ferruleItem.price : (targetCue.ferruleType?.price || 0);
+
+      // 7. Tip Size
+      const tipItem = config.tipSizes?.find(
+        (t) => t.id === targetCue.tipSize?.id || t.name === targetCue.tipSize?.name
+      );
+      const tipPrice = tipItem ? tipItem.price : (targetCue.tipSize?.price || 0);
+
+      // 8. Nameplate & Engraving
+      const plateItem = catalog.namePlates.find((p) => p.id === targetCue.namePlate?.id);
+      const platePrice = plateItem ? plateItem.price : (targetCue.namePlate?.price || 0);
+      const isCustomEngraving =
+        targetCue.namePlate?.allowEngraving !== false && Boolean(targetCue.engraving?.trim());
+      const engravingPrice =
+        isCustomEngraving && plateItem
+          ? plateItem.engravingPrice
+          : isCustomEngraving
+          ? targetCue.namePlate?.engravingPrice || 0
+          : 0;
+
+      // 9. Extensions
+      let extensionsPrice = 0;
+      if (targetCue.endButtJoin && targetCue.extensions?.length) {
+        for (const ext of targetCue.extensions) {
+          const extItem = catalog.extensions.find((e) => e.id === ext.id);
+          extensionsPrice += extItem ? extItem.price : (ext.price || 0);
+        }
+      }
+
+      // 10. Mini Butt
+      let miniButtPrice = 0;
+      if (targetCue.endButtJoin && targetCue.miniButt) {
+        const miniItem = catalog.miniButts.find((m) => m.id === targetCue.miniButt?.id);
+        miniButtPrice = miniItem ? miniItem.price : (targetCue.miniButt.price || 0);
+      }
+
+      const total = Math.max(
+        0,
+        shaftPrice +
+          lengthPrice +
+          buttTimberPrice +
+          largeSplicePrice +
+          smallSplicePrice +
+          largeVeneersPrice +
+          smallVeneersPrice +
+          endButtJoinPrice +
+          domeJointPrice +
+          ferrulePrice +
+          tipPrice +
+          platePrice +
+          engravingPrice +
+          miniButtPrice +
+          extensionsPrice
+      );
+
+      return {
+        shaftPrice,
+        lengthPrice,
+        buttTimberPrice,
+        largeSplicePrice,
+        smallSplicePrice,
+        largeVeneersPrice,
+        smallVeneersPrice,
+        endButtJoinPrice,
+        domeJointPrice,
+        ferrulePrice,
+        tipPrice,
+        platePrice,
+        engravingPrice,
+        miniButtPrice,
+        extensionsPrice,
+        total,
+      };
+    },
+    [catalog, config]
+  );
 
   return (
     <PricingContext.Provider

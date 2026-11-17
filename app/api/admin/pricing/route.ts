@@ -4,15 +4,30 @@ import { getSessionUser } from '@/lib/auth';
 import { savePricingConfig, resetPricingConfig } from '@/lib/pricingStore';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const NO_CACHE_HEADERS = {
+  'Content-Type': 'application/json',
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0',
+  'Pragma': 'no-cache',
+  'Expires': '0',
+  'Surrogate-Control': 'no-store',
+};
 
 export async function GET() {
   try {
     const config = await loadPricingFromDB();
-    return NextResponse.json({ success: true, config });
+    return new NextResponse(JSON.stringify({ success: true, config }), {
+      status: 200,
+      headers: NO_CACHE_HEADERS,
+    });
   } catch (error: any) {
-    return NextResponse.json(
-      { success: false, error: error?.message || 'Failed to fetch pricing config' },
-      { status: 500 }
+    return new NextResponse(
+      JSON.stringify({ success: false, error: error?.message || 'Failed to fetch pricing config' }),
+      {
+        status: 500,
+        headers: NO_CACHE_HEADERS,
+      }
     );
   }
 }
@@ -22,9 +37,9 @@ export async function POST(req: NextRequest) {
     // 1. Verify Admin Session Security
     const user = getSessionUser();
     if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized: Admin authentication required to modify pricing rules' },
-        { status: 401 }
+      return new NextResponse(
+        JSON.stringify({ success: false, error: 'Unauthorized: Admin authentication required to modify pricing rules' }),
+        { status: 401, headers: NO_CACHE_HEADERS }
       );
     }
 
@@ -32,34 +47,40 @@ export async function POST(req: NextRequest) {
 
     if (body.action === 'reset') {
       const resetConfig = await resetPricingInDB();
-      return NextResponse.json({
-        success: true,
-        message: 'Pricing reset to default factory values',
-        config: resetConfig,
-      });
+      return new NextResponse(
+        JSON.stringify({
+          success: true,
+          message: 'Pricing reset to default factory values',
+          config: resetConfig,
+        }),
+        { status: 200, headers: NO_CACHE_HEADERS }
+      );
     }
 
     // 2. Validate and Sanitize
     const result = savePricingConfig(body);
     if (!result.success) {
-      return NextResponse.json(
-        { success: false, error: result.error || 'Validation or save failed' },
-        { status: 400 }
+      return new NextResponse(
+        JSON.stringify({ success: false, error: result.error || 'Validation or save failed' }),
+        { status: 400, headers: NO_CACHE_HEADERS }
       );
     }
 
-    // 3. Persist to Active Database (PostgreSQL or Local File)
+    // 3. Persist to Active Database (PostgreSQL)
     await savePricingToDB(result.config);
 
-    return NextResponse.json({
-      success: true,
-      message: 'Pricing rules updated and persisted to database',
-      config: result.config,
-    });
+    return new NextResponse(
+      JSON.stringify({
+        success: true,
+        message: 'Pricing rules updated and persisted to database',
+        config: result.config,
+      }),
+      { status: 200, headers: NO_CACHE_HEADERS }
+    );
   } catch (error: any) {
-    return NextResponse.json(
-      { success: false, error: error?.message || 'Invalid request payload' },
-      { status: 500 }
+    return new NextResponse(
+      JSON.stringify({ success: false, error: error?.message || 'Invalid request payload' }),
+      { status: 500, headers: NO_CACHE_HEADERS }
     );
   }
 }
