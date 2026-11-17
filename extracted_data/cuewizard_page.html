@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cue Wizard</title>
+    <base href="/" />
+    <meta name="description" content="Design a custom cue with Cue Wizard">
+    <meta name="keywords" content="Cue, Wizard, Snooker cues, Billiards cues">
+    <!--Apple-->
+    <link rel="apple-touch-icon" sizes="57x57" href="images/web/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="images/web/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/web/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="images/web/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/web/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="images/web/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="images/web/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="images/web/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/web/apple-touch-icon-180x180.png">
+    <link rel="mask-icon" href="images/web/safari-pinned-tab.svg" color="#3A93C9">
+    <!--Chrome/Android/General-->
+    <link rel="icon" type="image/png" href="images/web/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="images/web/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="images/web/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="images/web/favicon-16x16.png" sizes="16x16">
+    <!--Windows-->
+    <meta name="msapplication-config" content="IEconfig.xml" />
+    <meta name="msapplication-TileColor" content="#3A93C9">
+    <meta name="msapplication-TileImage" content="images/web/mstile-144x144.png">
+    <!--Android theme colour-->
+    <meta name="theme-color" content="#3A93C9">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/site.css" rel="stylesheet">
+    <link href="css/print.css" rel="stylesheet" media="print">
+    <link href="https://fonts.googleapis.com/css?family=Alex+Brush|Lora|Roboto" rel="stylesheet">
+
+    <link href="" rel="preload" />
+    <noscript>
+        <div id="ScriptWarning">
+            <strong>Warning!</strong>
+            Unfortunately your browser has disabled scripting. Please enable it in order to display this page.
+        </div>
+    </noscript>
+</head>
+<body style="overflow-y: scroll;">
+    <div style="opacity: 0">
+        <span style="font-family:  Roboto"></span>
+        <span style="font-family: Alex Brush"></span>
+        <span style="font-family: Lora"></span>
+    </div>
+    <cue-wizard>
+        <div class="modal fade in login-window" tabindex="-1" role="dialog" style="display: block;">
+            <div class="modal-dialog" role="document" style="margin-top: 50px;">
+                <!--            <a routerLink="/">-->
+                <!--                <img src="/images/logo.svg" class="login-logo img-responsive"/>-->
+                <!--            </a>-->
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="text-center">
+                            <h3 id="angular">Loading...</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--End wrap-->
+    </cue-wizard>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6 footer-left"></div>
+                <div class="col-sm-6 footer-right">
+                    <p>
+                        &copy; Cue Wizard
+                        <script>document.write(new Date().getFullYear())</script>
+                        <a href="https://www.glow-internet.com">Web Design Liverpool</a> by Glow
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Index AOT -->
+    <script src="https://js.braintreegateway.com/web/3.101.2/js/client.min.js"></script>
+    
+    <!-- Load Hosted Fields component. -->
+    <script src="https://js.braintreegateway.com/web/3.101.2/js/hosted-fields.min.js"></script>
+    <script src="https://js.braintreegateway.com/web/3.101.2/js/three-d-secure.js"></script>
+
+    <script src="https://cdn.ckeditor.com/4.7.1/basic/ckeditor.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src=" https://www.googletagmanager.com/gtag/js?id=UA-4876053-2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-4876053-2');
+    </script>
+
+<script type="text/javascript" src="/dist/polyfills.18512ef93e261773bab8.js"></script><script type="text/javascript" src="/dist/app.18512ef93e261773bab8.js"></script><script type="text/javascript" src="/dist/vendor.18512ef93e261773bab8.js"></script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"3e55d411ba2b45fabb6bdd98dc3257be","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

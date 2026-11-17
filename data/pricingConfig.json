@@ -1,0 +1,2461 @@
+{
+  "version": 2,
+  "lastUpdated": "2026-11-16T17:39:29.530Z",
+  "surcharges": {
+    "buttJointFittingPrice": 12,
+    "domeJointPrice": 31,
+    "defaultCurrency": "£"
+  },
+  "shafts": [
+    {
+      "id": "4142380b-f55f-e711-9417-901b0e53171f",
+      "name": "Ash Grade P1600",
+      "price": 924,
+      "enabled": true
+    },
+    {
+      "id": "4242380b-f55f-e711-9417-901b0e53171f",
+      "name": "Ash Grade P80",
+      "price": 575,
+      "enabled": true
+    },
+    {
+      "id": "4342380b-f55f-e711-9417-901b0e53171f",
+      "name": "Ash Grade P60",
+      "price": 394,
+      "enabled": true
+    },
+    {
+      "id": "4442380b-f55f-e711-9417-901b0e53171f",
+      "name": "Ash Grade P30",
+      "price": 242,
+      "enabled": true
+    },
+    {
+      "id": "4542380b-f55f-e711-9417-901b0e53171f",
+      "name": "Ash Grade P20",
+      "price": 152,
+      "enabled": true
+    },
+    {
+      "id": "4642380b-f55f-e711-9417-901b0e53171f",
+      "name": "Maple",
+      "price": 334,
+      "enabled": true
+    }
+  ],
+  "lengths": [
+    {
+      "id": "4742380b-f55f-e711-9417-901b0e53171f",
+      "name": "48” (122cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4842380b-f55f-e711-9417-901b0e53171f",
+      "name": "48.5” (123cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4942380b-f55f-e711-9417-901b0e53171f",
+      "name": "49” (124cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4a42380b-f55f-e711-9417-901b0e53171f",
+      "name": "49.5” (126cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4b42380b-f55f-e711-9417-901b0e53171f",
+      "name": "50” (127cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4c42380b-f55f-e711-9417-901b0e53171f",
+      "name": "50.5” (128cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4d42380b-f55f-e711-9417-901b0e53171f",
+      "name": "51” (130cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4e42380b-f55f-e711-9417-901b0e53171f",
+      "name": "51.5” (131cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4f42380b-f55f-e711-9417-901b0e53171f",
+      "name": "52” (132cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5042380b-f55f-e711-9417-901b0e53171f",
+      "name": "52.5” (133cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5142380b-f55f-e711-9417-901b0e53171f",
+      "name": "53” (135cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5242380b-f55f-e711-9417-901b0e53171f",
+      "name": "53.5” (136cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5342380b-f55f-e711-9417-901b0e53171f",
+      "name": "54” (137cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5442380b-f55f-e711-9417-901b0e53171f",
+      "name": "54.5” (138cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5542380b-f55f-e711-9417-901b0e53171f",
+      "name": "55” (140cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5642380b-f55f-e711-9417-901b0e53171f",
+      "name": "55.5” (141cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5742380b-f55f-e711-9417-901b0e53171f",
+      "name": "56” (142cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5842380b-f55f-e711-9417-901b0e53171f",
+      "name": "56.5” (144cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5942380b-f55f-e711-9417-901b0e53171f",
+      "name": "57” (145cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5a42380b-f55f-e711-9417-901b0e53171f",
+      "name": "57.5” (146cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5b42380b-f55f-e711-9417-901b0e53171f",
+      "name": "58” (147cm)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5c42380b-f55f-e711-9417-901b0e53171f",
+      "name": "58.5” (149cm)",
+      "price": 61,
+      "enabled": true
+    },
+    {
+      "id": "5d42380b-f55f-e711-9417-901b0e53171f",
+      "name": "59” (150cm)",
+      "price": 61,
+      "enabled": true
+    },
+    {
+      "id": "5e42380b-f55f-e711-9417-901b0e53171f",
+      "name": "59.5” (151cm)",
+      "price": 61,
+      "enabled": true
+    },
+    {
+      "id": "5f42380b-f55f-e711-9417-901b0e53171f",
+      "name": "60” (152cm)",
+      "price": 61,
+      "enabled": true
+    },
+    {
+      "id": "6042380b-f55f-e711-9417-901b0e53171f",
+      "name": "60.5” (154cm)",
+      "price": 61,
+      "enabled": true
+    },
+    {
+      "id": "6142380b-f55f-e711-9417-901b0e53171f",
+      "name": "61” (155cm)",
+      "price": 61,
+      "enabled": true
+    },
+    {
+      "id": "6242380b-f55f-e711-9417-901b0e53171f",
+      "name": "61.5” (156cm)",
+      "price": 61,
+      "enabled": true
+    },
+    {
+      "id": "6342380b-f55f-e711-9417-901b0e53171f",
+      "name": "62” (157cm)",
+      "price": 61,
+      "enabled": true
+    },
+    {
+      "id": "6442380b-f55f-e711-9417-901b0e53171f",
+      "name": "62.5” (159cm)",
+      "price": 61,
+      "enabled": true
+    },
+    {
+      "id": "6542380b-f55f-e711-9417-901b0e53171f",
+      "name": "63” (160cm)",
+      "price": 61,
+      "enabled": true
+    }
+  ],
+  "splices": [
+    {
+      "id": "c1fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Ash",
+      "onePrice": 12,
+      "fourPrice": 48,
+      "enabled": true
+    },
+    {
+      "id": "c2fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Ebony",
+      "onePrice": 12,
+      "fourPrice": 48,
+      "enabled": true
+    },
+    {
+      "id": "c3fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Kingwood",
+      "onePrice": 24,
+      "fourPrice": 96,
+      "enabled": true
+    },
+    {
+      "id": "c4fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Maple",
+      "onePrice": 12,
+      "fourPrice": 48,
+      "enabled": true
+    },
+    {
+      "id": "c5fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Olivewood",
+      "onePrice": 20,
+      "fourPrice": 80,
+      "enabled": true
+    },
+    {
+      "id": "c6fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Rosewood",
+      "onePrice": 12,
+      "fourPrice": 48,
+      "enabled": true
+    },
+    {
+      "id": "c7fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Snakewood",
+      "onePrice": 55,
+      "fourPrice": 220,
+      "enabled": true
+    },
+    {
+      "id": "c8fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Thuya Burr",
+      "onePrice": 24,
+      "fourPrice": 96,
+      "enabled": true
+    },
+    {
+      "id": "c9fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Tulipwood",
+      "onePrice": 20,
+      "fourPrice": 80,
+      "enabled": true
+    },
+    {
+      "id": "cafa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Cocobola",
+      "onePrice": 20,
+      "fourPrice": 80,
+      "enabled": true
+    },
+    {
+      "id": "cbfa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Paduk",
+      "onePrice": 12,
+      "fourPrice": 48,
+      "enabled": true
+    },
+    {
+      "id": "ccfa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Zebrano",
+      "onePrice": 20,
+      "fourPrice": 80,
+      "enabled": true
+    },
+    {
+      "id": "cdfa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Ash",
+      "onePrice": 12,
+      "fourPrice": 48,
+      "enabled": true
+    },
+    {
+      "id": "cefa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Ebony",
+      "onePrice": 12,
+      "fourPrice": 48,
+      "enabled": true
+    },
+    {
+      "id": "cffa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Kingwood",
+      "onePrice": 24,
+      "fourPrice": 96,
+      "enabled": true
+    },
+    {
+      "id": "d0fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Maple",
+      "onePrice": 12,
+      "fourPrice": 48,
+      "enabled": true
+    },
+    {
+      "id": "d1fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Olivewood",
+      "onePrice": 20,
+      "fourPrice": 80,
+      "enabled": true
+    },
+    {
+      "id": "d2fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Rosewood",
+      "onePrice": 12,
+      "fourPrice": 48,
+      "enabled": true
+    },
+    {
+      "id": "d3fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Snakewood",
+      "onePrice": 55,
+      "fourPrice": 220,
+      "enabled": true
+    },
+    {
+      "id": "d4fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Thuya Burr",
+      "onePrice": 24,
+      "fourPrice": 96,
+      "enabled": true
+    },
+    {
+      "id": "d5fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Tulipwood",
+      "onePrice": 20,
+      "fourPrice": 80,
+      "enabled": true
+    },
+    {
+      "id": "d6fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Cocobola",
+      "onePrice": 20,
+      "fourPrice": 80,
+      "enabled": true
+    },
+    {
+      "id": "d7fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Paduk",
+      "onePrice": 12,
+      "fourPrice": 48,
+      "enabled": true
+    },
+    {
+      "id": "d8fa8f62-0c60-e711-9417-901b0e53171f",
+      "name": "Zebrano",
+      "onePrice": 20,
+      "fourPrice": 80,
+      "enabled": true
+    }
+  ],
+  "veneers": [
+    {
+      "id": "aff0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Black",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 3,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 1,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "b4f0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Bright Green",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 3,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 1,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "b9f0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Dark Blue",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 3,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 1,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "bef0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Green",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 3,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 1,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "c3f0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Light Blue",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 3,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 1,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "c8f0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Orange",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 3,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 1,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "cdf0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Plum",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 3,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 1,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "d2f0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Red",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 3,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 1,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "d7f0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Sycamore",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 3,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 1,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "dcf0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Yellow",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 3,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 1,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "e1f0bc83-8089-e711-9417-901b0e53171f",
+      "name": "None",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 0,
+          "fourPrice": 0
+        },
+        {
+          "layer": 3,
+          "price": 0,
+          "fourPrice": 0
+        },
+        {
+          "layer": 1,
+          "price": 0,
+          "fourPrice": 0
+        },
+        {
+          "layer": 2,
+          "price": 0,
+          "fourPrice": 0
+        }
+      ]
+    },
+    {
+      "id": "e6f0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Ash",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 3,
+          "price": 7,
+          "fourPrice": 28
+        }
+      ]
+    },
+    {
+      "id": "e8f0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Ebony",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 3,
+          "price": 7,
+          "fourPrice": 28
+        }
+      ]
+    },
+    {
+      "id": "eaf0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Maple",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 3,
+          "price": 7,
+          "fourPrice": 28
+        }
+      ]
+    },
+    {
+      "id": "ecf0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Kingwood",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 3,
+          "price": 12,
+          "fourPrice": 48
+        }
+      ]
+    },
+    {
+      "id": "eef0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Olivewood",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 3,
+          "price": 10,
+          "fourPrice": 40
+        }
+      ]
+    },
+    {
+      "id": "f0f0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Rosewood",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 3,
+          "price": 7,
+          "fourPrice": 28
+        }
+      ]
+    },
+    {
+      "id": "f2f0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Snakewood",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 3,
+          "price": 28,
+          "fourPrice": 112
+        }
+      ]
+    },
+    {
+      "id": "f4f0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Thuya Burr",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 3,
+          "price": 12,
+          "fourPrice": 48
+        }
+      ]
+    },
+    {
+      "id": "f6f0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Tulipwood",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 3,
+          "price": 10,
+          "fourPrice": 40
+        }
+      ]
+    },
+    {
+      "id": "f8f0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Cocobola",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 3,
+          "price": 10,
+          "fourPrice": 40
+        }
+      ]
+    },
+    {
+      "id": "faf0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Paduk",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 3,
+          "price": 7,
+          "fourPrice": 28
+        }
+      ]
+    },
+    {
+      "id": "fcf0bc83-8089-e711-9417-901b0e53171f",
+      "name": "Zebrano",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 3,
+          "price": 10,
+          "fourPrice": 40
+        }
+      ]
+    },
+    {
+      "id": "fef0bc83-8089-e711-9417-901b0e53171f",
+      "name": "None",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 3,
+          "price": 0,
+          "fourPrice": 0
+        }
+      ]
+    },
+    {
+      "id": "00f1bc83-8089-e711-9417-901b0e53171f",
+      "name": "Black",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "03f1bc83-8089-e711-9417-901b0e53171f",
+      "name": "Bright Green",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "06f1bc83-8089-e711-9417-901b0e53171f",
+      "name": "Dark Blue",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "09f1bc83-8089-e711-9417-901b0e53171f",
+      "name": "Green",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "0cf1bc83-8089-e711-9417-901b0e53171f",
+      "name": "Light Blue",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "0ff1bc83-8089-e711-9417-901b0e53171f",
+      "name": "Orange",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "12f1bc83-8089-e711-9417-901b0e53171f",
+      "name": "Plum",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "15f1bc83-8089-e711-9417-901b0e53171f",
+      "name": "Red",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "18f1bc83-8089-e711-9417-901b0e53171f",
+      "name": "Sycamore",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "1bf1bc83-8089-e711-9417-901b0e53171f",
+      "name": "Yellow",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 1,
+          "fourPrice": 4
+        },
+        {
+          "layer": 2,
+          "price": 1,
+          "fourPrice": 4
+        }
+      ]
+    },
+    {
+      "id": "1ef1bc83-8089-e711-9417-901b0e53171f",
+      "name": "None",
+      "enabled": true,
+      "assets": [
+        {
+          "layer": 0,
+          "price": 0,
+          "fourPrice": 0
+        },
+        {
+          "layer": 2,
+          "price": 0,
+          "fourPrice": 0
+        }
+      ]
+    }
+  ],
+  "ferrules": [
+    {
+      "id": "b342380b-f55f-e711-9417-901b0e53171f",
+      "name": "Solid Brass (for Snooker or English Pool)",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "b442380b-f55f-e711-9417-901b0e53171f",
+      "name": "Black Fibre (for Chinese 8 Ball Pool)",
+      "price": 12,
+      "enabled": true
+    }
+  ],
+  "tipSizes": [
+    {
+      "id": "b842380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 7mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "b942380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 7.25mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "ba42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 7.5mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "bb42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 8mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "bc42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 8.25mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "bd42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 8.5mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "be42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 8.75mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "bf42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 9mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "c042380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 9.25mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "c142380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 9.5mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "c242380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 9.75mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "c342380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 10mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "c442380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 10.25mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "c542380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 10.5mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "c642380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 10.75mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "c742380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 11mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "c842380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 11.25mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "c942380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 11.5mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "ca42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 11.75mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "cb42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 12mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "cc42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 12.25mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "cd42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 12.5mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "ce42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 12.75mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "cf42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk Master - 13mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "d342380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 7mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "d442380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 7mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "d542380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 7mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "d642380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 7.25mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "d742380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 7.25mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "d842380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 7.25mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "d942380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 7.5mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "da42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 7.5mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "db42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 7.5mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "dc42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 7.75mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "dd42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 7.75mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "de42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 7.75mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "df42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 8mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "e042380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 8mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "e142380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 8mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "e242380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 8.25mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "e342380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 8.25mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "e442380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 8.25mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "e542380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 8.5mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "e642380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 8.5mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "e742380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 8.5mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "e842380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 8.75mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "e942380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 8.75mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "ea42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 8.75mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "eb42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 9mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "ec42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 9mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "ed42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 9mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "ee42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 9.25mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "ef42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 9.25mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "f042380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 9.25mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "f142380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 9.5mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "f242380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 9.5mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "f342380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 9.5mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "f442380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 9.75mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "f542380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 9.75mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "f642380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 9.75mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "f742380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 10mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "f842380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 10mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "f942380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 10mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "fa42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 10.25mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "fb42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 10.25mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "fc42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 10.25mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "fd42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 10.5mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "fe42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 10.5mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "ff42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 10.5mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "0043380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 10.75mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "0143380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 10.75mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "0243380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 10.75mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "0343380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 11mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "0443380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 11mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "0543380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 11mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "0643380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 11.25mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "0743380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 11.25mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "0843380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 11.25mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "0943380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 11.5mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "0a43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 11.5mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "0b43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 11.5mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "0c43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 11.75mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "0d43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 11.75mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "0e43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 11.75mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "0f43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 12mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "1043380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 12mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "1143380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 12mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "1243380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 12.25mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "1343380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 12.25mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "1443380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 12.25mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "1543380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 12.5mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "1643380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 12.5mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "1743380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 12.5mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "1843380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 12.75mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "1943380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 12.75mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "1a43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 12.75mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "1b43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 13mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "1c43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 13mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "1d43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Elk-Pro - 13mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "2143380b-f55f-e711-9417-901b0e53171f",
+      "name": "Blue Diamond - 7mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "2243380b-f55f-e711-9417-901b0e53171f",
+      "name": "Blue Diamond - 7.25mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "2343380b-f55f-e711-9417-901b0e53171f",
+      "name": "Blue Diamond - 7.5mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "2443380b-f55f-e711-9417-901b0e53171f",
+      "name": "Blue Diamond - 8mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "2543380b-f55f-e711-9417-901b0e53171f",
+      "name": "Blue Diamond - 8.25mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "2643380b-f55f-e711-9417-901b0e53171f",
+      "name": "Blue Diamond - 8.5mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "2743380b-f55f-e711-9417-901b0e53171f",
+      "name": "Blue Diamond - 8.75mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "2843380b-f55f-e711-9417-901b0e53171f",
+      "name": "Blue Diamond - 9mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "2943380b-f55f-e711-9417-901b0e53171f",
+      "name": "Blue Diamond - 9.25mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "2a43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Blue Diamond - 9.5mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "2b43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Blue Diamond - 9.75mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "2c43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Blue Diamond - 10mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "2d43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Blue Diamond - 10.25mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "2e43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Blue Diamond - 10.5mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "2f43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Blue Diamond - 10.75mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "ecfad296-3863-4223-88aa-01fe9fa03588",
+      "name": "Blue Diamond - 11mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "2b73380b-f55f-e711-9417-901b0e53171f",
+      "name": "Blue Diamond - 11mm",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "3343380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 7mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "3443380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 7mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "3543380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 7mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "3643380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 7mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "3743380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 7.25mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "3843380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 7.25mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "3943380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 7.25mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "3a43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 7.25mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "3b43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 7.5mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "3c43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 7.5mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "3d43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 7.5mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "3e43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 7.5mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "3f43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 7.75mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4043380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 7.75mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4143380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 7.75mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4243380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 7.75mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4343380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 8mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4443380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 8mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4543380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 8mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4643380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 8mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4743380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 8.25mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4843380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 8.25mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4943380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 8.25mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4a43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 8.25mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4b43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 8.5mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4c43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 8.5mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4d43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 8.5mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4e43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 8.5mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "4f43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 8.75mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5043380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 8.75mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5143380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 8.75mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5243380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 8.75mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5343380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 9mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5443380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 9mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5543380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 9mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5643380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 9mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5743380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 9.25mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5843380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 9.25mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5943380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 9.25mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5a43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 9.25mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5b43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 9.5mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5c43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 9.5mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5d43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 9.5mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5e43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 9.5mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "5f43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 9.75mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "6043380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 9.75mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "6143380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 9.75mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "6243380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 9.75mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "764b320b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "6343380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "6443380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "6543380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "6643380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7348380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7585380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8943d80b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "6743380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10.25mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "6843380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10.25mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "6943380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10.25mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "6a43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10.25mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "6b43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10.5mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "6c43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10.5mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "6d43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10.5mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "6e43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10.5mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "6f43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10.75mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7043380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10.75mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7143380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10.75mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7243380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 10.75mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7343380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 11mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7443380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 11mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7543380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 11mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7643380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 11mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7743380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 11.25mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7843380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 11.25mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7943380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 11.25mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7a43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 11.25mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7b43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 11.5mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7c43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 11.5mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7d43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 11.5mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7e43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 11.5mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "7f43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 11.75mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8043380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 11.75mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8143380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 11.75mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8243380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 11.75mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8343380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 12mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8443380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 12mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8543380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 12mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8643380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 12mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8743380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 12.25mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8843380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 12.25mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8943380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 12.25mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8a43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 12.25mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8b43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 12.5mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8c43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 12.5mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8d43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 12.5mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8e43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 12.5mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "8f43380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 12.75mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "9043380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 12.75mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "9143380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 12.75mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "9243380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 12.75mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "9343380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 13mm Soft",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "9443380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 13mm Medium",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "9543380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 13mm Hard",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "9643380b-f55f-e711-9417-901b0e53171f",
+      "name": "Talisman Pro - 13mm Extra Hard",
+      "price": 0,
+      "enabled": true
+    }
+  ],
+  "namePlates": [
+    {
+      "id": "a842380b-f55f-e711-9417-901b0e53171f",
+      "name": "Disc",
+      "price": 0,
+      "engravingPrice": 19,
+      "allowEngraving": true,
+      "enabled": true
+    },
+    {
+      "id": "a942380b-f55f-e711-9417-901b0e53171f",
+      "name": "Name Plate",
+      "price": 10,
+      "engravingPrice": 19,
+      "allowEngraving": true,
+      "enabled": true
+    },
+    {
+      "id": "aa42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Brass Disc",
+      "price": 0,
+      "engravingPrice": 0,
+      "allowEngraving": false,
+      "enabled": true
+    }
+  ],
+  "extensions": [
+    {
+      "id": "d9704c19-7065-e711-9417-901b0e53171f",
+      "name": "12” to 16” Telescopic",
+      "price": 39,
+      "enabled": true
+    },
+    {
+      "id": "da704c19-7065-e711-9417-901b0e53171f",
+      "name": "23” to 35” Telescopic",
+      "price": 40,
+      "enabled": true
+    },
+    {
+      "id": "db704c19-7065-e711-9417-901b0e53171f",
+      "name": "20” Ebonised",
+      "price": 29,
+      "enabled": true
+    }
+  ],
+  "miniButts": [
+    {
+      "id": "ae42380b-f55f-e711-9417-901b0e53171f",
+      "name": "None",
+      "price": 0,
+      "enabled": true
+    },
+    {
+      "id": "af42380b-f55f-e711-9417-901b0e53171f",
+      "name": "Ebonised",
+      "price": 24,
+      "enabled": true
+    },
+    {
+      "id": "b042380b-f55f-e711-9417-901b0e53171f",
+      "name": "Ebony",
+      "price": 33,
+      "enabled": true
+    },
+    {
+      "id": "b142380b-f55f-e711-9417-901b0e53171f",
+      "name": "Rosewood",
+      "price": 24,
+      "enabled": true
+    },
+    {
+      "id": "b242380b-f55f-e711-9417-901b0e53171f",
+      "name": "Olivewood",
+      "price": 32,
+      "enabled": true
+    }
+  ]
+}
