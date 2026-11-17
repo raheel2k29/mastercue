@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { PricingConfig, AdminItemPrice, AdminSplicePrice, AdminPlatePrice } from '@/types/admin';
 import { getDefaultPricingConfig } from '@/lib/defaultPricing';
 import { calculatePrice, getDefaultCue } from '@/lib/cueEngine';
@@ -20,11 +21,22 @@ import {
   Lock,
   Calculator,
   RefreshCw,
+  LogOut,
+  Database,
+  User,
+  Loader2,
 } from 'lucide-react';
 
 export default function AdminPricingPage() {
+  const router = useRouter();
   const [config, setConfig] = useState<PricingConfig>(() => getDefaultPricingConfig());
   const [loading, setLoading] = useState(true);
+  const [authChecking, setAuthChecking] = useState(true);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
+  const [dbStatus, setDbStatus] = useState<{ type: string; connected: boolean }>({
+    type: 'local',
+    connected: true,
+  });
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -46,9 +58,40 @@ export default function AdminPricingPage() {
     }
   };
 
+  // Auth check on mount
   useEffect(() => {
-    loadConfig();
-  }, []);
+    const checkAuthAndLoad = async () => {
+      try {
+        setAuthChecking(true);
+        const meRes = await fetch('/api/admin/me', { cache: 'no-store' });
+        const meData = await meRes.json();
+        if (!meData.authenticated) {
+          router.push('/admin/login');
+          return;
+        }
+        setCurrentUser(meData.user?.email || 'admin@mastercue.com');
+        if (meData.dbStatus) {
+          setDbStatus(meData.dbStatus);
+        }
+        await loadConfig();
+      } catch (e) {
+        router.push('/admin/login');
+      } finally {
+        setAuthChecking(false);
+      }
+    };
+    checkAuthAndLoad();
+  }, [router]);
+
+  // Handle Logout
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' });
+      router.push('/admin/login');
+    } catch {
+      router.push('/admin/login');
+    }
+  };
 
   // Save updated config
   const handleSave = async () => {
@@ -226,6 +269,15 @@ export default function AdminPricingPage() {
     domeJointPrice: config.surcharges.domeJointPrice,
   });
 
+  if (authChecking) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-400 space-y-3">
+        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+        <p className="text-xs font-semibold tracking-wide">Verifying Admin Session Security...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col selection:bg-amber-500 selection:text-white">
       {/* Top Header */}
@@ -248,11 +300,23 @@ export default function AdminPricingPage() {
         </div>
 
         {/* Global Action Bar */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          {/* Active Database Badge */}
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-slate-300 font-medium">
+            <Database className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{dbStatus.type === 'postgresql' ? 'PostgreSQL' : 'Local Database'}</span>
+          </div>
+
+          {/* User Badge */}
+          <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-slate-300 font-medium">
+            <User className="w-3.5 h-3.5 text-amber-400" />
+            <span>{currentUser || 'admin@mastercue.com'}</span>
+          </div>
+
           <Link
             href="/"
             target="_blank"
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition-all shadow-sm"
           >
             <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
             <span>Open Studio</span>
@@ -261,7 +325,7 @@ export default function AdminPricingPage() {
           <button
             onClick={handleReset}
             disabled={saving}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-red-500/20 text-xs font-semibold text-slate-300 hover:text-red-300 border border-slate-700 hover:border-red-500/30 transition-all"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-red-500/20 text-xs font-semibold text-slate-300 hover:text-red-300 border border-slate-700 hover:border-red-500/30 transition-all"
             title="Reset to original CueWizard factory defaults"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -271,7 +335,7 @@ export default function AdminPricingPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50"
           >
             {saving ? (
               <RefreshCw className="w-4 h-4 animate-spin" />
@@ -279,6 +343,16 @@ export default function AdminPricingPage() {
               <Save className="w-4 h-4" />
             )}
             <span>{saving ? 'Saving...' : 'Save All Changes'}</span>
+          </button>
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-xs font-semibold text-slate-400 hover:text-white border border-slate-700 transition-all"
+            title="Sign Out from Admin Portal"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Sign Out</span>
           </button>
         </div>
       </header>

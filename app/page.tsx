@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { CueConfiguration } from '@/types/cue';
 import { getDefaultCue, getWeightRange } from '@/lib/cueEngine';
 import { CUE_JOINTS } from '@/lib/cueData';
@@ -18,7 +17,6 @@ import {
   Eye,
   Award,
   ArrowRight,
-  Settings,
 } from 'lucide-react';
 
 function CueCustomizerContent() {
@@ -117,14 +115,6 @@ function CueCustomizerContent() {
 
           {/* Top Actions */}
           <div className="flex items-center gap-2">
-            <Link
-              href="/admin"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-white transition shadow-sm"
-              title="Admin Pricing & Rules Manager"
-            >
-              <Settings className="w-3.5 h-3.5 text-amber-400" />
-              <span className="hidden sm:inline">Admin</span>
-            </Link>
             <button
               onClick={handleReset}
               title="Reset to default"
