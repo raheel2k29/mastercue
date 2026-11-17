@@ -71,12 +71,15 @@ function getPgPool(): Pool | null {
     pgPool = new Pool({
       connectionString: cleanUrl,
       ssl: { rejectUnauthorized: false },
+      max: 10,
+      idleTimeoutMillis: 60000,
+      connectionTimeoutMillis: 8000,
     });
   }
   return pgPool;
 }
 
-// Initialize PostgreSQL Tables if connected
+// Initialize PostgreSQL Tables if needed (lazy/fallback)
 async function initPgTables(pool: Pool) {
   if (pgInitialized) return;
   try {
@@ -179,7 +182,6 @@ export async function findAdminByEmail(email: string): Promise<AdminUserRecord |
 
   if (pool) {
     try {
-      await initPgTables(pool);
       const res = await pool.query(
         'SELECT id, email, password_hash as "passwordHash", created_at as "createdAt" FROM admin_users WHERE email = $1',
         [cleanEmail]
@@ -187,7 +189,16 @@ export async function findAdminByEmail(email: string): Promise<AdminUserRecord |
       if (res.rows.length > 0) {
         return res.rows[0] as AdminUserRecord;
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.code === '42P01') {
+        // Table does not exist yet, initialize and retry once
+        await initPgTables(pool);
+        const retryRes = await pool.query(
+          'SELECT id, email, password_hash as "passwordHash", created_at as "createdAt" FROM admin_users WHERE email = $1',
+          [cleanEmail]
+        );
+        if (retryRes.rows.length > 0) return retryRes.rows[0] as AdminUserRecord;
+      }
       console.warn('PostgreSQL query error, falling back to local user store:', err);
     }
   }
@@ -202,12 +213,20 @@ export async function loadPricingFromDB(): Promise<PricingConfig> {
 
   if (pool) {
     try {
-      await initPgTables(pool);
       const res = await pool.query('SELECT config FROM pricing_configs WHERE id = $1', ['active']);
       if (res.rows.length > 0 && res.rows[0].config) {
-        return res.rows[0].config as PricingConfig;
+        memoryPricing = res.rows[0].config as PricingConfig;
+        return memoryPricing;
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.code === '42P01') {
+        await initPgTables(pool);
+        const retryRes = await pool.query('SELECT config FROM pricing_configs WHERE id = $1', ['active']);
+        if (retryRes.rows.length > 0 && retryRes.rows[0].config) {
+          memoryPricing = retryRes.rows[0].config as PricingConfig;
+          return memoryPricing;
+        }
+      }
       console.warn('PostgreSQL query error, falling back to local pricing store:', err);
     }
   }
@@ -245,7 +264,7 @@ export async function savePricingToDB(config: PricingConfig): Promise<boolean> {
 
   if (pool) {
     try {
-      await initPgTables(pool);
+      // Direct fast atomic UPSERT (1 network round-trip)
       await pool.query(
         `INSERT INTO pricing_configs (id, config, updated_at) 
          VALUES ($1, $2, NOW()) 
@@ -253,9 +272,19 @@ export async function savePricingToDB(config: PricingConfig): Promise<boolean> {
         ['active', JSON.stringify(config)]
       );
       return true;
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.code === '42P01') {
+        // Table not initialized yet, initialize and retry once
+        await initPgTables(pool);
+        await pool.query(
+          `INSERT INTO pricing_configs (id, config, updated_at) 
+           VALUES ($1, $2, NOW()) 
+           ON CONFLICT (id) DO UPDATE SET config = $2, updated_at = NOW()`,
+          ['active', JSON.stringify(config)]
+        );
+        return true;
+      }
       console.error('Failed saving to PostgreSQL database:', err);
-      // Even if PostgreSQL fails, keep memory and disk updated
     }
   }
 
