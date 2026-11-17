@@ -55,8 +55,10 @@ let memoryUsers: AdminUserRecord[] | null = null;
 let memoryPricing: PricingConfig | null = null;
 
 // Database Connection Pool for PostgreSQL (Supabase / Neon / Railway / AWS RDS)
-let pgPool: Pool | null = null;
-let pgInitialized = false;
+declare global {
+  var __mastercue_pgPool: Pool | undefined;
+  var __mastercue_pgInit: boolean | undefined;
+}
 
 function getPgPool(): Pool | null {
   const rawUrl =
@@ -66,31 +68,67 @@ function getPgPool(): Pool | null {
 
   if (!rawUrl) return null;
 
-  if (!pgPool) {
+  if (!globalThis.__mastercue_pgPool) {
     // Strip channel_binding and sslmode query params; pg handles SSL via ssl: { rejectUnauthorized: false }
     const cleanUrl = rawUrl
       .replace(/[?&]channel_binding=[^&]+/g, '')
       .replace(/[?&]sslmode=[^&]+/g, '');
 
-    pgPool = new Pool({
+    const pool = new Pool({
       connectionString: cleanUrl,
       ssl: { rejectUnauthorized: false },
-      max: 5,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000,
+      max: 10,
+      idleTimeoutMillis: 20000,
+      connectionTimeoutMillis: 5000,
+      keepAlive: true,
+      statement_timeout: 8000,
     });
 
-    pgPool.on('error', (err) => {
+    pool.on('error', (err) => {
       console.error('PostgreSQL idle client disconnected, resetting pool:', err);
-      pgPool = null;
+      globalThis.__mastercue_pgPool = undefined;
     });
+
+    globalThis.__mastercue_pgPool = pool;
   }
-  return pgPool;
+  return globalThis.__mastercue_pgPool;
+}
+
+// Enterprise retry wrapper with exponential backoff for transient serverless disconnects
+async function executeQueryWithRetry<T = any>(
+  queryText: string,
+  params: any[] = [],
+  retries = 2
+): Promise<any> {
+  const pool = getPgPool();
+  if (!pool) throw new Error('Database connection URL not configured');
+
+  let lastError: any = null;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await pool.query(queryText, params);
+    } catch (err: any) {
+      lastError = err;
+      console.warn(`PostgreSQL query attempt ${attempt} failed: ${err.message}`);
+      if (
+        err?.code === 'ECONNRESET' ||
+        err?.code === '57P01' ||
+        err?.code === 'EPIPE' ||
+        err?.message?.includes('closed')
+      ) {
+        globalThis.__mastercue_pgPool = undefined;
+      }
+      if (attempt < retries) {
+        await new Promise((r) => setTimeout(r, 250 * attempt));
+      }
+    }
+  }
+  throw lastError;
 }
 
 // Initialize PostgreSQL Tables if needed (lazy/fallback)
 async function initPgTables(pool: Pool) {
-  if (pgInitialized) return;
+  if (globalThis.__mastercue_pgInit) return;
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS admin_users (
@@ -126,7 +164,7 @@ async function initPgTables(pool: Pool) {
       );
     }
 
-    pgInitialized = true;
+    globalThis.__mastercue_pgInit = true;
   } catch (err) {
     console.error('PostgreSQL table initialization notice:', err);
   }
@@ -176,26 +214,61 @@ export async function getDatabaseStatus(): Promise<{
   type: 'postgresql' | 'local';
   connected: boolean;
   hasEnvUrl: boolean;
+  latencyMs?: number;
+  version?: number;
+  lastUpdated?: string;
   error?: string;
 }> {
-  const isPg = Boolean(process.env.DATABASE_URL || process.env.POSTGRES_URL);
+  const isPg = Boolean(
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL_UNPOOLED
+  );
   if (!isPg) {
     return { type: 'local', connected: false, hasEnvUrl: false };
   }
 
   const pool = getPgPool();
   if (!pool) {
-    return { type: 'postgresql', connected: false, hasEnvUrl: true, error: 'Connection string missing' };
+    return {
+      type: 'postgresql',
+      connected: false,
+      hasEnvUrl: true,
+      error: 'Connection string missing',
+    };
   }
 
+  const start = Date.now();
   try {
-    await pool.query('SELECT 1');
-    return { type: 'postgresql', connected: true, hasEnvUrl: true };
+    const res = await executeQueryWithRetry(
+      'SELECT config, updated_at FROM pricing_configs WHERE id = $1 LIMIT 1',
+      ['active']
+    );
+    const latencyMs = Date.now() - start;
+    let version = 1;
+    let lastUpdated: string | undefined;
+    if (res.rows.length > 0) {
+      const cfg =
+        typeof res.rows[0].config === 'string'
+          ? JSON.parse(res.rows[0].config)
+          : res.rows[0].config;
+      version = cfg?.version || 1;
+      lastUpdated = res.rows[0].updated_at || cfg?.lastUpdated;
+    }
+    return {
+      type: 'postgresql',
+      connected: true,
+      hasEnvUrl: true,
+      latencyMs,
+      version,
+      lastUpdated,
+    };
   } catch (err: any) {
     return {
       type: 'postgresql',
       connected: false,
       hasEnvUrl: true,
+      latencyMs: Date.now() - start,
       error: err?.message || 'Failed connecting to PostgreSQL',
     };
   }
@@ -238,7 +311,10 @@ export async function loadPricingFromDB(): Promise<PricingConfig> {
 
   if (pool) {
     try {
-      const res = await pool.query('SELECT config FROM pricing_configs WHERE id = $1', ['active']);
+      const res = await executeQueryWithRetry(
+        'SELECT config FROM pricing_configs WHERE id = $1',
+        ['active']
+      );
       if (res.rows.length > 0 && res.rows[0].config) {
         let parsed = res.rows[0].config;
         if (typeof parsed === 'string') parsed = JSON.parse(parsed);
@@ -248,7 +324,10 @@ export async function loadPricingFromDB(): Promise<PricingConfig> {
     } catch (err: any) {
       if (err?.code === '42P01') {
         await initPgTables(pool);
-        const retryRes = await pool.query('SELECT config FROM pricing_configs WHERE id = $1', ['active']);
+        const retryRes = await executeQueryWithRetry(
+          'SELECT config FROM pricing_configs WHERE id = $1',
+          ['active']
+        );
         if (retryRes.rows.length > 0 && retryRes.rows[0].config) {
           let parsed = retryRes.rows[0].config;
           if (typeof parsed === 'string') parsed = JSON.parse(parsed);
@@ -293,8 +372,8 @@ export async function savePricingToDB(config: PricingConfig): Promise<boolean> {
 
   if (pool) {
     try {
-      // Direct fast atomic UPSERT (1 network round-trip)
-      await pool.query(
+      // Direct fast atomic UPSERT with retry
+      await executeQueryWithRetry(
         `INSERT INTO pricing_configs (id, config, updated_at) 
          VALUES ($1, $2, NOW()) 
          ON CONFLICT (id) DO UPDATE SET config = $2, updated_at = NOW()`,
@@ -303,9 +382,8 @@ export async function savePricingToDB(config: PricingConfig): Promise<boolean> {
       return true;
     } catch (err: any) {
       if (err?.code === '42P01') {
-        // Table not initialized yet, initialize and retry once
         await initPgTables(pool);
-        await pool.query(
+        await executeQueryWithRetry(
           `INSERT INTO pricing_configs (id, config, updated_at) 
            VALUES ($1, $2, NOW()) 
            ON CONFLICT (id) DO UPDATE SET config = $2, updated_at = NOW()`,
@@ -334,4 +412,55 @@ export async function resetPricingInDB(): Promise<PricingConfig> {
   memoryPricing = defaults;
   await savePricingToDB(defaults);
   return defaults;
+}
+
+// Enterprise Health Monitor for Admin UI
+export async function checkDBHealth(): Promise<{
+  connected: boolean;
+  type: 'neon-postgresql' | 'local-filesystem';
+  latencyMs: number;
+  lastUpdated?: string;
+  version?: number;
+  error?: string;
+}> {
+  const start = Date.now();
+  const pool = getPgPool();
+  if (!pool) {
+    return {
+      connected: false,
+      type: 'local-filesystem',
+      latencyMs: 0,
+      error: 'DATABASE_URL environment variable is missing',
+    };
+  }
+
+  try {
+    const res = await executeQueryWithRetry(
+      'SELECT config, updated_at FROM pricing_configs WHERE id = $1 LIMIT 1',
+      ['active']
+    );
+    const latencyMs = Date.now() - start;
+    if (res.rows.length > 0) {
+      const cfg = typeof res.rows[0].config === 'string' ? JSON.parse(res.rows[0].config) : res.rows[0].config;
+      return {
+        connected: true,
+        type: 'neon-postgresql',
+        latencyMs,
+        lastUpdated: res.rows[0].updated_at || cfg?.lastUpdated,
+        version: cfg?.version || 1,
+      };
+    }
+    return {
+      connected: true,
+      type: 'neon-postgresql',
+      latencyMs,
+    };
+  } catch (err: any) {
+    return {
+      connected: false,
+      type: 'local-filesystem',
+      latencyMs: Date.now() - start,
+      error: err?.message,
+    };
+  }
 }

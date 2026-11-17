@@ -58,9 +58,9 @@ export const PricingProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [loading, setLoading] = useState<boolean>(true);
 
   // Fetch dynamic pricing directly from PostgreSQL backed API with zero caching
-  const refreshPricing = useCallback(async () => {
+  const refreshPricing = useCallback(async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const res = await fetch(`/api/admin/pricing?_t=${Date.now()}`, {
         cache: 'no-store',
         headers: {
@@ -71,30 +71,63 @@ export const PricingProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (!res.ok) throw new Error('Failed to fetch pricing config');
       const data = await res.json();
       if (data.success && data.config) {
-        setConfig(data.config);
+        setConfig((prev) => {
+          // Only trigger state update if version or content actually changed
+          if (
+            prev.version === data.config.version &&
+            prev.lastUpdated === data.config.lastUpdated
+          ) {
+            return prev;
+          }
+          return data.config;
+        });
       }
     } catch (err) {
       console.warn('Could not load dynamic pricing, using fail-safe defaults:', err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    refreshPricing();
+    // Initial fetch
+    refreshPricing(false);
 
-    // Cross-tab real-time sync when Admin updates pricing in another window/tab
+    // 1. Cross-tab real-time sync when Admin updates pricing in another window/tab
+    let channel: BroadcastChannel | null = null;
     if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
-      const channel = new BroadcastChannel('mastercue-pricing');
+      channel = new BroadcastChannel('mastercue-pricing');
       channel.onmessage = (event) => {
         if (event.data?.type === 'PRICING_UPDATED') {
-          refreshPricing();
+          refreshPricing(true);
         }
       };
-      return () => {
-        channel.close();
-      };
     }
+
+    // 2. Tab Visibility / Focus revalidation (stale-while-revalidate when customer returns)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refreshPricing(true);
+      }
+    };
+    const handleFocus = () => {
+      refreshPricing(true);
+    };
+
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    // 3. Background periodic heartbeat (every 30 seconds) across distributed devices
+    const intervalId = setInterval(() => {
+      refreshPricing(true);
+    }, 30000);
+
+    return () => {
+      if (channel) channel.close();
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(intervalId);
+    };
   }, [refreshPricing]);
 
   // Construct dynamic catalog by merging original static items with active DB prices & statuses
