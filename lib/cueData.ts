@@ -18,30 +18,16 @@ export const CUE_SHAFTS: CueShaft[] = [
   {
     "tip": "TIPASHELKMAS",
     "asset": "ShaftAsh",
-    "default": false,
-    "price": 924,
-    "prices": [
-      {
-        "key": "Price",
-        "value": 924
-      }
-    ],
-    "id": "4142380b-f55f-e711-9417-901b0e53171f",
-    "name": "Ash Grade P1600"
-  },
-  {
-    "tip": "TIPASHELKMAS",
-    "asset": "ShaftAsh",
     "default": true,
-    "price": 570,
+    "price": 242,
     "prices": [
       {
         "key": "Price",
-        "value": 570
+        "value": 242
       }
     ],
-    "id": "4242380b-f55f-e711-9417-901b0e53171f",
-    "name": "Ash Grade P80"
+    "id": "4442380b-f55f-e711-9417-901b0e53171f",
+    "name": "Ash Premium"
   },
   {
     "tip": "TIPASHELKMAS",
@@ -55,35 +41,35 @@ export const CUE_SHAFTS: CueShaft[] = [
       }
     ],
     "id": "4342380b-f55f-e711-9417-901b0e53171f",
-    "name": "Ash Grade P60"
+    "name": "Ash Premium plus"
   },
   {
     "tip": "TIPASHELKMAS",
     "asset": "ShaftAsh",
     "default": false,
-    "price": 242,
+    "price": 585,
     "prices": [
       {
         "key": "Price",
-        "value": 242
+        "value": 585
       }
     ],
-    "id": "4442380b-f55f-e711-9417-901b0e53171f",
-    "name": "Ash Grade P30"
+    "id": "4242380b-f55f-e711-9417-901b0e53171f",
+    "name": "Ash Executive"
   },
   {
     "tip": "TIPASHELKMAS",
     "asset": "ShaftAsh",
     "default": false,
-    "price": 152,
+    "price": 924,
     "prices": [
       {
         "key": "Price",
-        "value": 152
+        "value": 924
       }
     ],
-    "id": "4542380b-f55f-e711-9417-901b0e53171f",
-    "name": "Ash Grade P20"
+    "id": "4142380b-f55f-e711-9417-901b0e53171f",
+    "name": "Ash Professional"
   },
   {
     "tip": "TIPMAPLEELKMAS",
@@ -3657,7 +3643,7 @@ export const CUE_FERRULES: CueFerrule[] = [
       }
     ],
     "id": "b342380b-f55f-e711-9417-901b0e53171f",
-    "name": "Solid Brass (for Snooker or English Pool)"
+    "name": "Brass"
   },
   {
     "asset": "BLKFERRULE",
@@ -3670,7 +3656,20 @@ export const CUE_FERRULES: CueFerrule[] = [
       }
     ],
     "id": "b442380b-f55f-e711-9417-901b0e53171f",
-    "name": "Black Fibre (for Chinese 8 Ball Pool)"
+    "name": "Black"
+  },
+  {
+    "asset": "TITANFERRULE",
+    "default": false,
+    "price": 25,
+    "prices": [
+      {
+        "key": "Price",
+        "value": 25
+      }
+    ],
+    "id": "b542380b-f55f-e711-9417-901b0e53171f",
+    "name": "Titanium"
   }
 ];
 

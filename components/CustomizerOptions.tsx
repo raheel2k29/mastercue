@@ -43,6 +43,7 @@ import {
   isLargeSplicesAllowed,
   isExtensionsAllowed,
   isTipSizeAvailable,
+  getAvailableTipSizes,
   canSelectVeneer,
   BUTT_JOINT_FITTING_PRICE,
   DOME_JOINT_PRICE,
@@ -87,11 +88,11 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
   const handleFerruleChange = (ferrule: CueFerrule) => {
     const updatedCue = { ...cue, ferruleType: ferrule };
     if (!isTipSizeAvailable(updatedCue, cue.tipSize)) {
-      const validSizes = (cue.tip?.tips || []).filter((s) =>
-        s.allowedFerrules?.includes(ferrule.asset || '')
-      );
-      if (validSizes.length > 0) {
-        updatedCue.tipSize = validSizes[0];
+      if (cue.tip) {
+        const validSizes = getAvailableTipSizes(updatedCue, cue.tip);
+        if (validSizes.length > 0) {
+          updatedCue.tipSize = validSizes[0];
+        }
       }
     }
     onChange(updatedCue);
@@ -795,7 +796,7 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
               <div className="space-y-3">
                 <h3 className="text-sm font-bold text-slate-900">Ferrule Type</h3>
                 <p className="text-xs text-slate-500">
-                  Material holding tip (Brass or Black Fibre).
+                  Material holding tip (Brass, Black, or Titanium).
                 </p>
                 <div className="space-y-2">
                   {catalog.ferrules.map((ferrule) => {

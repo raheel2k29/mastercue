@@ -119,12 +119,22 @@ export function isExtensionsAllowed(cue: Partial<CueConfiguration>): {
 // 6. Tip Size Availability (Filtered by selected Ferrule)
 export function getAvailableTipSizes(cue: Partial<CueConfiguration>, tip: CueTip): CueTipSize[] {
   const ferruleAsset = cue.ferruleType?.asset ?? '';
-  return (tip.tips || []).filter((ts) => ts.allowedFerrules?.includes(ferruleAsset));
+  return (tip.tips || []).filter((ts) => {
+    if (!ts.allowedFerrules) return true;
+    if (ferruleAsset === 'TITANFERRULE') {
+      return ts.allowedFerrules.includes('') || ts.allowedFerrules.includes('TITANFERRULE');
+    }
+    return ts.allowedFerrules.includes(ferruleAsset);
+  });
 }
 
-export function isTipSizeAvailable(cue: Partial<CueConfiguration>, size: CueTipSize): boolean {
+export function isTipSizeAvailable(cue: Partial<CueConfiguration>, size?: CueTipSize | null): boolean {
+  if (!size || !size.allowedFerrules) return true;
   const ferruleAsset = cue.ferruleType?.asset ?? '';
-  return size.allowedFerrules?.includes(ferruleAsset) ?? true;
+  if (ferruleAsset === 'TITANFERRULE') {
+    return size.allowedFerrules.includes('') || size.allowedFerrules.includes('TITANFERRULE');
+  }
+  return size.allowedFerrules.includes(ferruleAsset);
 }
 
 // 7. Veneer Layer Dependency (CueWizard sequential cascading)

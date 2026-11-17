@@ -37,12 +37,12 @@ function CueCustomizerContent() {
   const applyPreset = (type: 'pro' | 'exotic' | 'classic') => {
     const base = getDefaultCue();
     if (type === 'pro') {
-      const ashP1600 = catalog.shafts.find((s) => s.name.includes('P1600')) || catalog.shafts[0];
+      const ashPro = catalog.shafts.find((s) => s.name.toLowerCase().includes('professional')) || catalog.shafts[0];
       const joint34 = CUE_JOINTS.find((j) => j.name.includes('Through Butt')) || CUE_JOINTS[1];
       const snakewood = catalog.splices.find((s) => s.name.toLowerCase().includes('snake')) || catalog.splices[1];
       setCue({
         ...base,
-        shaft: ashP1600,
+        shaft: ashPro,
         buttJoint: joint34,
         largeSplices: 4,
         largeSpliceMaterial: snakewood,

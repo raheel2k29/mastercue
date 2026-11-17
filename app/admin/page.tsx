@@ -254,14 +254,14 @@ export default function AdminPricingPage() {
 
   const simCue = React.useMemo(() => {
     const base = getDefaultCue();
-    const ashP80 = config.shafts.find((s) => s.name.includes('P80'));
-    const ashP1600 = config.shafts.find((s) => s.name.includes('P1600'));
+    const ashExecutive = config.shafts.find((s) => s.name.toLowerCase().includes('executive'));
+    const ashProfessional = config.shafts.find((s) => s.name.toLowerCase().includes('professional'));
     const snakewood = config.splices.find((s) => s.name.toLowerCase().includes('snake'));
 
     if (simPreset === 'standard') {
       return {
         ...base,
-        shaft: { ...base.shaft!, price: ashP80?.price ?? 570 },
+        shaft: { ...base.shaft!, price: ashExecutive?.price ?? 585 },
         buttJoint: CUE_JOINTS[0], // No Joint
         endButtJoin: false,
         largeSplices: 0,
@@ -269,7 +269,7 @@ export default function AdminPricingPage() {
     } else if (simPreset === 'tournament') {
       return {
         ...base,
-        shaft: { ...base.shaft!, price: ashP80?.price ?? 570 },
+        shaft: { ...base.shaft!, price: ashExecutive?.price ?? 585 },
         buttJoint: CUE_JOINTS[1], // 3/4 Joint
         endButtJoin: true,
         largeSplices: 0,
@@ -278,7 +278,7 @@ export default function AdminPricingPage() {
       // Exotic 4-Splice Snakewood
       return {
         ...base,
-        shaft: { ...base.shaft!, price: ashP1600?.price ?? 924 },
+        shaft: { ...base.shaft!, price: ashProfessional?.price ?? 924 },
         buttJoint: CUE_JOINTS[1],
         endButtJoin: true,
         largeSplices: 4,
@@ -854,7 +854,7 @@ export default function AdminPricingPage() {
                       : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
                   }`}
                 >
-                  Test 1: Standard 1-Piece Ash P80
+                  Test 1: Standard 1-Piece Ash Executive
                 </button>
                 <button
                   onClick={() => setSimPreset('tournament')}
@@ -874,7 +874,7 @@ export default function AdminPricingPage() {
                       : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
                   }`}
                 >
-                  Test 3: Exotic 4-Splice Snakewood (+P1600)
+                  Test 3: Exotic 4-Splice Snakewood (+Professional)
                 </button>
               </div>
 
