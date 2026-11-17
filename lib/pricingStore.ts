@@ -5,52 +5,86 @@ import { getDefaultPricingConfig } from './defaultPricing';
 
 export { getDefaultPricingConfig };
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const CONFIG_FILE = path.join(DATA_DIR, 'pricingConfig.json');
+let memoryCache: PricingConfig | null = null;
 
-// Ensure data directory exists
-function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+// Resolve safe writable directory (handles Vercel / AWS Lambda / Read-Only filesystems)
+function getDataDir(): string {
+  if (
+    process.env.VERCEL ||
+    process.env.AWS_LAMBDA_FUNCTION_NAME ||
+    process.env.NODE_ENV === 'production'
+  ) {
+    if (fs.existsSync('/tmp')) {
+      const tmpDir = path.join('/tmp', 'mastercue-data');
+      if (!fs.existsSync(tmpDir)) {
+        try {
+          fs.mkdirSync(tmpDir, { recursive: true });
+        } catch {}
+      }
+      return tmpDir;
+    }
   }
+
+  const localDir = path.join(process.cwd(), 'data');
+  if (!fs.existsSync(localDir)) {
+    try {
+      fs.mkdirSync(localDir, { recursive: true });
+    } catch {}
+  }
+  return localDir;
 }
 
-// Fetch active config with fallback to defaults
+function getConfigFile(): string {
+  return path.join(getDataDir(), 'pricingConfig.json');
+}
+
+// Fetch active config with fallback to memory and defaults
 export function getPricingConfig(): PricingConfig {
-  try {
-    ensureDataDir();
-    if (!fs.existsSync(CONFIG_FILE)) {
-      const defaults = getDefaultPricingConfig();
-      fs.writeFileSync(CONFIG_FILE, JSON.stringify(defaults, null, 2), 'utf-8');
-      return defaults;
-    }
-
-    const fileContent = fs.readFileSync(CONFIG_FILE, 'utf-8');
-    const parsed = JSON.parse(fileContent);
-
-    // Merge with defaults to guarantee all required keys exist
-    const defaults = getDefaultPricingConfig();
-    return {
-      version: parsed.version || defaults.version,
-      lastUpdated: parsed.lastUpdated || defaults.lastUpdated,
-      surcharges: {
-        ...defaults.surcharges,
-        ...(parsed.surcharges || {}),
-      },
-      shafts: parsed.shafts?.length ? parsed.shafts : defaults.shafts,
-      lengths: parsed.lengths?.length ? parsed.lengths : defaults.lengths,
-      splices: parsed.splices?.length ? parsed.splices : defaults.splices,
-      veneers: parsed.veneers?.length ? parsed.veneers : defaults.veneers,
-      ferrules: parsed.ferrules?.length ? parsed.ferrules : defaults.ferrules,
-      tipSizes: parsed.tipSizes?.length ? parsed.tipSizes : defaults.tipSizes,
-      namePlates: parsed.namePlates?.length ? parsed.namePlates : defaults.namePlates,
-      extensions: parsed.extensions?.length ? parsed.extensions : defaults.extensions,
-      miniButts: parsed.miniButts?.length ? parsed.miniButts : defaults.miniButts,
-    };
-  } catch (err) {
-    console.error('Failed reading pricingConfig.json, falling back to defaults:', err);
-    return getDefaultPricingConfig();
+  if (memoryCache) {
+    return memoryCache;
   }
+
+  try {
+    const configFile = getConfigFile();
+    if (fs.existsSync(configFile)) {
+      const fileContent = fs.readFileSync(configFile, 'utf-8');
+      const parsed = JSON.parse(fileContent);
+
+      const defaults = getDefaultPricingConfig();
+      const merged: PricingConfig = {
+        version: parsed.version || defaults.version,
+        lastUpdated: parsed.lastUpdated || defaults.lastUpdated,
+        surcharges: {
+          ...defaults.surcharges,
+          ...(parsed.surcharges || {}),
+        },
+        shafts: parsed.shafts?.length ? parsed.shafts : defaults.shafts,
+        lengths: parsed.lengths?.length ? parsed.lengths : defaults.lengths,
+        splices: parsed.splices?.length ? parsed.splices : defaults.splices,
+        veneers: parsed.veneers?.length ? parsed.veneers : defaults.veneers,
+        ferrules: parsed.ferrules?.length ? parsed.ferrules : defaults.ferrules,
+        tipSizes: parsed.tipSizes?.length ? parsed.tipSizes : defaults.tipSizes,
+        namePlates: parsed.namePlates?.length ? parsed.namePlates : defaults.namePlates,
+        extensions: parsed.extensions?.length ? parsed.extensions : defaults.extensions,
+        miniButts: parsed.miniButts?.length ? parsed.miniButts : defaults.miniButts,
+      };
+      memoryCache = merged;
+      return merged;
+    }
+  } catch (err) {
+    console.warn('Reading local config failed, using defaults:', err);
+  }
+
+  const defaults = getDefaultPricingConfig();
+  memoryCache = defaults;
+
+  // Try writing to safe location
+  try {
+    const configFile = getConfigFile();
+    fs.writeFileSync(configFile, JSON.stringify(defaults, null, 2), 'utf-8');
+  } catch {}
+
+  return defaults;
 }
 
 // Sanitize and validate price numbers
@@ -60,14 +94,13 @@ function sanitizePrice(val: any, fallback = 0): number {
   return Math.round(num * 100) / 100;
 }
 
-// Save updated config with validation
+// Save updated config safely without EROFS crashes
 export function savePricingConfig(incoming: Partial<PricingConfig>): {
   success: boolean;
   config: PricingConfig;
   error?: string;
 } {
   try {
-    ensureDataDir();
     const current = getPricingConfig();
 
     const updated: PricingConfig = {
@@ -147,10 +180,19 @@ export function savePricingConfig(incoming: Partial<PricingConfig>): {
       })),
     };
 
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(updated, null, 2), 'utf-8');
+    memoryCache = updated;
+
+    // Persist to safe disk location (/tmp on serverless or data/ locally)
+    try {
+      const configFile = getConfigFile();
+      fs.writeFileSync(configFile, JSON.stringify(updated, null, 2), 'utf-8');
+    } catch (writeErr: any) {
+      console.warn('Filesystem is read-only in this environment, changes held in memory:', writeErr?.message);
+    }
+
     return { success: true, config: updated };
   } catch (err: any) {
-    console.error('Failed saving pricing config:', err);
+    console.error('Validation error while saving pricing config:', err);
     return {
       success: false,
       config: getPricingConfig(),
@@ -161,8 +203,15 @@ export function savePricingConfig(incoming: Partial<PricingConfig>): {
 
 // Reset configuration to pristine defaults
 export function resetPricingConfig(): PricingConfig {
-  ensureDataDir();
   const defaults = getDefaultPricingConfig();
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(defaults, null, 2), 'utf-8');
+  memoryCache = defaults;
+
+  try {
+    const configFile = getConfigFile();
+    fs.writeFileSync(configFile, JSON.stringify(defaults, null, 2), 'utf-8');
+  } catch (err: any) {
+    console.warn('Could not write reset to disk, reset held in memory:', err?.message);
+  }
+
   return defaults;
 }

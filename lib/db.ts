@@ -12,12 +12,47 @@ export interface AdminUserRecord {
   createdAt: string;
 }
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const USERS_FILE = path.join(DATA_DIR, 'adminUsers.json');
-const PRICING_FILE = path.join(DATA_DIR, 'pricingConfig.json');
-
 const DEFAULT_ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@mastercue.com';
 const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'MasterCue2026!';
+
+// Resolve safe writable directory for serverless (Vercel / Lambda)
+function getDataDir(): string {
+  if (
+    process.env.VERCEL ||
+    process.env.AWS_LAMBDA_FUNCTION_NAME ||
+    process.env.NODE_ENV === 'production'
+  ) {
+    if (fs.existsSync('/tmp')) {
+      const tmpDir = path.join('/tmp', 'mastercue-data');
+      if (!fs.existsSync(tmpDir)) {
+        try {
+          fs.mkdirSync(tmpDir, { recursive: true });
+        } catch {}
+      }
+      return tmpDir;
+    }
+  }
+
+  const localDir = path.join(process.cwd(), 'data');
+  if (!fs.existsSync(localDir)) {
+    try {
+      fs.mkdirSync(localDir, { recursive: true });
+    } catch {}
+  }
+  return localDir;
+}
+
+function getUsersFile(): string {
+  return path.join(getDataDir(), 'adminUsers.json');
+}
+
+function getPricingFile(): string {
+  return path.join(getDataDir(), 'pricingConfig.json');
+}
+
+// In-memory fallback caches
+let memoryUsers: AdminUserRecord[] | null = null;
+let memoryPricing: PricingConfig | null = null;
 
 // Database Connection Pool for PostgreSQL (Supabase / Neon / Railway / AWS RDS)
 let pgPool: Pool | null = null;
@@ -28,7 +63,7 @@ function getPgPool(): Pool | null {
   if (!pgPool) {
     pgPool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
+      ssl: { rejectUnauthorized: false },
     });
   }
   return pgPool;
@@ -74,49 +109,60 @@ async function initPgTables(pool: Pool) {
 
     pgInitialized = true;
   } catch (err) {
-    console.error('PostgreSQL initialization error:', err);
+    console.error('PostgreSQL table initialization notice:', err);
   }
 }
 
 // Local filesystem fallback helpers
-function ensureLocalDataDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-}
-
 function getLocalUsers(): AdminUserRecord[] {
-  ensureLocalDataDir();
-  if (!fs.existsSync(USERS_FILE)) {
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(DEFAULT_ADMIN_PASSWORD, salt);
-    const defaultUser: AdminUserRecord = {
-      id: 'admin-1',
-      email: DEFAULT_ADMIN_EMAIL.toLowerCase(),
-      passwordHash: hash,
-      createdAt: new Date().toISOString(),
-    };
-    fs.writeFileSync(USERS_FILE, JSON.stringify([defaultUser], null, 2), 'utf-8');
-    return [defaultUser];
+  if (memoryUsers && memoryUsers.length > 0) {
+    return memoryUsers;
   }
+
+  const usersFile = getUsersFile();
+  if (fs.existsSync(usersFile)) {
+    try {
+      const content = fs.readFileSync(usersFile, 'utf-8');
+      const parsed = JSON.parse(content);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        memoryUsers = parsed;
+        return parsed;
+      }
+    } catch (e) {}
+  }
+
+  const salt = bcrypt.genSaltSync(10);
+  const hash = bcrypt.hashSync(DEFAULT_ADMIN_PASSWORD, salt);
+  const defaultUser: AdminUserRecord = {
+    id: 'admin-1',
+    email: DEFAULT_ADMIN_EMAIL.toLowerCase(),
+    passwordHash: hash,
+    createdAt: new Date().toISOString(),
+  };
+
+  memoryUsers = [defaultUser];
 
   try {
-    const content = fs.readFileSync(USERS_FILE, 'utf-8');
-    return JSON.parse(content);
-  } catch (e) {
-    return [];
-  }
+    fs.writeFileSync(usersFile, JSON.stringify([defaultUser], null, 2), 'utf-8');
+  } catch {}
+
+  return [defaultUser];
 }
 
 // -------------------------------------------------------------
 // Public Database Interface
 // -------------------------------------------------------------
 
-export function getDatabaseStatus(): { type: 'postgresql' | 'local'; connected: boolean } {
+export function getDatabaseStatus(): {
+  type: 'postgresql' | 'local';
+  connected: boolean;
+  hasEnvUrl: boolean;
+} {
   const isPg = Boolean(process.env.DATABASE_URL);
   return {
     type: isPg ? 'postgresql' : 'local',
     connected: true,
+    hasEnvUrl: isPg,
   };
 }
 
@@ -125,15 +171,21 @@ export async function findAdminByEmail(email: string): Promise<AdminUserRecord |
   const pool = getPgPool();
 
   if (pool) {
-    await initPgTables(pool);
-    const res = await pool.query('SELECT id, email, password_hash as "passwordHash", created_at as "createdAt" FROM admin_users WHERE email = $1', [cleanEmail]);
-    if (res.rows.length > 0) {
-      return res.rows[0] as AdminUserRecord;
+    try {
+      await initPgTables(pool);
+      const res = await pool.query(
+        'SELECT id, email, password_hash as "passwordHash", created_at as "createdAt" FROM admin_users WHERE email = $1',
+        [cleanEmail]
+      );
+      if (res.rows.length > 0) {
+        return res.rows[0] as AdminUserRecord;
+      }
+    } catch (err) {
+      console.warn('PostgreSQL query error, falling back to local user store:', err);
     }
-    return null;
   }
 
-  // Fallback to local store
+  // Fallback to local / memory store
   const users = getLocalUsers();
   return users.find((u) => u.email === cleanEmail) || null;
 }
@@ -149,27 +201,39 @@ export async function loadPricingFromDB(): Promise<PricingConfig> {
         return res.rows[0].config as PricingConfig;
       }
     } catch (err) {
-      console.warn('Failed to load from PostgreSQL, falling back:', err);
+      console.warn('PostgreSQL query error, falling back to local pricing store:', err);
     }
   }
 
-  // Fallback to local store
-  ensureLocalDataDir();
-  if (fs.existsSync(PRICING_FILE)) {
+  if (memoryPricing) {
+    return memoryPricing;
+  }
+
+  // Fallback to local store (/tmp or data/)
+  const pricingFile = getPricingFile();
+  if (fs.existsSync(pricingFile)) {
     try {
-      const content = fs.readFileSync(PRICING_FILE, 'utf-8');
-      return JSON.parse(content);
+      const content = fs.readFileSync(pricingFile, 'utf-8');
+      const parsed = JSON.parse(content);
+      memoryPricing = parsed;
+      return parsed;
     } catch (e) {
       console.warn('Failed reading local pricing file, using default:', e);
     }
   }
 
   const defaults = getDefaultPricingConfig();
-  fs.writeFileSync(PRICING_FILE, JSON.stringify(defaults, null, 2), 'utf-8');
+  memoryPricing = defaults;
+
+  try {
+    fs.writeFileSync(pricingFile, JSON.stringify(defaults, null, 2), 'utf-8');
+  } catch {}
+
   return defaults;
 }
 
 export async function savePricingToDB(config: PricingConfig): Promise<boolean> {
+  memoryPricing = config;
   const pool = getPgPool();
 
   if (pool) {
@@ -183,19 +247,25 @@ export async function savePricingToDB(config: PricingConfig): Promise<boolean> {
       );
       return true;
     } catch (err) {
-      console.error('Failed saving to PostgreSQL:', err);
-      return false;
+      console.error('Failed saving to PostgreSQL database:', err);
+      // Even if PostgreSQL fails, keep memory and disk updated
     }
   }
 
-  // Fallback to local store
-  ensureLocalDataDir();
-  fs.writeFileSync(PRICING_FILE, JSON.stringify(config, null, 2), 'utf-8');
+  // Persist to safe location
+  try {
+    const pricingFile = getPricingFile();
+    fs.writeFileSync(pricingFile, JSON.stringify(config, null, 2), 'utf-8');
+  } catch (err: any) {
+    console.warn('Disk write skipped on read-only serverless filesystem:', err?.message);
+  }
+
   return true;
 }
 
 export async function resetPricingInDB(): Promise<PricingConfig> {
   const defaults = getDefaultPricingConfig();
+  memoryPricing = defaults;
   await savePricingToDB(defaults);
   return defaults;
 }

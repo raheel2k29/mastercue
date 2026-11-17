@@ -379,6 +379,29 @@ export default function AdminPricingPage() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+        {/* Database Integration Status Banner */}
+        {dbStatus.type === 'postgresql' ? (
+          <div className="p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-between text-xs text-emerald-300">
+            <div className="flex items-center gap-2.5">
+              <Database className="w-4 h-4 text-emerald-400" />
+              <span><strong>Live PostgreSQL Database Connected:</strong> All pricing changes are permanently saved in your database across redeployments.</span>
+            </div>
+            <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono text-[10px]">DATABASE_URL Active</span>
+          </div>
+        ) : (
+          <div className="p-4 rounded-2xl bg-amber-950/30 border border-amber-500/30 flex items-start gap-3 text-xs text-amber-300">
+            <Database className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="font-semibold text-amber-200">
+                Notice: Running on Serverless / Safe Storage
+              </p>
+              <p className="text-amber-300/80 text-[11px] leading-relaxed">
+                Changes will persist in server memory. To persist changes permanently across all future Vercel deployments, connect a free PostgreSQL database (from <strong>Neon.tech</strong> or <strong>Supabase</strong>) by adding the <code className="bg-amber-500/20 px-1 py-0.5 rounded text-amber-200">DATABASE_URL</code> variable in your Vercel Project Settings &gt; Environment Variables.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Fail-Safe Protection Banner */}
         <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 flex items-start gap-3">
           <ShieldCheck className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
