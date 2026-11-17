@@ -41,6 +41,7 @@ import {
   isLargeSplicesAllowed,
   isExtensionsAllowed,
   isTipSizeAvailable,
+  getAvailableTipSizes,
   canSelectVeneer,
   BUTT_JOINT_FITTING_PRICE,
   DOME_JOINT_PRICE,
@@ -84,11 +85,11 @@ export const CustomizerSidebar: React.FC<CustomizerSidebarProps> = ({ cue, onCha
   const handleFerruleChange = (ferrule: CueFerrule) => {
     const updatedCue = { ...cue, ferruleType: ferrule };
     if (!isTipSizeAvailable(updatedCue, cue.tipSize)) {
-      const validSizes = (cue.tip?.tips || []).filter((s) =>
-        s.allowedFerrules?.includes(ferrule.asset || '')
-      );
-      if (validSizes.length > 0) {
-        updatedCue.tipSize = validSizes[0];
+      if (cue.tip) {
+        const validSizes = getAvailableTipSizes(updatedCue, cue.tip);
+        if (validSizes.length > 0) {
+          updatedCue.tipSize = validSizes[0];
+        }
       }
     }
     onChange(updatedCue);
