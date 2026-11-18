@@ -463,6 +463,15 @@ export default function AdminPricingPage() {
     }));
   };
 
+  const updateCaseItem = (id: string, patch: Partial<AdminItemPrice>) => {
+    setConfig((prev) => ({
+      ...prev,
+      cases: (prev.cases || []).map((c) =>
+        c.id === id ? { ...c, ...patch } : c
+      ),
+    }));
+  };
+
   // -------------------------------------------------------------
   // Live Simulator Calculations (Instant Sanity Check)
   // -------------------------------------------------------------
@@ -1491,13 +1500,19 @@ export default function AdminPricingPage() {
                     key={c.id}
                     className="p-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 space-y-3"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-200">{c.name}</span>
-                      <label className="flex items-center gap-1.5 cursor-pointer text-[11px] text-slate-400">
+                    <div className="flex items-center justify-between gap-2">
+                      <input
+                        type="text"
+                        value={c.name}
+                        onChange={(e) => updateCaseItem(c.id, { name: e.target.value })}
+                        className="text-xs font-bold text-slate-200 bg-transparent border-b border-transparent hover:border-slate-700 focus:border-amber-500 focus:outline-none flex-1 truncate"
+                        title="Click to rename case bundle"
+                      />
+                      <label className="flex items-center gap-1.5 cursor-pointer text-[11px] text-slate-400 shrink-0">
                         <input
                           type="checkbox"
                           checked={c.enabled !== false}
-                          onChange={(e) => updateCasePrice(c.id, c.price, e.target.checked)}
+                          onChange={(e) => updateCaseItem(c.id, { enabled: e.target.checked })}
                           className="rounded border-slate-700 text-amber-500 focus:ring-amber-500 h-3.5 w-3.5 bg-slate-800"
                         />
                         <span>Active</span>
@@ -1512,7 +1527,7 @@ export default function AdminPricingPage() {
                           type="number"
                           min="0"
                           value={c.price}
-                          onChange={(e) => updateCasePrice(c.id, Number(e.target.value))}
+                          onChange={(e) => updateCaseItem(c.id, { price: Number(e.target.value) })}
                           className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-bold text-white focus:outline-none focus:border-amber-500 text-right"
                         />
                       </div>

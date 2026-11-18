@@ -665,14 +665,24 @@ function CustomerAuthContent() {
             </div>
           )}
 
-          {/* Bottom Back Link */}
-          <div className="text-center">
-            <Link
-              href="/"
-              className="text-xs text-slate-500 hover:text-slate-800 transition inline-flex items-center gap-1.5 font-medium"
-            >
-              <span>← Back to Master Cue Customizer Studio</span>
-            </Link>
+          {/* Bottom Back Link & Workshop Admin Link */}
+          <div className="text-center space-y-2 pt-2">
+            <div>
+              <Link
+                href="/"
+                className="text-xs text-slate-500 hover:text-slate-800 transition inline-flex items-center gap-1.5 font-medium"
+              >
+                <span>← Back to Master Cue Customizer Studio</span>
+              </Link>
+            </div>
+            <div>
+              <Link
+                href="/admin"
+                className="text-[11px] text-amber-600 hover:text-amber-700 font-semibold transition inline-flex items-center gap-1 hover:underline"
+              >
+                <span>Workshop Admin & Pricing Manager →</span>
+              </Link>
+            </div>
           </div>
         </div>
       </main>

@@ -176,6 +176,14 @@ function CueCustomizerContent() {
                 {customer ? `Account (${customer.fullName.split(' ')[0]})` : 'My Account'}
               </span>
             </button>
+            <Link
+              href="/admin"
+              title="Workshop Admin & Pricing Control Panel"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-xs font-bold text-amber-700 transition"
+            >
+              <Sliders className="w-3.5 h-3.5 text-amber-600" />
+              <span className="hidden sm:inline">Admin</span>
+            </Link>
           </div>
         </div>
       </header>
