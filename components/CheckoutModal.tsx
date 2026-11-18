@@ -25,7 +25,6 @@ import {
 } from 'lucide-react';
 import { CueConfiguration, CueCase } from '@/types/cue';
 import { OrderRecord } from '@/types/order';
-import { CUE_CASES } from '@/lib/cueData';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -586,9 +585,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         <span className="font-mono font-bold">+£40</span>
                       </div>
                     )}
+                    <div className="flex justify-between pt-1.5">
+                      <span className="text-slate-400">Selected Case:</span>
+                      <span className={selectedCase && selectedCase.id !== 'case_none' ? 'font-semibold text-emerald-400 truncate max-w-[160px]' : 'font-semibold text-slate-300'}>
+                        {selectedCase && selectedCase.id !== 'case_none' ? selectedCase.name : 'Standard Transit Tube'}
+                      </span>
+                    </div>
                     {selectedCase && selectedCase.id !== 'case_none' && (
-                      <div className="flex justify-between pt-1.5 text-emerald-400 font-medium">
-                        <span className="truncate max-w-[170px]">Case: {selectedCase.name}:</span>
+                      <div className="flex justify-between pt-1 text-emerald-400 font-medium">
+                        <span>Case Bundle Price:</span>
                         <span className="font-mono font-bold">+£{selectedCase.bundlePrice}</span>
                       </div>
                     )}
@@ -870,56 +875,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   </div>
                 </div>
 
-                {/* Cue & Case Bundle Selection */}
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-[11px] font-bold text-slate-700">
-                      Bespoke Cue & Case Bundle Deal
-                    </label>
-                    <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                      Bundle Savings
-                    </span>
-                  </div>
-                  <div className="space-y-1.5">
-                    {CUE_CASES.map((c) => {
-                      const isSelected = (selectedCase?.id === c.id) || (!selectedCase && c.id === 'case_none');
-                      const isNone = c.id === 'case_none';
-
-                      return (
-                        <button
-                          key={c.id}
-                          type="button"
-                          onClick={() => setSelectedCase(isNone ? null : c)}
-                          className={`w-full p-2.5 rounded-xl border text-left transition text-xs flex items-center justify-between ${
-                            isSelected
-                              ? isNone
-                                ? 'border-slate-400 bg-slate-50 ring-1 ring-slate-400'
-                                : 'border-amber-500 bg-amber-50/70 ring-1 ring-amber-500'
-                              : 'border-slate-200 bg-white hover:border-slate-300'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2 min-w-0 pr-2">
-                            {isSelected && <Check className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />}
-                            <div className="truncate">
-                              <span className="font-semibold text-slate-900 block truncate">{c.name}</span>
-                              <span className="text-[10px] text-slate-500 block truncate">{c.tagline}</span>
-                            </div>
-                          </div>
-                          <div className="text-right flex-shrink-0 font-mono text-[11px]">
-                            {c.retailPrice > 0 ? (
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-slate-400 line-through text-[10px]">£{c.retailPrice}</span>
-                                <span className="font-bold text-amber-700">+£{c.bundlePrice}</span>
-                              </div>
-                            ) : (
-                              <span className="text-slate-500 font-bold">Included</span>
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
 
                 {/* Special Crafting Notes */}
                 <div>
