@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createOrder, getOrders, createCustomerAccount } from '@/lib/db';
+import { createOrder, getOrders, createCustomerAccount, findCustomerByEmail } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
 import { hashPassword, createCustomerSessionToken, CUSTOMER_SESSION_COOKIE } from '@/lib/customerAuth';
 import { OrderRecord } from '@/types/order';
@@ -60,12 +60,19 @@ export async function POST(req: Request) {
     let customerId: string | undefined = undefined;
     let sessionToken: string | undefined = undefined;
 
-    if (accountPassword && accountPassword.trim().length >= 6) {
+    const cleanEmail = customer.email.trim().toLowerCase();
+    const existingCustomer = await findCustomerByEmail(cleanEmail);
+
+    if (existingCustomer) {
+      // Existing customer detected: automatically link order to their existing account!
+      customerId = existingCustomer.id;
+    } else if (accountPassword && accountPassword.trim().length >= 6) {
+      // New customer providing password to create their account
       const passwordHash = await hashPassword(accountPassword.trim());
       customerId = `cust_${timestamp}_${Math.random().toString(36).substring(2, 7)}`;
       const customerAccount = await createCustomerAccount({
         id: customerId,
-        email: customer.email.trim().toLowerCase(),
+        email: cleanEmail,
         passwordHash,
         fullName: customer.fullName.trim(),
         phone: customer.phone.trim(),

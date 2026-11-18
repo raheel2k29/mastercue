@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   ShieldCheck,
@@ -26,6 +26,7 @@ interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   cue: CueConfiguration;
+  customer?: { id: string; email: string; fullName: string; phone?: string; shippingAddress?: any } | null;
   price: {
     total: number;
     shaftPrice: number;
@@ -51,6 +52,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   onClose,
   cue,
   price,
+  customer,
 }) => {
   // Form fields
   const [fullName, setFullName] = useState('');
@@ -68,6 +70,71 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [paymentMethod, setPaymentMethod] = useState<'invoice_bank_transfer' | 'card_link' | 'paypal'>(
     'invoice_bank_transfer'
   );
+
+  // Customer session & account lookup
+  const [activeCustomer, setActiveCustomer] = useState<{
+    id: string;
+    email: string;
+    fullName: string;
+    phone?: string;
+    shippingAddress?: any;
+  } | null>(customer || null);
+  const [emailAccountExists, setEmailAccountExists] = useState(false);
+
+  // Sync / check customer on open
+  useEffect(() => {
+    if (isOpen) {
+      if (customer) {
+        setActiveCustomer(customer);
+        setFullName((prev) => prev || customer.fullName || '');
+        setEmail((prev) => prev || customer.email || '');
+        setPhone((prev) => prev || customer.phone || '');
+        if (customer.shippingAddress) {
+          setAddressLine1((prev) => prev || customer.shippingAddress.addressLine1 || '');
+          setAddressLine2((prev) => prev || customer.shippingAddress.addressLine2 || '');
+          setCity((prev) => prev || customer.shippingAddress.city || '');
+          setPostcode((prev) => prev || customer.shippingAddress.postcode || '');
+          setCountry((prev) => prev || customer.shippingAddress.country || 'United Kingdom');
+        }
+      } else {
+        fetch('/api/customer/me', { cache: 'no-store' })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.authenticated && data.customer) {
+              setActiveCustomer(data.customer);
+              setFullName((prev) => prev || data.customer.fullName || '');
+              setEmail((prev) => prev || data.customer.email || '');
+              setPhone((prev) => prev || data.customer.phone || '');
+              if (data.customer.shippingAddress) {
+                setAddressLine1((prev) => prev || data.customer.shippingAddress.addressLine1 || '');
+                setAddressLine2((prev) => prev || data.customer.shippingAddress.addressLine2 || '');
+                setCity((prev) => prev || data.customer.shippingAddress.city || '');
+                setPostcode((prev) => prev || data.customer.shippingAddress.postcode || '');
+                setCountry((prev) => prev || data.customer.shippingAddress.country || 'United Kingdom');
+              }
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  }, [isOpen, customer]);
+
+  // Debounced email lookup for guest checkout
+  useEffect(() => {
+    if (!activeCustomer && email.includes('@') && email.length > 5) {
+      const timer = setTimeout(() => {
+        fetch(`/api/customer/check-email?email=${encodeURIComponent(email.trim().toLowerCase())}`)
+          .then((r) => r.json())
+          .then((d) => {
+            setEmailAccountExists(Boolean(d.exists));
+          })
+          .catch(() => {});
+      }, 350);
+      return () => clearTimeout(timer);
+    } else {
+      setEmailAccountExists(false);
+    }
+  }, [email, activeCustomer]);
 
   // Status & Feedback
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -117,8 +184,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       setErrorMessage('Please enter your postal / ZIP code.');
       return;
     }
-    if (!accountPassword || accountPassword.trim().length < 6) {
-      setErrorMessage('Please choose an account password (at least 6 characters) so we can create your customer account to track this order.');
+    // Password is only validated if a new unauthenticated customer chooses to create an account
+    if (!activeCustomer && !emailAccountExists && accountPassword && accountPassword.trim().length < 6) {
+      setErrorMessage('Account password must be at least 6 characters long.');
       return;
     }
 
@@ -143,7 +211,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         },
         paymentMethod,
         notes: notes.trim(),
-        accountPassword: accountPassword.trim(),
+        accountPassword: (!activeCustomer && !emailAccountExists && accountPassword) ? accountPassword.trim() : undefined,
       };
 
       const res = await fetch('/api/orders', {
@@ -564,47 +632,78 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   </div>
                 </div>
 
-                {/* Customer Account Creation (Mandatory to accompany this order) */}
-                <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <User className="w-4 h-4 text-amber-700" />
-                      <span className="text-xs font-bold text-slate-900">
-                        Create Account For This Order <span className="text-rose-500">*</span>
-                      </span>
+                {/* Customer Account Status / Creation */}
+                {activeCustomer ? (
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between shadow-sm">
+                    <div className="flex items-center gap-2.5">
+                      <UserCheck className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                      <div>
+                        <span className="font-bold text-slate-900 block">
+                          Signed In as {activeCustomer.fullName}
+                        </span>
+                        <span className="text-emerald-700 text-[11px] block">
+                          {activeCustomer.email} • This bespoke order will automatically link to your customer account
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-200/60 text-amber-900 font-bold">
-                      Order Tracking
+                    <span className="text-[10px] font-mono font-bold uppercase px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex-shrink-0">
+                      Account Active
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-600 leading-relaxed">
-                    An account will be created using your email to accompany this order. Set a password to track workshop handcrafting progress and download build sheets.
-                  </p>
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-700 mb-1">
-                      Account Password <span className="text-rose-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        required
-                        minLength={6}
-                        value={accountPassword}
-                        onChange={(e) => setAccountPassword(e.target.value)}
-                        placeholder="Choose a password (min 6 characters)"
-                        className="w-full pl-9 pr-10 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition bg-white"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
+                ) : emailAccountExists ? (
+                  <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center justify-between shadow-sm">
+                    <div className="flex items-center gap-2.5">
+                      <Sparkles className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                      <div>
+                        <span className="font-bold text-slate-900 block">
+                          Master Cue Account Found
+                        </span>
+                        <span className="text-amber-700 text-[11px] block">
+                          An account for {email} exists. This order will automatically link to your account dashboard without needing a new password.
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono font-bold uppercase px-2.5 py-1 rounded-full bg-amber-200/80 text-amber-900 border border-amber-300 flex-shrink-0">
+                      Auto-Linked
+                    </span>
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <User className="w-4 h-4 text-slate-700" />
+                        <span className="text-xs font-bold text-slate-900">
+                          Create Account to Track Order <span className="text-slate-400 font-normal">(Optional)</span>
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-200 text-slate-700 font-bold">
+                        Optional
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      Set a password if you want to track handcrafting progress and download build sheets in the customer portal. Leave blank to checkout as guest.
+                    </p>
+                    <div>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          value={accountPassword}
+                          onChange={(e) => setAccountPassword(e.target.value)}
+                          placeholder="Choose password (min 6 characters) or leave blank"
+                          className="w-full pl-9 pr-10 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition bg-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {/* Special Crafting Notes */}
                 <div>

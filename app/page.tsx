@@ -348,6 +348,7 @@ function CueCustomizerContent() {
         onClose={() => setShowCheckoutModal(false)}
         cue={cue}
         price={price}
+        customer={customer}
       />
 
       {/* Customer Sign In / Sign Up / Track Modal Popup */}
