@@ -43,6 +43,7 @@ export interface OrderPricingBreakdown {
 export interface OrderRecord {
   id: string;
   orderNumber: string;
+  customerId?: string;
   customer: CustomerShippingAddress;
   cue: CueConfiguration;
   pricing: OrderPricingBreakdown;

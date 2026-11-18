@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { CueConfiguration } from '@/types/cue';
 import { getDefaultCue, getWeightRange } from '@/lib/cueEngine';
 import { CUE_JOINTS } from '@/lib/cueData';
@@ -18,6 +19,7 @@ import {
   Eye,
   Award,
   ArrowRight,
+  User,
 } from 'lucide-react';
 
 function CueCustomizerContent() {
@@ -141,6 +143,14 @@ function CueCustomizerContent() {
               <Eye className="w-3.5 h-3.5 text-amber-600" />
               <span>Specs</span>
             </button>
+            <Link
+              href="/account"
+              title="Customer Account & Order Tracking"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-white shadow-sm transition"
+            >
+              <User className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">My Account</span>
+            </Link>
           </div>
         </div>
       </header>

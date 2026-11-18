@@ -4,6 +4,7 @@ import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
 import { PricingConfig } from '@/types/admin';
 import { OrderRecord, OrderStatus } from '@/types/order';
+import { CustomerRecord } from '@/types/customer';
 import { getDefaultPricingConfig } from './defaultPricing';
 
 export interface AdminUserRecord {
@@ -55,10 +56,15 @@ function getOrdersFile(): string {
   return path.join(getDataDir(), 'orders.json');
 }
 
+function getCustomersFile(): string {
+  return path.join(getDataDir(), 'customers.json');
+}
+
 // In-memory fallback caches
 let memoryUsers: AdminUserRecord[] | null = null;
 let memoryPricing: PricingConfig | null = null;
 let memoryOrders: OrderRecord[] | null = null;
+let memoryCustomers: CustomerRecord[] | null = null;
 
 // Database Connection Pool for PostgreSQL (Supabase / Neon / Railway / AWS RDS)
 declare global {
@@ -151,6 +157,7 @@ async function initPgTables(pool: Pool) {
       CREATE TABLE IF NOT EXISTS orders (
         id VARCHAR(64) PRIMARY KEY,
         order_number VARCHAR(32) UNIQUE NOT NULL,
+        customer_id VARCHAR(64),
         customer_name VARCHAR(255) NOT NULL,
         customer_email VARCHAR(255) NOT NULL,
         customer_phone VARCHAR(64),
@@ -167,6 +174,20 @@ async function initPgTables(pool: Pool) {
       );
       CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders (created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_orders_order_number ON orders (order_number);
+
+      CREATE TABLE IF NOT EXISTS customers (
+        id VARCHAR(64) PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        full_name VARCHAR(255) NOT NULL,
+        phone VARCHAR(64),
+        shipping_address JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_customers_email ON customers (email);
+
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_id VARCHAR(64);
     `);
 
     // Seed default admin user in PostgreSQL if table is empty
@@ -530,6 +551,7 @@ function mapRowToOrder(row: any): OrderRecord {
   return {
     id: row.id,
     orderNumber: row.order_number,
+    customerId: row.customer_id || undefined,
     customer,
     cue,
     pricing,
@@ -550,13 +572,14 @@ export async function createOrder(order: OrderRecord): Promise<OrderRecord> {
       await initPgTables(pool);
       await executeQueryWithRetry(
         `INSERT INTO orders (
-          id, order_number, customer_name, customer_email, customer_phone,
+          id, order_number, customer_id, customer_name, customer_email, customer_phone,
           shipping_address, cue_configuration, pricing_breakdown,
           total_price, currency, payment_method, status, notes, created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())`,
         [
           order.id,
           order.orderNumber,
+          order.customerId || null,
           order.customer.fullName,
           order.customer.email.toLowerCase(),
           order.customer.phone || null,
@@ -657,4 +680,171 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
   } catch {}
 
   return true;
+}
+
+// -------------------------------------------------------------
+// Customers & Account Layer (Neon PostgreSQL + Fallback)
+// -------------------------------------------------------------
+
+function getLocalCustomers(): CustomerRecord[] {
+  if (memoryCustomers && memoryCustomers.length > 0) {
+    return memoryCustomers;
+  }
+  const file = getCustomersFile();
+  if (fs.existsSync(file)) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(file, 'utf-8'));
+      if (Array.isArray(parsed)) {
+        memoryCustomers = parsed;
+        return parsed;
+      }
+    } catch {}
+  }
+  memoryCustomers = [];
+  return [];
+}
+
+function mapRowToCustomer(row: any): CustomerRecord {
+  const shippingAddress =
+    typeof row.shipping_address === 'string'
+      ? JSON.parse(row.shipping_address)
+      : row.shipping_address;
+
+  return {
+    id: row.id,
+    email: row.email,
+    passwordHash: row.password_hash,
+    fullName: row.full_name,
+    phone: row.phone || undefined,
+    shippingAddress: shippingAddress || undefined,
+    createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
+    updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : undefined,
+  };
+}
+
+export async function createCustomerAccount(customer: CustomerRecord): Promise<CustomerRecord> {
+  const pool = getPgPool();
+  if (pool) {
+    try {
+      await initPgTables(pool);
+      await executeQueryWithRetry(
+        `INSERT INTO customers (
+          id, email, password_hash, full_name, phone, shipping_address, created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+        ON CONFLICT (email) DO UPDATE SET
+          password_hash = EXCLUDED.password_hash,
+          full_name = EXCLUDED.full_name,
+          phone = COALESCE(EXCLUDED.phone, customers.phone),
+          shipping_address = COALESCE(EXCLUDED.shipping_address, customers.shipping_address),
+          updated_at = NOW()`,
+        [
+          customer.id,
+          customer.email.toLowerCase(),
+          customer.passwordHash,
+          customer.fullName,
+          customer.phone || null,
+          customer.shippingAddress ? JSON.stringify(customer.shippingAddress) : null,
+        ]
+      );
+
+      // Link any existing unlinked orders matching this email
+      await executeQueryWithRetry(
+        `UPDATE orders SET customer_id = $1 WHERE LOWER(customer_email) = $2 AND (customer_id IS NULL OR customer_id = '')`,
+        [customer.id, customer.email.toLowerCase()]
+      );
+    } catch (err: any) {
+      console.error('PostgreSQL createCustomerAccount failed:', err?.message);
+    }
+  }
+
+  try {
+    const list = getLocalCustomers();
+    const existingIdx = list.findIndex((c) => c.email.toLowerCase() === customer.email.toLowerCase());
+    if (existingIdx >= 0) {
+      list[existingIdx] = customer;
+    } else {
+      list.push(customer);
+    }
+    memoryCustomers = list;
+    fs.writeFileSync(getCustomersFile(), JSON.stringify(list, null, 2), 'utf-8');
+  } catch (err: any) {
+    console.warn('Customer disk write skipped:', err?.message);
+  }
+
+  return customer;
+}
+
+export async function findCustomerByEmail(email: string): Promise<CustomerRecord | null> {
+  if (!email) return null;
+  const pool = getPgPool();
+  if (pool) {
+    try {
+      await initPgTables(pool);
+      const res = await executeQueryWithRetry(
+        'SELECT * FROM customers WHERE LOWER(email) = $1 LIMIT 1',
+        [email.trim().toLowerCase()]
+      );
+      if (res.rows && res.rows.length > 0) {
+        return mapRowToCustomer(res.rows[0]);
+      }
+    } catch (err: any) {
+      console.error('PostgreSQL findCustomerByEmail failed:', err?.message);
+    }
+  }
+
+  const local = getLocalCustomers().find((c) => c.email.toLowerCase() === email.trim().toLowerCase());
+  return local || null;
+}
+
+export async function findCustomerById(id: string): Promise<CustomerRecord | null> {
+  if (!id) return null;
+  const pool = getPgPool();
+  if (pool) {
+    try {
+      await initPgTables(pool);
+      const res = await executeQueryWithRetry(
+        'SELECT * FROM customers WHERE id = $1 LIMIT 1',
+        [id]
+      );
+      if (res.rows && res.rows.length > 0) {
+        return mapRowToCustomer(res.rows[0]);
+      }
+    } catch (err: any) {
+      console.error('PostgreSQL findCustomerById failed:', err?.message);
+    }
+  }
+
+  const local = getLocalCustomers().find((c) => c.id === id);
+  return local || null;
+}
+
+export async function getCustomerOrders(email: string, customerId?: string): Promise<OrderRecord[]> {
+  const pool = getPgPool();
+  if (pool) {
+    try {
+      await initPgTables(pool);
+      let res;
+      if (customerId) {
+        res = await executeQueryWithRetry(
+          'SELECT * FROM orders WHERE customer_id = $1 OR LOWER(customer_email) = $2 ORDER BY created_at DESC',
+          [customerId, email.trim().toLowerCase()]
+        );
+      } else {
+        res = await executeQueryWithRetry(
+          'SELECT * FROM orders WHERE LOWER(customer_email) = $1 ORDER BY created_at DESC',
+          [email.trim().toLowerCase()]
+        );
+      }
+      if (res.rows && res.rows.length > 0) {
+        return res.rows.map(mapRowToOrder);
+      }
+    } catch (err: any) {
+      console.error('PostgreSQL getCustomerOrders failed:', err?.message);
+    }
+  }
+
+  const lower = email.trim().toLowerCase();
+  return getLocalOrders().filter(
+    (o) => o.customer.email.toLowerCase() === lower || (customerId && o.customerId === customerId)
+  );
 }

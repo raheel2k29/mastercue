@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { createOrder, getOrders } from '@/lib/db';
+import { createOrder, getOrders, createCustomerAccount } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
+import { hashPassword, createCustomerSessionToken, CUSTOMER_SESSION_COOKIE } from '@/lib/customerAuth';
 import { OrderRecord } from '@/types/order';
 
 export const dynamic = 'force-dynamic';
@@ -10,7 +11,7 @@ export const revalidate = 0;
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { customer, cue, pricing, paymentMethod, notes } = body;
+    const { customer, cue, pricing, paymentMethod, notes, accountPassword } = body;
 
     // Validate customer contact & shipping
     if (!customer?.fullName?.trim()) {
@@ -35,6 +36,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Country is required' }, { status: 400 });
     }
 
+    // Validate account password if provided or enforce account creation
+    if (accountPassword && accountPassword.trim().length < 6) {
+      return NextResponse.json({ success: false, error: 'Account password must be at least 6 characters long' }, { status: 400 });
+    }
+
     // Validate cue configuration & pricing
     if (!cue || !cue.shaft?.name) {
       return NextResponse.json({ success: false, error: 'Valid cue configuration is required' }, { status: 400 });
@@ -50,9 +56,34 @@ export async function POST(req: Request) {
     const orderNumber = `MC-${new Date().getFullYear().toString().slice(-2)}${randomDigits}`;
     const orderId = `ord_${timestamp}_${Math.random().toString(36).substring(2, 7)}`;
 
+    // Create or Link Customer Account
+    let customerId: string | undefined = undefined;
+    let sessionToken: string | undefined = undefined;
+
+    if (accountPassword && accountPassword.trim().length >= 6) {
+      const passwordHash = await hashPassword(accountPassword.trim());
+      customerId = `cust_${timestamp}_${Math.random().toString(36).substring(2, 7)}`;
+      const customerAccount = await createCustomerAccount({
+        id: customerId,
+        email: customer.email.trim().toLowerCase(),
+        passwordHash,
+        fullName: customer.fullName.trim(),
+        phone: customer.phone.trim(),
+        shippingAddress: customer,
+        createdAt: new Date().toISOString(),
+      });
+      customerId = customerAccount.id;
+      sessionToken = createCustomerSessionToken({
+        customerId: customerAccount.id,
+        email: customerAccount.email,
+        fullName: customerAccount.fullName,
+      });
+    }
+
     const orderRecord: OrderRecord = {
       id: orderId,
       orderNumber,
+      customerId,
       customer: {
         fullName: customer.fullName.trim(),
         email: customer.email.trim().toLowerCase(),
@@ -92,12 +123,25 @@ export async function POST(req: Request) {
 
     const savedOrder = await createOrder(orderRecord);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       orderNumber: savedOrder.orderNumber,
       order: savedOrder,
+      accountCreated: Boolean(customerId),
       message: 'Order placed successfully! Handcrafted cue specifications permanently saved.',
     });
+
+    if (sessionToken) {
+      response.cookies.set(CUSTOMER_SESSION_COOKIE, sessionToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+      });
+    }
+
+    return response;
   } catch (err: any) {
     console.error('Error placing order:', err);
     return NextResponse.json(
