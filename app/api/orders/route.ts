@@ -125,6 +125,7 @@ export async function POST(req: Request) {
       cue: {
         ...cue,
         priorityService: isPriority,
+        case: cue?.case && cue.case.id !== 'case_none' ? cue.case : null,
       },
       pricing: {
         total: totalPrice,
@@ -144,6 +145,7 @@ export async function POST(req: Request) {
         miniButtPrice: Number(pricing.miniButtPrice) || 0,
         extensionsPrice: Number(pricing.extensionsPrice) || 0,
         priorityServicePrice,
+        casePrice: Number(pricing.casePrice) || (cue?.case?.bundlePrice || 0),
         currency: pricing.currency || '£',
       },
       serviceLevel,

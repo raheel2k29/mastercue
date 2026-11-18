@@ -11,7 +11,8 @@ import {
   CueDome,
   CuePlate,
   CueExtension,
-  CueMiniButt
+  CueMiniButt,
+  CueCase,
 } from '@/types/cue';
 
 export const CUE_SHAFTS: CueShaft[] = [
@@ -5945,4 +5946,73 @@ export const CUE_OTHER_PRICES = [
     "name": "Dome Joint",
     "price": 31.0
   }
+];
+
+export const CUE_CASES: CueCase[] = [
+  {
+    id: 'case_none',
+    name: 'No Case (Standard Transit Tube)',
+    tagline: 'Standard rigid courier delivery tube',
+    retailPrice: 0,
+    bundlePrice: 0,
+    savings: 0,
+    compartments: 'Protective transit tube only',
+    material: 'Reinforced hard courier tube',
+    security: 'Standard courier seals',
+    colorScheme: 'slate',
+  },
+  {
+    id: 'case_classic_hard',
+    name: 'Master Cue Classic Leatherette Hard Case',
+    tagline: 'Streamlined single-cue protection with plush padded interior',
+    retailPrice: 65,
+    bundlePrice: 45,
+    savings: 20,
+    badge: 'Popular',
+    compartments: 'Holds 1 Complete Cue + Chalk holder',
+    material: 'Durable PU Leatherette with shock-absorbent high-density foam',
+    security: 'Dual polished brass catches',
+    colorScheme: 'amber',
+  },
+  {
+    id: 'case_pro_aluminum',
+    name: 'Pro-Lock Heavy-Duty Aluminum Tour Case',
+    tagline: 'Reinforced flight-grade aluminum alloy with lockable latches',
+    retailPrice: 95,
+    bundlePrice: 70,
+    savings: 25,
+    badge: 'Heavy-Duty',
+    compartments: 'Holds 1 Cue + Extension or 2-piece cue with foam channels',
+    material: 'Aviation-grade aluminum shell with shock-proof velvet-lined interior',
+    security: 'Key-lockable latches with dual keys included',
+    colorScheme: 'sky',
+    featured: true,
+  },
+  {
+    id: 'case_wide_tour',
+    name: 'Master Cue Deluxe Wide 3-Compartment Case',
+    tagline: 'Full tournament suite: accommodates cue, mini butt, and telescopic extension',
+    retailPrice: 125,
+    bundlePrice: 95,
+    savings: 30,
+    badge: 'Best Value Bundle',
+    compartments: 'Dedicated channels: Cue + Mini Butt + Telescopic Extension + Chalk & Tips',
+    material: 'Hand-stitched leatherette outer with deep velvet grooved interior',
+    security: 'Triple heavy-duty brass clasps & corner scuff guards',
+    colorScheme: 'emerald',
+    featured: true,
+  },
+  {
+    id: 'case_heritage_leather',
+    name: 'Heritage Handcrafted Genuine Saddle Leather Case',
+    tagline: 'Master artisan crafted 100% genuine saddle leather with embossed crest',
+    retailPrice: 185,
+    bundlePrice: 145,
+    savings: 40,
+    badge: 'Luxury Handcrafted',
+    compartments: '2 Full Cues or Cue + Extension Suite with luxury French velvet',
+    material: 'Top-grain genuine cowhide saddle leather with antiqued brass hardware',
+    security: 'Twin leather wrap-around buckle straps with key-lock center catch',
+    colorScheme: 'purple',
+  },
 ];

@@ -55,4 +55,5 @@ export interface PricingConfig {
   namePlates: AdminPlatePrice[];
   extensions: AdminItemPrice[];
   miniButts: AdminItemPrice[];
+  cases?: AdminItemPrice[];
 }

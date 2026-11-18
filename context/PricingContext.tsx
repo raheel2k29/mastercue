@@ -13,6 +13,7 @@ import {
   CUE_PLATES,
   CUE_EXTENSIONS,
   CUE_MINI_BUTTS,
+  CUE_CASES,
 } from '@/lib/cueData';
 import {
   CueShaft,
@@ -23,6 +24,7 @@ import {
   CuePlate,
   CueExtension,
   CueMiniButt,
+  CueCase,
   CueConfiguration,
 } from '@/types/cue';
 import { calculatePrice, getButtTimberAsset, isLargeSplicesAllowed } from '@/lib/cueEngine';
@@ -36,6 +38,7 @@ interface DynamicCatalog {
   namePlates: CuePlate[];
   extensions: CueExtension[];
   miniButts: CueMiniButt[];
+  cases: CueCase[];
   surcharges: {
     buttJointFittingPrice: number;
     domeJointPrice: number;
@@ -231,6 +234,17 @@ export const PricingProvider: React.FC<{ children: React.ReactNode }> = ({ child
       };
     });
 
+    // 9. Cases
+    const casePriceMap = new Map((config.cases || []).map((c) => [c.id, c]));
+    const cases = CUE_CASES.map((c) => {
+      const adminItem = casePriceMap.get(c.id);
+      return {
+        ...c,
+        bundlePrice: adminItem ? adminItem.price : c.bundlePrice,
+        enabled: adminItem?.enabled !== false,
+      };
+    });
+
     return {
       shafts,
       lengths,
@@ -240,6 +254,7 @@ export const PricingProvider: React.FC<{ children: React.ReactNode }> = ({ child
       namePlates,
       extensions,
       miniButts,
+      cases,
       surcharges: config.surcharges,
     };
   }, [config]);
@@ -361,6 +376,13 @@ export const PricingProvider: React.FC<{ children: React.ReactNode }> = ({ child
         ? (catalog.surcharges.priorityCraftingPrice ?? 40)
         : 0;
 
+      // 12. Bundled Cue Case
+      let casePrice = 0;
+      if (targetCue.case && targetCue.case.id !== 'case_none') {
+        const caseItem = catalog.cases.find((c) => c.id === targetCue.case?.id);
+        casePrice = caseItem ? caseItem.bundlePrice : (targetCue.case.bundlePrice || 0);
+      }
+
       const total = Math.max(
         0,
         shaftPrice +
@@ -378,7 +400,8 @@ export const PricingProvider: React.FC<{ children: React.ReactNode }> = ({ child
           engravingPrice +
           miniButtPrice +
           extensionsPrice +
-          priorityServicePrice
+          priorityServicePrice +
+          casePrice
       );
 
       return {
@@ -398,6 +421,7 @@ export const PricingProvider: React.FC<{ children: React.ReactNode }> = ({ child
         miniButtPrice,
         extensionsPrice,
         priorityServicePrice,
+        casePrice,
         total,
       };
     },

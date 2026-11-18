@@ -24,6 +24,7 @@ import {
   ChevronUp,
   RefreshCw,
   Zap,
+  Briefcase,
 } from 'lucide-react';
 import { OrderRecord, OrderStatus } from '@/types/order';
 import { CustomerProfile } from '@/types/customer';
@@ -255,6 +256,12 @@ export default function CustomerAccountPage() {
                               <span>Priority Build (6 Weeks)</span>
                             </span>
                           )}
+                          {ord.cue.case && ord.cue.case.id !== 'case_none' && (
+                            <span className="text-[10px] font-mono uppercase font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 shadow-xs">
+                              <Briefcase className="w-3 h-3 text-emerald-600" />
+                              <span>{ord.cue.case.name.split(' ')[0]} Case Bundle</span>
+                            </span>
+                          )}
                           <span
                             className={`text-[11px] font-mono uppercase font-bold px-2.5 py-0.5 rounded-full border ${
                               ord.status === 'in_crafting'
@@ -423,6 +430,14 @@ export default function CustomerAccountPage() {
                                 {(ord.serviceLevel === 'priority' || ord.cue.priorityService) ? '⚡ Priority (Within 6 Weeks)' : 'Standard (10–12 Weeks)'}
                               </span>
                             </div>
+                            {ord.cue.case && ord.cue.case.id !== 'case_none' && (
+                              <div className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200 text-emerald-950">
+                                <span className="text-emerald-700 block text-[10px] font-bold">Bundled Cue Case</span>
+                                <span className="font-bold flex items-center gap-1">
+                                  {ord.cue.case.name} (+£{ord.cue.case.bundlePrice})
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
 

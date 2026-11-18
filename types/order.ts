@@ -38,6 +38,7 @@ export interface OrderPricingBreakdown {
   miniButtPrice: number;
   extensionsPrice: number;
   priorityServicePrice?: number;
+  casePrice?: number;
   currency: string;
 }
 

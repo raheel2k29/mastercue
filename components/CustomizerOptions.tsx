@@ -62,6 +62,8 @@ import {
   Lock,
   Zap,
   Clock,
+  Briefcase,
+  Shield,
 } from 'lucide-react';
 
 interface CustomizerOptionsProps {
@@ -1118,6 +1120,92 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
                     +{catalog.surcharges.defaultCurrency || '£'}{catalog.surcharges.priorityCraftingPrice ?? 40} Expedited
                   </span>
                 </button>
+              </div>
+            </div>
+
+            {/* Cue & Case Bundle Deal Selection */}
+            <div className="space-y-3 p-4 rounded-2xl bg-slate-50/80 border border-slate-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                    <Briefcase className="w-4 h-4 text-amber-600" />
+                    <span>Cue & Case Bundle Deals</span>
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Bundle a custom flight case or luxury leather case with your bespoke cue & save up to £40.
+                  </p>
+                </div>
+                {cue.case && cue.case.id !== 'case_none' && (
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 shadow-xs">
+                    <Shield className="w-3 h-3 text-emerald-600" />
+                    <span>Bundle Saved £{cue.case.savings}</span>
+                  </span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 gap-2.5 pt-1">
+                {catalog.cases.map((c) => {
+                  const isSelected = (cue.case?.id === c.id) || (!cue.case && c.id === 'case_none');
+                  const isNone = c.id === 'case_none';
+
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => updateCue({ case: isNone ? null : c })}
+                      className={`p-3.5 rounded-xl border text-left transition-all relative ${
+                        isSelected
+                          ? isNone
+                            ? 'border-slate-400 bg-white ring-2 ring-slate-400/20 shadow-sm'
+                            : 'border-amber-500 bg-gradient-to-br from-amber-500/10 via-amber-100/30 to-white ring-2 ring-amber-500 shadow-sm'
+                          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="space-y-1 flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-bold text-slate-950">{c.name}</span>
+                            {c.badge && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-amber-500 text-slate-950">
+                                {c.badge}
+                              </span>
+                            )}
+                            {c.savings > 0 && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                Save £{c.savings} Bundle
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-slate-600 leading-snug">{c.tagline}</p>
+                          <div className="flex items-center gap-3 text-[10px] text-slate-500 pt-0.5 flex-wrap">
+                            <span>📦 {c.compartments}</span>
+                            <span>🔒 {c.security}</span>
+                          </div>
+                        </div>
+
+                        <div className="text-right flex-shrink-0 flex flex-col items-end">
+                          <div className="flex items-center gap-1.5">
+                            {isSelected && <Check className="w-4 h-4 text-amber-600" />}
+                            {c.retailPrice > 0 ? (
+                              <div className="text-right">
+                                <span className="text-[10px] text-slate-400 line-through block">
+                                  £{c.retailPrice}
+                                </span>
+                                <span className="text-xs font-mono font-black text-amber-700">
+                                  +£{c.bundlePrice}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-xs font-mono font-bold text-slate-700">
+                                Included Free
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

@@ -320,6 +320,12 @@ function CueCustomizerContent() {
                   <span className="font-semibold text-amber-700">+£{price.priorityServicePrice}</span>
                 </div>
               ) : null}
+              {cue.case && cue.case.id !== 'case_none' ? (
+                <div className="flex justify-between py-1.5">
+                  <span className="text-slate-500">Bespoke Case Bundle ({cue.case.name}):</span>
+                  <span className="font-semibold text-emerald-700">+£{cue.case.bundlePrice}</span>
+                </div>
+              ) : null}
               <div className="flex justify-between py-2 text-sm font-bold border-t border-slate-200">
                 <span className="text-slate-800">Current Price:</span>
                 <span className="text-slate-950 font-mono text-base font-extrabold">£{price.total}</span>

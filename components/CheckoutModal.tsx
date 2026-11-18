@@ -20,9 +20,12 @@ import {
   EyeOff,
   Zap,
   Clock,
+  Briefcase,
+  Shield,
 } from 'lucide-react';
-import { CueConfiguration } from '@/types/cue';
+import { CueConfiguration, CueCase } from '@/types/cue';
 import { OrderRecord } from '@/types/order';
+import { CUE_CASES } from '@/lib/cueData';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -47,6 +50,7 @@ interface CheckoutModalProps {
     miniButtPrice: number;
     extensionsPrice: number;
     priorityServicePrice?: number;
+    casePrice?: number;
   };
 }
 
@@ -71,21 +75,27 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [accountCreated, setAccountCreated] = useState(false);
   const [priorityService, setPriorityService] = useState<boolean>(Boolean(cue.priorityService));
+  const [selectedCase, setSelectedCase] = useState<CueCase | null>(cue.case || null);
   const [paymentMethod, setPaymentMethod] = useState<'invoice_bank_transfer' | 'card_link' | 'paypal'>(
     'invoice_bank_transfer'
   );
 
-  // Synchronize priority service whenever modal opens or cue prop changes
+  // Synchronize options whenever modal opens or cue prop changes
   useEffect(() => {
     if (isOpen) {
       setPriorityService(Boolean(cue.priorityService));
+      setSelectedCase(cue.case || null);
     }
-  }, [isOpen, cue.priorityService]);
+  }, [isOpen, cue.priorityService, cue.case]);
 
-  // Dynamic payable calculation (ensures live update if user toggles speed in checkout)
-  const baseTotal = price.total - (price.priorityServicePrice || (cue.priorityService ? 40 : 0));
+  // Dynamic payable calculation (ensures live update if user toggles turnaround or case in checkout)
+  const baseWithoutExtras =
+    price.total -
+    (price.priorityServicePrice || (cue.priorityService ? 40 : 0)) -
+    (price.casePrice || (cue.case?.bundlePrice || 0));
   const currentPriorityPrice = priorityService ? 40 : 0;
-  const payableTotal = baseTotal + currentPriorityPrice;
+  const currentCasePrice = selectedCase && selectedCase.id !== 'case_none' ? (selectedCase.bundlePrice || 0) : 0;
+  const payableTotal = baseWithoutExtras + currentPriorityPrice + currentCasePrice;
 
   // Customer session & account lookup
   const [activeCustomer, setActiveCustomer] = useState<{
@@ -226,6 +236,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       const updatedCue: CueConfiguration = {
         ...cue,
         priorityService,
+        case: selectedCase,
       };
 
       const payload = {
@@ -243,6 +254,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         pricing: {
           ...price,
           priorityServicePrice: currentPriorityPrice,
+          casePrice: currentCasePrice,
           total: payableTotal,
           currency: '£',
         },
@@ -439,6 +451,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       {(completedOrder.serviceLevel === 'priority' || completedOrder.cue.priorityService) ? '⚡ Priority Service (Within 6 Weeks)' : 'Standard (10–12 Weeks)'}
                     </span>
                   </div>
+                  {completedOrder.cue.case && completedOrder.cue.case.id !== 'case_none' && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Bundled Cue Case:</span>
+                      <span className="font-bold text-emerald-700">
+                        {completedOrder.cue.case.name} (+£{completedOrder.cue.case.bundlePrice})
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -564,6 +584,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       <div className="flex justify-between pt-1.5 text-amber-400 font-medium">
                         <span>Priority Crafting Slot:</span>
                         <span className="font-mono font-bold">+£40</span>
+                      </div>
+                    )}
+                    {selectedCase && selectedCase.id !== 'case_none' && (
+                      <div className="flex justify-between pt-1.5 text-emerald-400 font-medium">
+                        <span className="truncate max-w-[170px]">Case: {selectedCase.name}:</span>
+                        <span className="font-mono font-bold">+£{selectedCase.bundlePrice}</span>
                       </div>
                     )}
                   </div>
@@ -841,6 +867,57 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       <div className="text-[11px] text-amber-950 font-medium mt-0.5">Ready within 6 weeks</div>
                       <div className="text-[11px] font-bold text-amber-800 font-mono mt-1">+£40 Expedited</div>
                     </button>
+                  </div>
+                </div>
+
+                {/* Cue & Case Bundle Selection */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-[11px] font-bold text-slate-700">
+                      Bespoke Cue & Case Bundle Deal
+                    </label>
+                    <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      Bundle Savings
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {CUE_CASES.map((c) => {
+                      const isSelected = (selectedCase?.id === c.id) || (!selectedCase && c.id === 'case_none');
+                      const isNone = c.id === 'case_none';
+
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => setSelectedCase(isNone ? null : c)}
+                          className={`w-full p-2.5 rounded-xl border text-left transition text-xs flex items-center justify-between ${
+                            isSelected
+                              ? isNone
+                                ? 'border-slate-400 bg-slate-50 ring-1 ring-slate-400'
+                                : 'border-amber-500 bg-amber-50/70 ring-1 ring-amber-500'
+                              : 'border-slate-200 bg-white hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 min-w-0 pr-2">
+                            {isSelected && <Check className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />}
+                            <div className="truncate">
+                              <span className="font-semibold text-slate-900 block truncate">{c.name}</span>
+                              <span className="text-[10px] text-slate-500 block truncate">{c.tagline}</span>
+                            </div>
+                          </div>
+                          <div className="text-right flex-shrink-0 font-mono text-[11px]">
+                            {c.retailPrice > 0 ? (
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-slate-400 line-through text-[10px]">£{c.retailPrice}</span>
+                                <span className="font-bold text-amber-700">+£{c.bundlePrice}</span>
+                              </div>
+                            ) : (
+                              <span className="text-slate-500 font-bold">Included</span>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 

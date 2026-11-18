@@ -15,6 +15,7 @@ import {
   CUE_PLATES,
   CUE_EXTENSIONS,
   CUE_MINI_BUTTS,
+  CUE_CASES,
   CUE_OTHER_PRICES,
 } from './cueData';
 
@@ -104,6 +105,13 @@ export function getDefaultPricingConfig(): PricingConfig {
     enabled: true,
   }));
 
+  const cases: AdminItemPrice[] = CUE_CASES.map((c) => ({
+    id: c.id,
+    name: c.name,
+    price: c.bundlePrice,
+    enabled: true,
+  }));
+
   return {
     version: 1,
     lastUpdated: new Date().toISOString(),
@@ -122,5 +130,6 @@ export function getDefaultPricingConfig(): PricingConfig {
     namePlates,
     extensions,
     miniButts,
+    cases,
   };
 }

@@ -476,6 +476,10 @@ export function calculatePrice(
     ? (customSurcharges?.priorityCraftingPrice ?? 40)
     : 0;
 
+  const casePrice = cue.case && cue.case.id !== 'case_none'
+    ? (cue.case.bundlePrice ?? 0)
+    : 0;
+
   const total =
     shaftPrice +
     lengthPrice +
@@ -492,7 +496,8 @@ export function calculatePrice(
     engravingPrice +
     miniButtPrice +
     extensionsPrice +
-    priorityServicePrice;
+    priorityServicePrice +
+    casePrice;
 
   return {
     shaftPrice,
@@ -511,6 +516,7 @@ export function calculatePrice(
     miniButtPrice,
     extensionsPrice,
     priorityServicePrice,
+    casePrice,
     total,
   };
 }
@@ -571,5 +577,6 @@ export function getDefaultCue(): CueConfiguration {
     engraving: 'CUSTOM MADE',
     font: 'Roboto',
     priorityService: false,
+    case: null,
   };
 }

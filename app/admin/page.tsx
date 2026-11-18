@@ -913,6 +913,11 @@ export default function AdminPricingPage() {
                                 Engraved: &quot;{ord.cue.engraving}&quot;
                               </div>
                             )}
+                            {ord.cue.case && ord.cue.case.id !== 'case_none' && (
+                              <div className="text-[10px] text-emerald-400 font-semibold truncate">
+                                🧰 Bundle: {ord.cue.case.name} (+£{ord.cue.case.bundlePrice})
+                              </div>
+                            )}
                           </td>
                           <td className="py-3.5 px-4 text-right font-mono font-black text-white text-sm">
                             £{ord.pricing.total}
@@ -1116,6 +1121,14 @@ export default function AdminPricingPage() {
                           : 'Standard (10–12 Weeks)'}
                       </span>
                     </div>
+                    {selectedOrder.cue.case && selectedOrder.cue.case.id !== 'case_none' && (
+                      <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300">
+                        <span className="text-emerald-400 block text-[10px] font-bold">Bundled Cue Case</span>
+                        <span className="font-bold flex items-center gap-1">
+                          🧰 {selectedOrder.cue.case.name} (+£{selectedOrder.cue.case.bundlePrice})
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

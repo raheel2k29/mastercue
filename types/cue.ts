@@ -158,6 +158,22 @@ export interface CueMiniButt {
   [key: string]: any;
 }
 
+export interface CueCase {
+  id: string;
+  name: string;
+  tagline: string;
+  retailPrice: number;
+  bundlePrice: number;
+  savings: number;
+  badge?: string;
+  compartments: string;
+  material: string;
+  security: string;
+  colorScheme: string;
+  featured?: boolean;
+  enabled?: boolean;
+}
+
 export interface CueConfiguration {
   shaft: CueShaft;
   length: CueLength;
@@ -192,4 +208,7 @@ export interface CueConfiguration {
 
   // Service Level & Turnaround
   priorityService?: boolean; // Priority service: cue within 6 weeks (+£40)
+
+  // Cue & Case Bundle
+  case?: CueCase | null;
 }
