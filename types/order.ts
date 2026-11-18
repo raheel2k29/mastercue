@@ -37,6 +37,7 @@ export interface OrderPricingBreakdown {
   engravingPrice: number;
   miniButtPrice: number;
   extensionsPrice: number;
+  priorityServicePrice?: number;
   currency: string;
 }
 
@@ -47,6 +48,8 @@ export interface OrderRecord {
   customer: CustomerShippingAddress;
   cue: CueConfiguration;
   pricing: OrderPricingBreakdown;
+  serviceLevel?: 'standard' | 'priority';
+  targetCompletionWeeks?: number;
   paymentMethod: string;
   notes?: string;
   status: OrderStatus;

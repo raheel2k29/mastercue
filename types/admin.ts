@@ -38,6 +38,7 @@ export interface AdminPlatePrice {
 export interface AdminGlobalSurcharges {
   buttJointFittingPrice: number;
   domeJointPrice: number;
+  priorityCraftingPrice?: number;
   defaultCurrency: string;
 }
 

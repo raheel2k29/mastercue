@@ -96,6 +96,17 @@ export async function POST(req: Request) {
       }
     }
 
+    // Turnaround Service Level
+    const isPriority =
+      body.serviceLevel === 'priority' ||
+      Boolean(cue?.priorityService) ||
+      Number(pricing?.priorityServicePrice) > 0;
+    const serviceLevel = isPriority ? 'priority' : 'standard';
+    const targetCompletionWeeks = isPriority ? 6 : 12;
+    const priorityServicePrice = isPriority
+      ? (Number(pricing?.priorityServicePrice) || 40)
+      : 0;
+
     const orderRecord: OrderRecord = {
       id: orderId,
       orderNumber,
@@ -111,7 +122,10 @@ export async function POST(req: Request) {
         postcode: customer.postcode.trim().toUpperCase(),
         country: customer.country.trim(),
       },
-      cue,
+      cue: {
+        ...cue,
+        priorityService: isPriority,
+      },
       pricing: {
         total: totalPrice,
         shaftPrice: Number(pricing.shaftPrice) || 0,
@@ -129,8 +143,11 @@ export async function POST(req: Request) {
         engravingPrice: Number(pricing.engravingPrice) || 0,
         miniButtPrice: Number(pricing.miniButtPrice) || 0,
         extensionsPrice: Number(pricing.extensionsPrice) || 0,
+        priorityServicePrice,
         currency: pricing.currency || '£',
       },
+      serviceLevel,
+      targetCompletionWeeks,
       paymentMethod: paymentMethod || 'invoice_bank_transfer',
       notes: notes?.trim() || '',
       status: 'pending',

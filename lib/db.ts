@@ -548,6 +548,11 @@ function mapRowToOrder(row: any): OrderRecord {
       ? JSON.parse(row.pricing_breakdown)
       : row.pricing_breakdown;
 
+  const isPriority =
+    row.service_level === 'priority' ||
+    Boolean(cue?.priorityService) ||
+    Boolean(pricing?.priorityServicePrice && Number(pricing.priorityServicePrice) > 0);
+
   return {
     id: row.id,
     orderNumber: row.order_number,
@@ -555,6 +560,8 @@ function mapRowToOrder(row: any): OrderRecord {
     customer,
     cue,
     pricing,
+    serviceLevel: isPriority ? 'priority' : 'standard',
+    targetCompletionWeeks: isPriority ? 6 : (row.target_completion_weeks ? Number(row.target_completion_weeks) : 12),
     paymentMethod: row.payment_method || 'invoice_bank_transfer',
     notes: row.notes || '',
     status: (row.status as OrderStatus) || 'pending',

@@ -394,7 +394,11 @@ export function generateLayers(cue: CueConfiguration): RenderLayer[] {
 // Calculate Price Breakdown and Total - 100% matched with CueWizard formula
 export function calculatePrice(
   cue: CueConfiguration,
-  customSurcharges?: { buttJointFittingPrice?: number; domeJointPrice?: number }
+  customSurcharges?: {
+    buttJointFittingPrice?: number;
+    domeJointPrice?: number;
+    priorityCraftingPrice?: number;
+  }
 ) {
   const shaftPrice = cue.shaft?.price || 0;
   const lengthPrice = cue.length?.price || 0;
@@ -468,6 +472,10 @@ export function calculatePrice(
     ? cue.extensions?.reduce((acc, curr) => acc + (curr.price || 0), 0) || 0
     : 0;
 
+  const priorityServicePrice = cue.priorityService
+    ? (customSurcharges?.priorityCraftingPrice ?? 40)
+    : 0;
+
   const total =
     shaftPrice +
     lengthPrice +
@@ -483,7 +491,8 @@ export function calculatePrice(
     platePrice +
     engravingPrice +
     miniButtPrice +
-    extensionsPrice;
+    extensionsPrice +
+    priorityServicePrice;
 
   return {
     shaftPrice,
@@ -501,6 +510,7 @@ export function calculatePrice(
     engravingPrice,
     miniButtPrice,
     extensionsPrice,
+    priorityServicePrice,
     total,
   };
 }
@@ -560,5 +570,6 @@ export function getDefaultCue(): CueConfiguration {
     namePlate: defaultNamePlate,
     engraving: 'CUSTOM MADE',
     font: 'Roboto',
+    priorityService: false,
   };
 }

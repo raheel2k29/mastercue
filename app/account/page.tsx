@@ -23,6 +23,7 @@ import {
   ChevronDown,
   ChevronUp,
   RefreshCw,
+  Zap,
 } from 'lucide-react';
 import { OrderRecord, OrderStatus } from '@/types/order';
 import { CustomerProfile } from '@/types/customer';
@@ -244,10 +245,16 @@ export default function CustomerAccountPage() {
                     {/* Order Top Bar */}
                     <div className="p-6 border-b border-slate-100 bg-slate-50/60 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                       <div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2.5 flex-wrap">
                           <span className="text-lg font-black font-mono text-slate-900">
                             {ord.orderNumber}
                           </span>
+                          {(ord.serviceLevel === 'priority' || ord.cue.priorityService) && (
+                            <span className="text-[10px] font-mono uppercase font-black px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 flex items-center gap-1 shadow-xs">
+                              <Zap className="w-3 h-3 fill-slate-950" />
+                              <span>Priority Build (6 Weeks)</span>
+                            </span>
+                          )}
                           <span
                             className={`text-[11px] font-mono uppercase font-bold px-2.5 py-0.5 rounded-full border ${
                               ord.status === 'in_crafting'
@@ -291,10 +298,20 @@ export default function CustomerAccountPage() {
 
                     {/* Interactive 5-Stage Crafting Timeline */}
                     <div className="p-6 bg-white border-b border-slate-100">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-6 flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-amber-600" />
-                        <span>Live Workshop Crafting Progress</span>
-                      </h4>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-amber-600" />
+                          <span>Live Workshop Crafting Progress</span>
+                        </h4>
+                        <span className={`text-[11px] font-semibold flex items-center gap-1.5 ${
+                          (ord.serviceLevel === 'priority' || ord.cue.priorityService)
+                            ? 'text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200'
+                            : 'text-slate-500'
+                        }`}>
+                          <Clock className="w-3.5 h-3.5 text-amber-600" />
+                          <span>Target: {(ord.serviceLevel === 'priority' || ord.cue.priorityService) ? 'Within 6 Weeks (Fast-Track Slot)' : '10–12 Weeks Standard'}</span>
+                        </span>
+                      </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 relative">
                         {TIMELINE_STEPS.map((step) => {
@@ -396,6 +413,16 @@ export default function CustomerAccountPage() {
                                 </span>
                               </div>
                             )}
+                            <div className={`p-3 rounded-xl border ${
+                              (ord.serviceLevel === 'priority' || ord.cue.priorityService)
+                                ? 'bg-amber-50/70 border-amber-300 text-amber-950'
+                                : 'bg-white border-slate-200'
+                            }`}>
+                              <span className="text-slate-400 block text-[10px]">Turnaround Service</span>
+                              <span className="font-bold flex items-center gap-1">
+                                {(ord.serviceLevel === 'priority' || ord.cue.priorityService) ? '⚡ Priority (Within 6 Weeks)' : 'Standard (10–12 Weeks)'}
+                              </span>
+                            </div>
                           </div>
                         </div>
 

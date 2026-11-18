@@ -39,6 +39,7 @@ interface DynamicCatalog {
   surcharges: {
     buttJointFittingPrice: number;
     domeJointPrice: number;
+    priorityCraftingPrice?: number;
     defaultCurrency: string;
   };
 }
@@ -355,6 +356,11 @@ export const PricingProvider: React.FC<{ children: React.ReactNode }> = ({ child
         miniButtPrice = miniItem ? miniItem.price : (targetCue.miniButt.price || 0);
       }
 
+      // 11. Priority Crafting Service (within 6 weeks)
+      const priorityServicePrice = targetCue.priorityService
+        ? (catalog.surcharges.priorityCraftingPrice ?? 40)
+        : 0;
+
       const total = Math.max(
         0,
         shaftPrice +
@@ -371,7 +377,8 @@ export const PricingProvider: React.FC<{ children: React.ReactNode }> = ({ child
           platePrice +
           engravingPrice +
           miniButtPrice +
-          extensionsPrice
+          extensionsPrice +
+          priorityServicePrice
       );
 
       return {
@@ -390,6 +397,7 @@ export const PricingProvider: React.FC<{ children: React.ReactNode }> = ({ child
         engravingPrice,
         miniButtPrice,
         extensionsPrice,
+        priorityServicePrice,
         total,
       };
     },

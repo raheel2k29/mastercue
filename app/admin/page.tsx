@@ -399,7 +399,10 @@ export default function AdminPricingPage() {
     }));
   };
 
-  const updateSurcharges = (field: 'buttJointFittingPrice' | 'domeJointPrice', val: number) => {
+  const updateSurcharges = (
+    field: 'buttJointFittingPrice' | 'domeJointPrice' | 'priorityCraftingPrice',
+    val: number
+  ) => {
     setConfig((prev) => ({
       ...prev,
       surcharges: {
@@ -875,8 +878,15 @@ export default function AdminPricingPage() {
                     <tbody className="divide-y divide-slate-700/50">
                       {orders.map((ord) => (
                         <tr key={ord.id} className="hover:bg-slate-700/30 transition-colors">
-                          <td className="py-3.5 px-4 font-mono font-bold text-amber-400">
-                            {ord.orderNumber}
+                          <td className="py-3.5 px-4">
+                            <div className="font-mono font-bold text-amber-400">
+                              {ord.orderNumber}
+                            </div>
+                            {(ord.serviceLevel === 'priority' || ord.cue.priorityService) && (
+                              <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-500 text-slate-950 uppercase tracking-wider">
+                                ⚡ Priority (6 Wks)
+                              </span>
+                            )}
                           </td>
                           <td className="py-3.5 px-4 text-slate-400 whitespace-nowrap">
                             {new Date(ord.createdAt).toLocaleDateString()}{' '}
@@ -1094,6 +1104,18 @@ export default function AdminPricingPage() {
                         </span>
                       </div>
                     )}
+                    <div className={`p-2.5 rounded-xl border ${
+                      (selectedOrder.serviceLevel === 'priority' || selectedOrder.cue.priorityService)
+                        ? 'bg-amber-500/10 border-amber-500/40 text-amber-300'
+                        : 'bg-slate-900 border-slate-800 text-white'
+                    }`}>
+                      <span className="text-slate-500 block text-[10px]">Workshop Turnaround</span>
+                      <span className="font-bold flex items-center gap-1">
+                        {(selectedOrder.serviceLevel === 'priority' || selectedOrder.cue.priorityService)
+                          ? '⚡ Priority Fast-Track (6 Weeks) [+£40]'
+                          : 'Standard (10–12 Weeks)'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1340,6 +1362,26 @@ export default function AdminPricingPage() {
                         min="0"
                         value={config.surcharges.domeJointPrice}
                         onChange={(e) => updateSurcharges('domeJointPrice', Number(e.target.value))}
+                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-bold text-white focus:outline-none focus:border-amber-500 text-right"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+                    <div>
+                      <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                        <span>⚡ Priority Crafting Service</span>
+                        <span className="text-[10px] text-amber-400 font-mono font-bold bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">6 Weeks</span>
+                      </div>
+                      <div className="text-[11px] text-slate-500">Expedited queue slot (guaranteed 6-week completion)</div>
+                    </div>
+                    <div className="flex items-center gap-1.5 w-28">
+                      <span className="text-slate-500 font-bold">£</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={config.surcharges.priorityCraftingPrice ?? 40}
+                        onChange={(e) => updateSurcharges('priorityCraftingPrice', Number(e.target.value))}
                         className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-bold text-white focus:outline-none focus:border-amber-500 text-right"
                       />
                     </div>

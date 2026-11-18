@@ -60,6 +60,8 @@ import {
   Check,
   AlertTriangle,
   Lock,
+  Zap,
+  Clock,
 } from 'lucide-react';
 
 interface CustomizerOptionsProps {
@@ -1048,9 +1050,77 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
           </div>
         )}
 
-        {/* --- TAB 7: EXTENSIONS & MINI BUTT --- */}
+        {/* --- TAB 7: EXTENSIONS & MINI BUTT & PRIORITY SERVICE --- */}
         {activeTab === 'accessories' && (
           <div className="space-y-6">
+            {/* Workshop Turnaround & Crafting Speed */}
+            <div className="space-y-3 p-4 rounded-2xl bg-slate-50/80 border border-slate-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-amber-600" />
+                    <span>Workshop Turnaround & Crafting Speed</span>
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Standard bespoke handcrafting queue or fast-track priority workshop slot.
+                  </p>
+                </div>
+                {cue.priorityService && (
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 flex items-center gap-1 shadow-xs">
+                    <Zap className="w-3 h-3 fill-slate-950" />
+                    <span>Fast-Track</span>
+                  </span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                {/* Standard Turnaround */}
+                <button
+                  type="button"
+                  onClick={() => updateCue({ priorityService: false })}
+                  className={`p-3.5 rounded-xl border text-left transition-all relative ${
+                    !cue.priorityService
+                      ? 'border-amber-500 bg-white ring-2 ring-amber-500/20 shadow-sm'
+                      : 'border-slate-200 bg-white/70 hover:border-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-900">Standard Handcrafting</span>
+                    {!cue.priorityService && <Check className="w-4 h-4 text-amber-600" />}
+                  </div>
+                  <span className="text-[11px] text-slate-500 block mt-1">10–12 Weeks Workshop Queue</span>
+                  <span className="text-[11px] font-mono font-bold text-slate-800 mt-1.5 block">
+                    Included (Free)
+                  </span>
+                </button>
+
+                {/* Priority Service */}
+                <button
+                  type="button"
+                  onClick={() => updateCue({ priorityService: true })}
+                  className={`p-3.5 rounded-xl border text-left transition-all relative ${
+                    cue.priorityService
+                      ? 'border-amber-500 bg-gradient-to-br from-amber-500/10 via-amber-100/40 to-amber-50 ring-2 ring-amber-500 shadow-sm'
+                      : 'border-slate-200 bg-white/70 hover:border-slate-300 hover:bg-white'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-950 flex items-center gap-1">
+                      <Zap className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
+                      <span>Priority Service (6 Weeks)</span>
+                    </span>
+                    {cue.priorityService && <Check className="w-4 h-4 text-amber-600" />}
+                  </div>
+                  <span className="text-[11px] text-amber-950 font-medium block mt-1">
+                    Guaranteed completion within 6 weeks
+                  </span>
+                  <span className="text-[11px] font-mono font-bold text-amber-800 mt-1.5 block">
+                    +{catalog.surcharges.defaultCurrency || '£'}{catalog.surcharges.priorityCraftingPrice ?? 40} Expedited
+                  </span>
+                </button>
+              </div>
+            </div>
+
             {!extensionCondition.allowed ? (
               <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3 max-w-xl">
                 <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />

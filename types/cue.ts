@@ -189,4 +189,7 @@ export interface CueConfiguration {
   namePlate: CuePlate | null;
   engraving: string;
   font: string; // 'Roboto' | 'Alex Brush' | 'Lora'
+
+  // Service Level & Turnaround
+  priorityService?: boolean; // Priority service: cue within 6 weeks (+£40)
 }

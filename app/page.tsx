@@ -314,6 +314,12 @@ function CueCustomizerContent() {
                   </span>
                 </div>
               )}
+              {price.priorityServicePrice && price.priorityServicePrice > 0 ? (
+                <div className="flex justify-between py-1.5">
+                  <span className="text-slate-500">⚡ Priority Service (6 Weeks):</span>
+                  <span className="font-semibold text-amber-700">+£{price.priorityServicePrice}</span>
+                </div>
+              ) : null}
               <div className="flex justify-between py-2 text-sm font-bold border-t border-slate-200">
                 <span className="text-slate-800">Current Price:</span>
                 <span className="text-slate-950 font-mono text-base font-extrabold">£{price.total}</span>

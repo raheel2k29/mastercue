@@ -18,6 +18,8 @@ import {
   UserCheck,
   Eye,
   EyeOff,
+  Zap,
+  Clock,
 } from 'lucide-react';
 import { CueConfiguration } from '@/types/cue';
 import { OrderRecord } from '@/types/order';
@@ -44,6 +46,7 @@ interface CheckoutModalProps {
     engravingPrice: number;
     miniButtPrice: number;
     extensionsPrice: number;
+    priorityServicePrice?: number;
   };
 }
 
@@ -67,9 +70,22 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [accountPassword, setAccountPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [accountCreated, setAccountCreated] = useState(false);
+  const [priorityService, setPriorityService] = useState<boolean>(Boolean(cue.priorityService));
   const [paymentMethod, setPaymentMethod] = useState<'invoice_bank_transfer' | 'card_link' | 'paypal'>(
     'invoice_bank_transfer'
   );
+
+  // Synchronize priority service whenever modal opens or cue prop changes
+  useEffect(() => {
+    if (isOpen) {
+      setPriorityService(Boolean(cue.priorityService));
+    }
+  }, [isOpen, cue.priorityService]);
+
+  // Dynamic payable calculation (ensures live update if user toggles speed in checkout)
+  const baseTotal = price.total - (price.priorityServicePrice || (cue.priorityService ? 40 : 0));
+  const currentPriorityPrice = priorityService ? 40 : 0;
+  const payableTotal = baseTotal + currentPriorityPrice;
 
   // Customer session & account lookup
   const [activeCustomer, setActiveCustomer] = useState<{
@@ -207,6 +223,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     try {
       setIsSubmitting(true);
 
+      const updatedCue: CueConfiguration = {
+        ...cue,
+        priorityService,
+      };
+
       const payload = {
         customer: {
           fullName: fullName.trim(),
@@ -218,11 +239,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           postcode: postcode.trim().toUpperCase(),
           country: country.trim(),
         },
-        cue,
+        cue: updatedCue,
         pricing: {
           ...price,
+          priorityServicePrice: currentPriorityPrice,
+          total: payableTotal,
           currency: '£',
         },
+        serviceLevel: priorityService ? 'priority' : 'standard',
+        targetCompletionWeeks: priorityService ? 6 : 12,
         paymentMethod,
         notes: notes.trim(),
         accountPassword: (!activeCustomer && !emailAccountExists && accountPassword) ? accountPassword.trim() : undefined,
@@ -314,6 +339,26 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               </button>
             </div>
 
+            {/* Priority Fast-Track Banner */}
+            {(completedOrder.serviceLevel === 'priority' || completedOrder.cue.priorityService) && (
+              <div className="bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-amber-500/5 border border-amber-500/40 rounded-2xl p-4 flex items-center gap-3.5 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold text-lg flex-shrink-0 shadow-sm">
+                  <Zap className="w-5 h-5 fill-slate-950" />
+                </div>
+                <div>
+                  <div className="text-xs font-black text-slate-950 flex items-center gap-2">
+                    <span>Priority Workshop Service Activated</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500 text-slate-950 font-black uppercase">
+                      6 Weeks Guaranteed
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-amber-950 mt-0.5">
+                    Your bespoke cue has received top-tier workshop scheduling and will be crafted, hand-spliced, and balanced within 6 weeks.
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Account Attached Card */}
             <div className="bg-slate-900 text-white border border-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
               <div className="flex items-center gap-3">
@@ -388,6 +433,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       </span>
                     </div>
                   )}
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Workshop Turnaround:</span>
+                    <span className={`font-bold ${(completedOrder.serviceLevel === 'priority' || completedOrder.cue.priorityService) ? 'text-amber-700 font-semibold' : 'text-slate-950'}`}>
+                      {(completedOrder.serviceLevel === 'priority' || completedOrder.cue.priorityService) ? '⚡ Priority Service (Within 6 Weeks)' : 'Standard (10–12 Weeks)'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -457,7 +508,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     <span className="text-[10px] font-black uppercase tracking-wider text-amber-400">
                       Bespoke Selection
                     </span>
-                    <span className="text-xl font-mono font-black text-white">£{price.total}</span>
+                    <span className="text-xl font-mono font-black text-white">£{payableTotal}</span>
                   </div>
 
                   <div className="space-y-2 text-xs divide-y divide-slate-800/80">
@@ -503,11 +554,23 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       <span>Insured Courier Delivery:</span>
                       <span className="font-bold">FREE</span>
                     </div>
+                    <div className="flex justify-between pt-1.5">
+                      <span className="text-slate-400">Crafting Turnaround:</span>
+                      <span className={priorityService ? 'font-bold text-amber-400 flex items-center gap-1' : 'font-semibold text-white'}>
+                        {priorityService ? '⚡ Priority (6 Wks)' : 'Standard (10-12 Wks)'}
+                      </span>
+                    </div>
+                    {priorityService && (
+                      <div className="flex justify-between pt-1.5 text-amber-400 font-medium">
+                        <span>Priority Crafting Slot:</span>
+                        <span className="font-mono font-bold">+£40</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
                     <span className="font-bold text-slate-300">Total payable:</span>
-                    <span className="font-mono text-2xl font-black text-amber-400">£{price.total}</span>
+                    <span className="font-mono text-2xl font-black text-amber-400">£{payableTotal}</span>
                   </div>
                 </div>
 
@@ -731,6 +794,56 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   </div>
                 )}
 
+                {/* Turnaround & Service Level Selection */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-[11px] font-bold text-slate-700">
+                      Workshop Crafting Turnaround
+                    </label>
+                    <span className="text-[10px] text-slate-500">
+                      {priorityService ? '⚡ Priority Slot Allocated' : 'Standard Queue'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setPriorityService(false)}
+                      className={`p-3 rounded-xl border text-left transition ${
+                        !priorityService
+                          ? 'border-amber-500 bg-amber-50/70 ring-1 ring-amber-500'
+                          : 'border-slate-200 bg-white hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-900">Standard Handcrafting</span>
+                        {!priorityService && <Check className="w-4 h-4 text-amber-600" />}
+                      </div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">10–12 weeks handcrafting</div>
+                      <div className="text-[11px] font-bold text-slate-900 mt-1">Included (Free)</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPriorityService(true)}
+                      className={`p-3 rounded-xl border text-left transition relative ${
+                        priorityService
+                          ? 'border-amber-500 bg-gradient-to-br from-amber-500/10 via-amber-100/40 to-amber-50 ring-2 ring-amber-500 shadow-xs'
+                          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/40'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-950 flex items-center gap-1">
+                          <Zap className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
+                          <span>Priority Service</span>
+                        </span>
+                        {priorityService && <Check className="w-4 h-4 text-amber-600" />}
+                      </div>
+                      <div className="text-[11px] text-amber-950 font-medium mt-0.5">Ready within 6 weeks</div>
+                      <div className="text-[11px] font-bold text-amber-800 font-mono mt-1">+£40 Expedited</div>
+                    </button>
+                  </div>
+                </div>
+
                 {/* Special Crafting Notes */}
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1">
@@ -812,7 +925,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     ) : (
                       <>
                         <Lock className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Place Bespoke Order • £{price.total}</span>
+                        <span>Place Bespoke Order • £{payableTotal}</span>
                         <ArrowRight className="w-4 h-4 text-amber-400" />
                       </>
                     )}

@@ -110,6 +110,7 @@ export function getDefaultPricingConfig(): PricingConfig {
     surcharges: {
       buttJointFittingPrice,
       domeJointPrice,
+      priorityCraftingPrice: 40,
       defaultCurrency: '£',
     },
     shafts,
