@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Lock,
@@ -13,17 +13,50 @@ import {
   User,
   Search,
   Sparkles,
+  Phone,
+  CheckCircle2,
+  UserPlus,
 } from 'lucide-react';
 
-export default function CustomerLoginPage() {
+function CustomerAuthContent() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'signin' | 'track'>('signin');
+  const searchParams = useSearchParams();
 
-  // Sign in state
+  const initialTab = searchParams?.get('tab') === 'signup' || searchParams?.get('mode') === 'signup'
+    ? 'signup'
+    : searchParams?.get('tab') === 'track'
+    ? 'track'
+    : 'signin';
+
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup' | 'track'>(initialTab);
+
+  // Sync tab if URL search param changes
+  useEffect(() => {
+    const tabParam = searchParams?.get('tab') || searchParams?.get('mode');
+    if (tabParam === 'signup') {
+      setActiveTab('signup');
+    } else if (tabParam === 'track') {
+      setActiveTab('track');
+    } else if (tabParam === 'signin') {
+      setActiveTab('signin');
+    }
+  }, [searchParams]);
+
+  // Sign In state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Sign Up state
+  const [signupFullName, setSignupFullName] = useState('');
+  const [signupEmail, setSignupEmail] = useState('');
+  const [signupPhone, setSignupPhone] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
+  const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
+  const [signupLoading, setSignupLoading] = useState(false);
+  const [signupError, setSignupError] = useState<string | null>(null);
+  const [signupSuccess, setSignupSuccess] = useState<string | null>(null);
 
   // Quick order tracking state
   const [trackOrderNumber, setTrackOrderNumber] = useState('');
@@ -55,6 +88,59 @@ export default function CustomerLoginPage() {
       setError(err.message || 'Login failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSignupError(null);
+    setSignupSuccess(null);
+
+    if (!signupFullName.trim()) {
+      setSignupError('Please provide your full name.');
+      return;
+    }
+    if (!signupEmail.trim() || !signupEmail.includes('@')) {
+      setSignupError('Please enter a valid email address.');
+      return;
+    }
+    if (signupPassword.length < 6) {
+      setSignupError('Password must be at least 6 characters long.');
+      return;
+    }
+    if (signupPassword !== signupConfirmPassword) {
+      setSignupError('Passwords do not match. Please re-enter.');
+      return;
+    }
+
+    setSignupLoading(true);
+
+    try {
+      const res = await fetch('/api/customer/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: signupFullName.trim(),
+          email: signupEmail.trim(),
+          phone: signupPhone.trim() || undefined,
+          password: signupPassword,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to create customer account');
+      }
+
+      setSignupSuccess('Account created successfully! Redirecting to your customer dashboard...');
+      setTimeout(() => {
+        router.push('/account');
+        router.refresh();
+      }, 800);
+    } catch (err: any) {
+      setSignupError(err.message || 'Registration failed');
+    } finally {
+      setSignupLoading(false);
     }
   };
 
@@ -100,37 +186,69 @@ export default function CustomerLoginPage() {
             </h1>
           </Link>
           <p className="text-xs text-slate-400">
-            Sign in to track your bespoke cue build progress, view build specifications, and manage orders.
+            Sign in or create an account to track your bespoke cue build progress, view build specifications, and manage orders.
           </p>
         </div>
 
-        {/* Mode Switcher Tabs */}
-        <div className="grid grid-cols-2 p-1 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold">
+        {/* 3-Mode Switcher Tabs */}
+        <div className="grid grid-cols-3 p-1 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-bold">
           <button
-            onClick={() => setActiveTab('signin')}
+            type="button"
+            onClick={() => {
+              setActiveTab('signin');
+              setError(null);
+            }}
             className={`py-2.5 rounded-xl transition ${
               activeTab === 'signin'
-                ? 'bg-amber-500 text-slate-950 shadow-md'
+                ? 'bg-amber-500 text-slate-950 shadow-md font-black'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Customer Sign In
+            Sign In
           </button>
           <button
-            onClick={() => setActiveTab('track')}
+            type="button"
+            onClick={() => {
+              setActiveTab('signup');
+              setSignupError(null);
+            }}
             className={`py-2.5 rounded-xl transition ${
-              activeTab === 'track'
-                ? 'bg-amber-500 text-slate-950 shadow-md'
+              activeTab === 'signup'
+                ? 'bg-amber-500 text-slate-950 shadow-md font-black'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Quick Order Tracker
+            Sign Up
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('track');
+              setTrackError(null);
+            }}
+            className={`py-2.5 rounded-xl transition ${
+              activeTab === 'track'
+                ? 'bg-amber-500 text-slate-950 shadow-md font-black'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Track Order
           </button>
         </div>
 
-        {/* Sign In View */}
+        {/* Tab 1: Sign In View */}
         {activeTab === 'signin' && (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur space-y-6">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur space-y-6 animate-in fade-in duration-200">
+            <div className="border-b border-slate-800/80 pb-4">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <User className="w-4 h-4 text-amber-500" />
+                Customer Sign In
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                Access your bespoke cue workshop build sheets & orders.
+              </p>
+            </div>
+
             {error && (
               <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 flex items-start gap-2.5 text-xs text-red-400 animate-in fade-in">
                 <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -189,23 +307,204 @@ export default function CustomerLoginPage() {
               </button>
             </form>
 
-            <div className="pt-2 text-center text-[11px] text-slate-400 border-t border-slate-800">
-              Accounts are created automatically when placing an order. Need to track an existing order without logging in? Switch to{' '}
-              <button
-                type="button"
-                onClick={() => setActiveTab('track')}
-                className="text-amber-400 hover:underline font-bold"
-              >
-                Quick Order Tracker
-              </button>
-              .
+            <div className="pt-4 text-center space-y-2 border-t border-slate-800 text-xs text-slate-400">
+              <p>
+                Don&apos;t have an account yet?{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('signup');
+                    setSignupError(null);
+                  }}
+                  className="text-amber-400 hover:underline font-bold"
+                >
+                  Create an Account (Sign Up) →
+                </button>
+              </p>
+              <p className="text-[11px] text-slate-500">
+                Want to check an order without logging in? Switch to{' '}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('track')}
+                  className="text-slate-400 hover:text-amber-400 underline font-medium"
+                >
+                  Quick Order Tracker
+                </button>
+              </p>
             </div>
           </div>
         )}
 
-        {/* Quick Order Tracker View */}
+        {/* Tab 2: Sign Up View (Account Creation) */}
+        {activeTab === 'signup' && (
+          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur space-y-6 animate-in fade-in duration-200">
+            <div className="border-b border-slate-800/80 pb-4">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <UserPlus className="w-4 h-4 text-amber-500" />
+                Create Customer Account
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                Register to track custom cue builds, save addresses, and view order specs.
+              </p>
+            </div>
+
+            {signupError && (
+              <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 flex items-start gap-2.5 text-xs text-red-400 animate-in fade-in">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span>{signupError}</span>
+              </div>
+            )}
+
+            {signupSuccess && (
+              <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-2.5 text-xs text-emerald-400 animate-in fade-in">
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span>{signupSuccess}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSignUp} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300 block">
+                  Full Name <span className="text-amber-500">*</span>
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    required
+                    value={signupFullName}
+                    onChange={(e) => setSignupFullName(e.target.value)}
+                    placeholder="e.g. Ronnie O'Sullivan"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-medium text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300 block">
+                  Email Address <span className="text-amber-500">*</span>
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    required
+                    value={signupEmail}
+                    onChange={(e) => setSignupEmail(e.target.value)}
+                    placeholder="e.g. ronnie@example.com"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-medium text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300 block">
+                  Phone Number <span className="text-slate-500 font-normal">(Optional, for delivery updates)</span>
+                </label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="tel"
+                    value={signupPhone}
+                    onChange={(e) => setSignupPhone(e.target.value)}
+                    placeholder="e.g. +44 7700 900077"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-medium text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-300 block">
+                    Password <span className="text-amber-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      value={signupPassword}
+                      onChange={(e) => setSignupPassword(e.target.value)}
+                      placeholder="Min 6 chars"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-medium text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-300 block">
+                    Confirm Password <span className="text-amber-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      value={signupConfirmPassword}
+                      onChange={(e) => setSignupConfirmPassword(e.target.value)}
+                      placeholder="Repeat password"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-medium text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 flex items-start gap-2">
+                <Sparkles className="w-4 h-4 flex-shrink-0 text-amber-400 mt-0.5" />
+                <span>
+                  Already placed an order with this email? It will automatically link to your new account.
+                </span>
+              </div>
+
+              <button
+                type="submit"
+                disabled={signupLoading}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/10 transition-all active:scale-95 disabled:opacity-50"
+              >
+                {signupLoading ? (
+                  <div className="w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <span>Create Customer Account</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="pt-4 text-center space-y-2 border-t border-slate-800 text-xs text-slate-400">
+              <p>
+                Already have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('signin');
+                    setError(null);
+                  }}
+                  className="text-amber-400 hover:underline font-bold"
+                >
+                  Sign in here →
+                </button>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: Quick Order Tracker View */}
         {activeTab === 'track' && (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur space-y-6">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur space-y-6 animate-in fade-in duration-200">
+            <div className="border-b border-slate-800/80 pb-4">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <Search className="w-4 h-4 text-amber-500" />
+                Quick Order Tracker
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                Lookup workshop status & specs instantly with your order number.
+              </p>
+            </div>
+
             {trackError && (
               <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 flex items-start gap-2.5 text-xs text-red-400 animate-in fade-in">
                 <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -322,6 +621,16 @@ export default function CustomerLoginPage() {
                 </div>
               </div>
             )}
+
+            <div className="pt-4 text-center border-t border-slate-800 text-xs text-slate-400">
+              <button
+                type="button"
+                onClick={() => setActiveTab('signin')}
+                className="text-amber-400 hover:underline font-bold"
+              >
+                ← Return to Customer Sign In
+              </button>
+            </div>
           </div>
         )}
 
@@ -336,5 +645,19 @@ export default function CustomerLoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CustomerLoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
+          <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <CustomerAuthContent />
+    </Suspense>
   );
 }

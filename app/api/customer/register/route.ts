@@ -27,6 +27,13 @@ export async function POST(req: Request) {
     const cleanEmail = email.trim().toLowerCase();
     const existing = await findCustomerByEmail(cleanEmail);
 
+    if (existing && existing.passwordHash) {
+      return NextResponse.json(
+        { success: false, error: 'An account with this email already exists. Please sign in instead.' },
+        { status: 409 }
+      );
+    }
+
     const passwordHash = await hashPassword(password.trim());
     const customerId = existing ? existing.id : `cust_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
