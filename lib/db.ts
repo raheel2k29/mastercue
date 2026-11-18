@@ -3,6 +3,7 @@ import path from 'path';
 import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
 import { PricingConfig } from '@/types/admin';
+import { OrderRecord, OrderStatus } from '@/types/order';
 import { getDefaultPricingConfig } from './defaultPricing';
 
 export interface AdminUserRecord {
@@ -50,9 +51,14 @@ function getPricingFile(): string {
   return path.join(getDataDir(), 'pricingConfig.json');
 }
 
+function getOrdersFile(): string {
+  return path.join(getDataDir(), 'orders.json');
+}
+
 // In-memory fallback caches
 let memoryUsers: AdminUserRecord[] | null = null;
 let memoryPricing: PricingConfig | null = null;
+let memoryOrders: OrderRecord[] | null = null;
 
 // Database Connection Pool for PostgreSQL (Supabase / Neon / Railway / AWS RDS)
 declare global {
@@ -142,6 +148,25 @@ async function initPgTables(pool: Pool) {
         config JSONB NOT NULL,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
+      CREATE TABLE IF NOT EXISTS orders (
+        id VARCHAR(64) PRIMARY KEY,
+        order_number VARCHAR(32) UNIQUE NOT NULL,
+        customer_name VARCHAR(255) NOT NULL,
+        customer_email VARCHAR(255) NOT NULL,
+        customer_phone VARCHAR(64),
+        shipping_address JSONB NOT NULL,
+        cue_configuration JSONB NOT NULL,
+        pricing_breakdown JSONB NOT NULL,
+        total_price NUMERIC(10, 2) NOT NULL,
+        currency VARCHAR(8) DEFAULT '£',
+        payment_method VARCHAR(64) DEFAULT 'invoice_bank_transfer',
+        status VARCHAR(32) DEFAULT 'pending',
+        notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders (created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_orders_order_number ON orders (order_number);
     `);
 
     // Seed default admin user in PostgreSQL if table is empty
@@ -463,4 +488,173 @@ export async function checkDBHealth(): Promise<{
       error: err?.message,
     };
   }
+}
+
+// -------------------------------------------------------------
+// Orders Data Layer (Neon PostgreSQL + Fallback Persistence)
+// -------------------------------------------------------------
+
+function getLocalOrders(): OrderRecord[] {
+  if (memoryOrders && memoryOrders.length > 0) {
+    return memoryOrders;
+  }
+  const ordersFile = getOrdersFile();
+  if (fs.existsSync(ordersFile)) {
+    try {
+      const content = fs.readFileSync(ordersFile, 'utf-8');
+      const parsed = JSON.parse(content);
+      if (Array.isArray(parsed)) {
+        memoryOrders = parsed;
+        return parsed;
+      }
+    } catch {}
+  }
+  memoryOrders = [];
+  return [];
+}
+
+function mapRowToOrder(row: any): OrderRecord {
+  const customer =
+    typeof row.shipping_address === 'string'
+      ? JSON.parse(row.shipping_address)
+      : row.shipping_address;
+  const cue =
+    typeof row.cue_configuration === 'string'
+      ? JSON.parse(row.cue_configuration)
+      : row.cue_configuration;
+  const pricing =
+    typeof row.pricing_breakdown === 'string'
+      ? JSON.parse(row.pricing_breakdown)
+      : row.pricing_breakdown;
+
+  return {
+    id: row.id,
+    orderNumber: row.order_number,
+    customer,
+    cue,
+    pricing,
+    paymentMethod: row.payment_method || 'invoice_bank_transfer',
+    notes: row.notes || '',
+    status: (row.status as OrderStatus) || 'pending',
+    createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
+    updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : undefined,
+  };
+}
+
+export async function createOrder(order: OrderRecord): Promise<OrderRecord> {
+  const pool = getPgPool();
+  let dbSaved = false;
+
+  if (pool) {
+    try {
+      await initPgTables(pool);
+      await executeQueryWithRetry(
+        `INSERT INTO orders (
+          id, order_number, customer_name, customer_email, customer_phone,
+          shipping_address, cue_configuration, pricing_breakdown,
+          total_price, currency, payment_method, status, notes, created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())`,
+        [
+          order.id,
+          order.orderNumber,
+          order.customer.fullName,
+          order.customer.email.toLowerCase(),
+          order.customer.phone || null,
+          JSON.stringify(order.customer),
+          JSON.stringify(order.cue),
+          JSON.stringify(order.pricing),
+          order.pricing.total,
+          order.pricing.currency || '£',
+          order.paymentMethod || 'invoice_bank_transfer',
+          order.status || 'pending',
+          order.notes || null,
+        ]
+      );
+      dbSaved = true;
+    } catch (err: any) {
+      console.error('PostgreSQL createOrder failed, falling back to disk backup:', err?.message);
+    }
+  }
+
+  // Double safety net: local file / in-memory backup
+  try {
+    const orders = getLocalOrders();
+    // Prepend new order
+    orders.unshift(order);
+    memoryOrders = orders;
+    const ordersFile = getOrdersFile();
+    fs.writeFileSync(ordersFile, JSON.stringify(orders, null, 2), 'utf-8');
+  } catch (err: any) {
+    console.warn('Orders disk write skipped:', err?.message);
+  }
+
+  return order;
+}
+
+export async function getOrders(limit = 100, offset = 0): Promise<OrderRecord[]> {
+  const pool = getPgPool();
+  if (pool) {
+    try {
+      await initPgTables(pool);
+      const res = await executeQueryWithRetry(
+        'SELECT * FROM orders ORDER BY created_at DESC LIMIT $1 OFFSET $2',
+        [limit, offset]
+      );
+      if (res.rows && res.rows.length > 0) {
+        return res.rows.map(mapRowToOrder);
+      }
+    } catch (err: any) {
+      console.error('PostgreSQL getOrders failed, using local orders:', err?.message);
+    }
+  }
+
+  return getLocalOrders().slice(offset, offset + limit);
+}
+
+export async function getOrderById(id: string): Promise<OrderRecord | null> {
+  const pool = getPgPool();
+  if (pool) {
+    try {
+      await initPgTables(pool);
+      const res = await executeQueryWithRetry(
+        'SELECT * FROM orders WHERE id = $1 OR order_number = $1 LIMIT 1',
+        [id]
+      );
+      if (res.rows && res.rows.length > 0) {
+        return mapRowToOrder(res.rows[0]);
+      }
+    } catch (err: any) {
+      console.error('PostgreSQL getOrderById failed:', err?.message);
+    }
+  }
+
+  const local = getLocalOrders().find((o) => o.id === id || o.orderNumber === id);
+  return local || null;
+}
+
+export async function updateOrderStatus(id: string, status: OrderStatus): Promise<boolean> {
+  const pool = getPgPool();
+  if (pool) {
+    try {
+      await executeQueryWithRetry(
+        'UPDATE orders SET status = $1, updated_at = NOW() WHERE id = $2 OR order_number = $2',
+        [status, id]
+      );
+    } catch (err: any) {
+      console.error('PostgreSQL updateOrderStatus failed:', err?.message);
+    }
+  }
+
+  try {
+    const orders = getLocalOrders();
+    const target = orders.find((o) => o.id === id || o.orderNumber === id);
+    if (target) {
+      target.status = status;
+      target.updatedAt = new Date().toISOString();
+      memoryOrders = orders;
+      fs.writeFileSync(getOrdersFile(), JSON.stringify(orders, null, 2), 'utf-8');
+    }
+  } catch {}
+
+  return true;
 }

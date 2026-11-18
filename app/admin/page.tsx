@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PricingConfig, AdminItemPrice, AdminSplicePrice, AdminPlatePrice } from '@/types/admin';
+import { OrderRecord, OrderStatus } from '@/types/order';
 import { getDefaultPricingConfig } from '@/lib/defaultPricing';
 import { calculatePrice, getDefaultCue } from '@/lib/cueEngine';
 import { CUE_SHAFTS, CUE_JOINTS, CUE_SPLICES } from '@/lib/cueData';
@@ -30,6 +31,12 @@ import {
   Clock,
   ArrowUpRight,
   SlidersHorizontal,
+  ShoppingBag,
+  PackageCheck,
+  Mail,
+  Phone,
+  MapPin,
+  Printer,
 } from 'lucide-react';
 
 export default function AdminPricingPage() {
@@ -52,7 +59,11 @@ export default function AdminPricingPage() {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'shafts' | 'splices' | 'joints' | 'plates' | 'simulator'>('shafts');
+  const [activeTab, setActiveTab] = useState<'orders' | 'shafts' | 'splices' | 'joints' | 'plates' | 'simulator'>('orders');
+  const [orders, setOrders] = useState<OrderRecord[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<OrderRecord | null>(null);
+  const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
   const lastSavedJsonRef = React.useRef<string>('');
@@ -114,6 +125,53 @@ export default function AdminPricingPage() {
     }
   };
 
+  // Fetch real-time customer orders from PostgreSQL
+  const fetchOrders = async () => {
+    try {
+      setLoadingOrders(true);
+      const res = await fetch(`/api/orders?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+        },
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.orders)) {
+        setOrders(data.orders);
+      }
+    } catch (err) {
+      console.error('Failed to fetch orders:', err);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
+  // Update order status (pending, in_crafting, shipped, completed, cancelled)
+  const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
+    try {
+      setUpdatingStatusId(orderId);
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
+        );
+        if (selectedOrder && selectedOrder.id === orderId) {
+          setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
+        }
+      }
+    } catch (err) {
+      console.error('Failed to update status:', err);
+    } finally {
+      setUpdatingStatusId(null);
+    }
+  };
+
   // Auth check on mount
   useEffect(() => {
     const checkAuthAndLoad = async () => {
@@ -129,7 +187,7 @@ export default function AdminPricingPage() {
         if (meData.dbStatus) {
           setDbStatus(meData.dbStatus);
         }
-        await loadConfig();
+        await Promise.all([loadConfig(), fetchOrders()]);
       } catch (e) {
         router.push('/admin/login');
       } finally {
@@ -615,6 +673,7 @@ export default function AdminPricingPage() {
         {/* Tab Navigation */}
         <div className="flex items-center gap-2 border-b border-slate-800 pb-3 overflow-x-auto">
           {[
+            { id: 'orders', label: `Customer Orders (${orders.length})`, icon: ShoppingBag },
             { id: 'shafts', label: 'Shafts & Lengths', icon: Layers },
             { id: 'splices', label: 'Exotic Splices (12 Woods)', icon: Sparkles },
             { id: 'joints', label: 'Joints & Fittings', icon: Sliders },
@@ -626,7 +685,12 @@ export default function AdminPricingPage() {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => {
+                  setActiveTab(tab.id as any);
+                  if (tab.id === 'orders') {
+                    fetchOrders();
+                  }
+                }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
                   isActive
                     ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10'
@@ -641,7 +705,7 @@ export default function AdminPricingPage() {
         </div>
 
         {/* Search and Bulk Operations Toolbar */}
-        {activeTab !== 'simulator' && (
+        {activeTab !== 'simulator' && activeTab !== 'orders' && (
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-950/70 p-3.5 rounded-2xl border border-slate-800">
             {/* Live Filter Input */}
             <div className="relative flex-1">
@@ -703,6 +767,355 @@ export default function AdminPricingPage() {
               >
                 +£10
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* TAB 0: CUSTOMER ORDERS MANAGEMENT */}
+        {/* ======================================================== */}
+        {activeTab === 'orders' && (
+          <div className="space-y-6">
+            {/* Orders Header & Summary KPIs */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 flex items-center justify-between">
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Total Customer Orders
+                  </span>
+                  <span className="text-2xl font-black text-white font-mono">{orders.length}</span>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500">
+                  <ShoppingBag className="w-5 h-5" />
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 flex items-center justify-between">
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Total Order Value
+                  </span>
+                  <span className="text-2xl font-black text-amber-400 font-mono">
+                    £{orders.reduce((sum, o) => sum + (Number(o.pricing?.total) || 0), 0).toLocaleString()}
+                  </span>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <DollarSign className="w-5 h-5" />
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 flex items-center justify-between">
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Workshop Queue
+                  </span>
+                  <span className="text-2xl font-black text-sky-400 font-mono">
+                    {orders.filter((o) => o.status === 'pending' || o.status === 'in_crafting').length} active
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={fetchOrders}
+                    disabled={loadingOrders}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold transition disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${loadingOrders ? 'animate-spin' : ''}`} />
+                    <span>Refresh</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Orders List / Empty State */}
+            {orders.length === 0 ? (
+              <div className="bg-slate-800/40 border border-slate-700/60 rounded-3xl p-12 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-slate-800 border border-slate-700 mx-auto flex items-center justify-center text-slate-400">
+                  <ShoppingBag className="w-8 h-8" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-base font-extrabold text-white">No Customer Orders Yet</h3>
+                  <p className="text-xs text-slate-400 max-w-md mx-auto">
+                    When visitors configure a bespoke cue and click &quot;Order Cue&quot; on the customizer, their orders will appear here automatically with full specs and delivery details.
+                  </p>
+                </div>
+                <Link
+                  href="/"
+                  target="_blank"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold transition shadow-md"
+                >
+                  <span>Test Storefront Customizer</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            ) : (
+              <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 overflow-hidden shadow-xl">
+                <div className="p-4 border-b border-slate-700/60 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-sm font-bold text-white">Recent Customer Bespoke Orders</h2>
+                    <p className="text-xs text-slate-400">
+                      Real-time orders retrieved directly from PostgreSQL. Click any order to view full workshop specs.
+                    </p>
+                  </div>
+                  <span className="text-xs text-emerald-400 font-medium">PostgreSQL Synced</span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-700/80 bg-slate-900/60 text-slate-400 uppercase tracking-wider text-[10px] font-bold">
+                        <th className="py-3 px-4">Order #</th>
+                        <th className="py-3 px-4">Date</th>
+                        <th className="py-3 px-4">Customer</th>
+                        <th className="py-3 px-4">Cue Configuration</th>
+                        <th className="py-3 px-4 text-right">Total (£)</th>
+                        <th className="py-3 px-4 text-center">Status</th>
+                        <th className="py-3 px-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-700/50">
+                      {orders.map((ord) => (
+                        <tr key={ord.id} className="hover:bg-slate-700/30 transition-colors">
+                          <td className="py-3.5 px-4 font-mono font-bold text-amber-400">
+                            {ord.orderNumber}
+                          </td>
+                          <td className="py-3.5 px-4 text-slate-400 whitespace-nowrap">
+                            {new Date(ord.createdAt).toLocaleDateString()}{' '}
+                            <span className="text-[10px] opacity-70">
+                              {new Date(ord.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <div className="font-bold text-white">{ord.customer.fullName}</div>
+                            <div className="text-[11px] text-slate-400">{ord.customer.email}</div>
+                            <div className="text-[10px] text-slate-500">
+                              {ord.customer.city}, {ord.customer.country}
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4 max-w-xs">
+                            <div className="font-semibold text-slate-200">
+                              {ord.cue.shaft?.name} • {ord.cue.length?.name}
+                            </div>
+                            <div className="text-[11px] text-slate-400 truncate">
+                              Ferrule: {ord.cue.ferruleType?.name} ({ord.cue.tipSize?.name}) • {ord.cue.weight}oz
+                            </div>
+                            {ord.cue.engraving && (
+                              <div className="text-[10px] text-amber-400/90 font-mono">
+                                Engraved: &quot;{ord.cue.engraving}&quot;
+                              </div>
+                            )}
+                          </td>
+                          <td className="py-3.5 px-4 text-right font-mono font-black text-white text-sm">
+                            £{ord.pricing.total}
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <select
+                              value={ord.status}
+                              disabled={updatingStatusId === ord.id}
+                              onChange={(e) => handleUpdateStatus(ord.id, e.target.value as OrderStatus)}
+                              className={`px-2.5 py-1 text-[11px] font-bold rounded-lg border focus:outline-none transition cursor-pointer ${
+                                ord.status === 'pending'
+                                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                                  : ord.status === 'confirmed'
+                                  ? 'bg-sky-500/20 text-sky-300 border-sky-500/40'
+                                  : ord.status === 'in_crafting'
+                                  ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                                  : ord.status === 'shipped'
+                                  ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
+                                  : ord.status === 'completed'
+                                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                                  : 'bg-slate-700/50 text-slate-400 border-slate-600'
+                              }`}
+                            >
+                              <option value="pending" className="bg-slate-900 text-white">Pending</option>
+                              <option value="confirmed" className="bg-slate-900 text-white">Confirmed</option>
+                              <option value="in_crafting" className="bg-slate-900 text-white">In Crafting</option>
+                              <option value="shipped" className="bg-slate-900 text-white">Shipped</option>
+                              <option value="completed" className="bg-slate-900 text-white">Completed</option>
+                              <option value="cancelled" className="bg-slate-900 text-white">Cancelled</option>
+                            </select>
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <button
+                              onClick={() => setSelectedOrder(ord)}
+                              className="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-amber-500 hover:text-slate-950 text-slate-200 text-xs font-bold transition shadow-sm"
+                            >
+                              View Build Sheet
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Detailed Order Build Sheet Inspection Drawer / Modal */}
+        {selectedOrder && (
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
+            <div className="relative w-full max-w-3xl bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden my-auto text-white">
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/60">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-mono font-bold text-xs">
+                    MC
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-white flex items-center gap-2">
+                      <span>Order {selectedOrder.orderNumber}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-md font-mono uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        {selectedOrder.status}
+                      </span>
+                    </h3>
+                    <p className="text-[11px] text-slate-400">
+                      Placed on {new Date(selectedOrder.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedOrder(null)}
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+                {/* Customer & Shipping Details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
+                    <h4 className="font-bold text-amber-400 uppercase tracking-wider text-[11px] flex items-center gap-1.5 border-b border-slate-800 pb-2">
+                      <User className="w-3.5 h-3.5" />
+                      Customer Contact
+                    </h4>
+                    <div className="space-y-1 text-slate-300">
+                      <div className="font-bold text-white text-sm">{selectedOrder.customer.fullName}</div>
+                      <div className="flex items-center gap-2 text-slate-400">
+                        <Mail className="w-3.5 h-3.5" />
+                        <span>{selectedOrder.customer.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-slate-400">
+                        <Phone className="w-3.5 h-3.5" />
+                        <span>{selectedOrder.customer.phone}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
+                    <h4 className="font-bold text-amber-400 uppercase tracking-wider text-[11px] flex items-center gap-1.5 border-b border-slate-800 pb-2">
+                      <MapPin className="w-3.5 h-3.5" />
+                      Delivery Destination
+                    </h4>
+                    <div className="space-y-1 text-slate-300">
+                      <div>{selectedOrder.customer.addressLine1}</div>
+                      {selectedOrder.customer.addressLine2 && <div>{selectedOrder.customer.addressLine2}</div>}
+                      <div>
+                        {selectedOrder.customer.city}, {selectedOrder.customer.postcode}
+                      </div>
+                      <div className="font-bold text-white">{selectedOrder.customer.country}</div>
+                      <div className="text-[10px] text-slate-500 pt-1">
+                        Payment: {selectedOrder.paymentMethod === 'invoice_bank_transfer' ? 'Direct Bank Transfer (BACS)' : 'Online Card / Invoice'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Customer Crafting Notes */}
+                {selectedOrder.notes && (
+                  <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs">
+                    <span className="font-bold text-amber-400 uppercase tracking-wider text-[10px] block mb-1">
+                      Customer Special Instructions:
+                    </span>
+                    <p className="text-slate-200 italic">&quot;{selectedOrder.notes}&quot;</p>
+                  </div>
+                )}
+
+                {/* Bespoke Cue Crafting Specifications */}
+                <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                  <h4 className="font-bold text-white uppercase tracking-wider text-xs flex items-center justify-between border-b border-slate-800 pb-2">
+                    <span className="flex items-center gap-2">
+                      <PackageCheck className="w-4 h-4 text-amber-400" />
+                      Workshop Cue Specifications
+                    </span>
+                    <span className="text-amber-400 font-mono font-black text-sm">
+                      Total: £{selectedOrder.pricing.total}
+                    </span>
+                  </h4>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                      <span className="text-slate-500 block text-[10px]">Shaft Wood</span>
+                      <span className="font-bold text-white">{selectedOrder.cue.shaft?.name}</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                      <span className="text-slate-500 block text-[10px]">Length</span>
+                      <span className="font-bold text-white">{selectedOrder.cue.length?.name}</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                      <span className="text-slate-500 block text-[10px]">Ferrule & Tip</span>
+                      <span className="font-bold text-white">
+                        {selectedOrder.cue.ferruleType?.name} ({selectedOrder.cue.tipSize?.name})
+                      </span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                      <span className="text-slate-500 block text-[10px]">Weight</span>
+                      <span className="font-bold text-amber-400 font-mono">{selectedOrder.cue.weight} oz</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                      <span className="text-slate-500 block text-[10px]">Butt Timber</span>
+                      <span className="font-bold text-white">{selectedOrder.cue.buttTimber?.name}</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                      <span className="text-slate-500 block text-[10px]">Joint System</span>
+                      <span className="font-bold text-white">{selectedOrder.cue.buttJoint?.name}</span>
+                    </div>
+                    {selectedOrder.cue.largeSpliceMaterial && (
+                      <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                        <span className="text-slate-500 block text-[10px]">Front Splices</span>
+                        <span className="font-bold text-white">
+                          {selectedOrder.cue.largeSplices}-Splice {selectedOrder.cue.largeSpliceMaterial.name}
+                        </span>
+                      </div>
+                    )}
+                    {selectedOrder.cue.endButtJoin && (
+                      <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                        <span className="text-slate-500 block text-[10px]">End Butt Joint</span>
+                        <span className="font-bold text-emerald-400">Fitted (+£12)</span>
+                      </div>
+                    )}
+                    {selectedOrder.cue.engraving && (
+                      <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                        <span className="text-slate-500 block text-[10px]">Engraved Disc</span>
+                        <span className="font-bold text-amber-400 font-mono">
+                          &quot;{selectedOrder.cue.engraving}&quot; ({selectedOrder.cue.font})
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="p-4 border-t border-slate-800 bg-slate-950/60 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Print Workshop Spec</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedOrder(null)}
+                  className="px-5 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold transition"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         )}

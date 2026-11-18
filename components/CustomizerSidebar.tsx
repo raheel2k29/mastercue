@@ -47,6 +47,7 @@ import {
   DOME_JOINT_PRICE,
 } from '@/lib/cueEngine';
 
+import { CheckoutModal } from '@/components/CheckoutModal';
 import {
   Layers,
   Sparkles,
@@ -66,6 +67,7 @@ interface CustomizerSidebarProps {
 }
 
 export const CustomizerSidebar: React.FC<CustomizerSidebarProps> = ({ cue, onChange }) => {
+  const [showCheckout, setShowCheckout] = useState(false);
   const [activeTab, setActiveTab] = useState<
     'shaft' | 'butt' | 'splices' | 'veneers' | 'tip' | 'engraving' | 'accessories'
   >('shaft');
@@ -882,17 +884,20 @@ export const CustomizerSidebar: React.FC<CustomizerSidebarProps> = ({ cue, onCha
             <span className="text-3xl font-extrabold text-slate-900 font-mono">£{price.total}</span>
           </div>
           <button
-            onClick={() => {
-              alert(
-                `Order summary ready!\n\nCurrent Price: £${price.total}\nShaft: ${cue.shaft?.name} (£${cue.shaft?.price})\nButt Timber: ${cue.buttTimber?.name} (£${price.buttTimberPrice})\nEnd Butt Joint: ${cue.endButtJoin ? 'Yes (+£12)' : 'No'}\nSplices: ${cue.largeSpliceMaterial ? cue.largeSpliceMaterial.name + ' (+£' + price.largeSplicePrice + ')' : 'None'}\nEngraving: "${cue.engraving}" (${price.engravingPrice ? '+£' + price.engravingPrice : 'Free'})`
-              );
-            }}
+            onClick={() => setShowCheckout(true)}
             className="px-7 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs tracking-wider uppercase shadow-md transition-all transform active:scale-95"
           >
             Order Cue
           </button>
         </div>
       </div>
+
+      <CheckoutModal
+        isOpen={showCheckout}
+        onClose={() => setShowCheckout(false)}
+        cue={cue}
+        price={price}
+      />
     </div>
   );
 };

@@ -6,6 +6,7 @@ import { getDefaultCue, getWeightRange } from '@/lib/cueEngine';
 import { CUE_JOINTS } from '@/lib/cueData';
 import { CueCanvasPreview } from '@/components/CueCanvasPreview';
 import { CustomizerOptions } from '@/components/CustomizerOptions';
+import { CheckoutModal } from '@/components/CheckoutModal';
 import { PricingProvider, usePricing } from '@/context/PricingContext';
 import {
   Sparkles,
@@ -22,6 +23,7 @@ import {
 function CueCustomizerContent() {
   const [cue, setCue] = useState<CueConfiguration>(() => getDefaultCue());
   const [showSpecsModal, setShowSpecsModal] = useState(false);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const { catalog, calculateDynamicPrice } = usePricing();
   const price = calculateDynamicPrice(cue);
   const weightRange = getWeightRange(cue);
@@ -182,11 +184,7 @@ function CueCustomizerContent() {
                   </span>
                 </div>
                 <button
-                  onClick={() => {
-                    alert(
-                      `Order summary ready!\n\nCurrent Price: £${price.total}\nShaft: ${cue.shaft?.name} (£${cue.shaft?.price})\nButt Timber: ${cue.buttTimber?.name} (£${price.buttTimberPrice})\nEnd Butt Joint: ${cue.endButtJoin ? 'Yes (+£12)' : 'No'}\nSplices: ${cue.largeSpliceMaterial ? cue.largeSpliceMaterial.name + ' (+£' + price.largeSplicePrice + ')' : 'None'}\nEngraving: "${cue.engraving}" (${price.engravingPrice ? '+£' + price.engravingPrice : 'Free'})`
-                    );
-                  }}
+                  onClick={() => setShowCheckoutModal(true)}
                   className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs tracking-wider uppercase shadow-md transition-all active:scale-95"
                 >
                   <span>Order Cue</span>
@@ -287,15 +285,35 @@ function CueCustomizerContent() {
               </div>
             </div>
 
-            <button
-              onClick={() => setShowSpecsModal(false)}
-              className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition"
-            >
-              Close
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowSpecsModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setShowSpecsModal(false);
+                  setShowCheckoutModal(true);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md"
+              >
+                <span>Proceed to Checkout</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Simple Bespoke Checkout Modal */}
+      <CheckoutModal
+        isOpen={showCheckoutModal}
+        onClose={() => setShowCheckoutModal(false)}
+        cue={cue}
+        price={price}
+      />
     </div>
   );
 }
