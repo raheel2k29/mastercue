@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createOrder, getOrders, createCustomerAccount, findCustomerByEmail } from '@/lib/db';
 import { getSessionUser } from '@/lib/auth';
-import { hashPassword, createCustomerSessionToken, CUSTOMER_SESSION_COOKIE } from '@/lib/customerAuth';
+import { hashPassword, createCustomerSessionToken, getCustomerSession, CUSTOMER_SESSION_COOKIE } from '@/lib/customerAuth';
 import { OrderRecord } from '@/types/order';
 
 export const dynamic = 'force-dynamic';
@@ -60,31 +60,40 @@ export async function POST(req: Request) {
     let customerId: string | undefined = undefined;
     let sessionToken: string | undefined = undefined;
 
-    const cleanEmail = customer.email.trim().toLowerCase();
-    const existingCustomer = await findCustomerByEmail(cleanEmail);
+    // Check if customer is actively logged in via session cookie
+    const activeSession = getCustomerSession();
+    let orderCustomerEmail = customer.email.trim().toLowerCase();
 
-    if (existingCustomer) {
-      // Existing customer detected: automatically link order to their existing account!
-      customerId = existingCustomer.id;
-    } else if (accountPassword && accountPassword.trim().length >= 6) {
-      // New customer providing password to create their account
-      const passwordHash = await hashPassword(accountPassword.trim());
-      customerId = `cust_${timestamp}_${Math.random().toString(36).substring(2, 7)}`;
-      const customerAccount = await createCustomerAccount({
-        id: customerId,
-        email: cleanEmail,
-        passwordHash,
-        fullName: customer.fullName.trim(),
-        phone: customer.phone.trim(),
-        shippingAddress: customer,
-        createdAt: new Date().toISOString(),
-      });
-      customerId = customerAccount.id;
-      sessionToken = createCustomerSessionToken({
-        customerId: customerAccount.id,
-        email: customerAccount.email,
-        fullName: customerAccount.fullName,
-      });
+    if (activeSession?.customerId) {
+      // Priority 1: User is already signed in - link directly to their account
+      customerId = activeSession.customerId;
+      // Use their verified signed-in email to prevent extension/form-filler discrepancies
+      orderCustomerEmail = activeSession.email.trim().toLowerCase();
+    } else {
+      // Priority 2: Guest checkout - check if an account with this email exists
+      const existingCustomer = await findCustomerByEmail(orderCustomerEmail);
+      if (existingCustomer) {
+        customerId = existingCustomer.id;
+      } else if (accountPassword && accountPassword.trim().length >= 6) {
+        // Priority 3: New customer creating account with password
+        const passwordHash = await hashPassword(accountPassword.trim());
+        customerId = `cust_${timestamp}_${Math.random().toString(36).substring(2, 7)}`;
+        const customerAccount = await createCustomerAccount({
+          id: customerId,
+          email: orderCustomerEmail,
+          passwordHash,
+          fullName: customer.fullName.trim(),
+          phone: customer.phone.trim(),
+          shippingAddress: customer,
+          createdAt: new Date().toISOString(),
+        });
+        customerId = customerAccount.id;
+        sessionToken = createCustomerSessionToken({
+          customerId: customerAccount.id,
+          email: customerAccount.email,
+          fullName: customerAccount.fullName,
+        });
+      }
     }
 
     const orderRecord: OrderRecord = {
@@ -93,7 +102,7 @@ export async function POST(req: Request) {
       customerId,
       customer: {
         fullName: customer.fullName.trim(),
-        email: customer.email.trim().toLowerCase(),
+        email: orderCustomerEmail,
         phone: customer.phone.trim(),
         addressLine1: customer.addressLine1.trim(),
         addressLine2: customer.addressLine2?.trim() || '',

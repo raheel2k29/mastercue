@@ -22,6 +22,7 @@ import {
   Sliders,
   ChevronDown,
   ChevronUp,
+  RefreshCw,
 } from 'lucide-react';
 import { OrderRecord, OrderStatus } from '@/types/order';
 import { CustomerProfile } from '@/types/customer';
@@ -55,37 +56,41 @@ const TIMELINE_STEPS = [
 export default function CustomerAccountPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [customer, setCustomer] = useState<CustomerProfile | null>(null);
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadCustomerData = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch('/api/customer/me', {
-          cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            Pragma: 'no-cache',
-          },
-        });
-        const data = await res.json();
-        if (!data.authenticated) {
-          router.replace('/account/login');
-          return;
-        }
-        setCustomer(data.customer);
-        setOrders(data.orders || []);
-        if (data.orders && data.orders.length > 0) {
-          setExpandedOrderId(data.orders[0].id);
-        }
-      } catch (err) {
+  const loadCustomerData = async (isManual = false) => {
+    try {
+      if (isManual) setRefreshing(true);
+      else setLoading(true);
+      const res = await fetch(`/api/customer/me?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+        },
+      });
+      const data = await res.json();
+      if (!data.authenticated) {
         router.replace('/account/login');
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
+      setCustomer(data.customer);
+      setOrders(data.orders || []);
+      if (data.orders && data.orders.length > 0) {
+        setExpandedOrderId((prev) => prev || data.orders[0].id);
+      }
+    } catch (err) {
+      if (!isManual) router.replace('/account/login');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
     loadCustomerData();
   }, [router]);
 
@@ -189,9 +194,20 @@ export default function CustomerAccountPage() {
                 Live workshop crafting progress and specifications permanently linked to your account.
               </p>
             </div>
-            <span className="text-xs font-mono font-bold text-amber-900 bg-amber-100 px-3 py-1 rounded-full border border-amber-200">
-              {orders.length} Order{orders.length === 1 ? '' : 's'}
-            </span>
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => loadCustomerData(true)}
+                disabled={refreshing}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs transition"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${refreshing ? 'animate-spin' : ''}`} />
+                <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
+              </button>
+              <span className="text-xs font-mono font-bold text-amber-900 bg-amber-100 px-3 py-1 rounded-full border border-amber-200">
+                {orders.length} Order{orders.length === 1 ? '' : 's'}
+              </span>
+            </div>
           </div>
 
           {/* Orders List */}
