@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { CueConfiguration } from '@/types/cue';
 import { getDefaultCue, getWeightRange } from '@/lib/cueEngine';
 import { CUE_JOINTS } from '@/lib/cueData';
 import { CueCanvasPreview } from '@/components/CueCanvasPreview';
 import { CustomizerOptions } from '@/components/CustomizerOptions';
 import { CheckoutModal } from '@/components/CheckoutModal';
+import { CustomerAuthModal } from '@/components/CustomerAuthModal';
 import { PricingProvider, usePricing } from '@/context/PricingContext';
 import {
   Sparkles,
@@ -23,12 +25,27 @@ import {
 } from 'lucide-react';
 
 function CueCustomizerContent() {
+  const router = useRouter();
   const [cue, setCue] = useState<CueConfiguration>(() => getDefaultCue());
   const [showSpecsModal, setShowSpecsModal] = useState(false);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [customer, setCustomer] = useState<{ id: string; email: string; fullName: string } | null>(null);
   const { catalog, calculateDynamicPrice } = usePricing();
   const price = calculateDynamicPrice(cue);
   const weightRange = getWeightRange(cue);
+
+  // Load customer session status
+  useEffect(() => {
+    fetch('/api/customer/me', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.authenticated && data.customer) {
+          setCustomer(data.customer);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Reset to default
   const handleReset = () => {
@@ -143,14 +160,22 @@ function CueCustomizerContent() {
               <Eye className="w-3.5 h-3.5 text-amber-600" />
               <span>Specs</span>
             </button>
-            <Link
-              href="/account"
+            <button
+              onClick={() => {
+                if (customer) {
+                  router.push('/account');
+                } else {
+                  setShowAuthModal(true);
+                }
+              }}
               title="Customer Account & Order Tracking"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-white shadow-sm transition"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-white shadow-sm transition active:scale-95"
             >
-              <User className="w-3.5 h-3.5 text-amber-400" />
-              <span className="hidden sm:inline">My Account</span>
-            </Link>
+              <User className={`w-3.5 h-3.5 ${customer ? 'text-emerald-400' : 'text-amber-400'}`} />
+              <span className="hidden sm:inline">
+                {customer ? `Account (${customer.fullName.split(' ')[0]})` : 'My Account'}
+              </span>
+            </button>
           </div>
         </div>
       </header>
@@ -323,6 +348,13 @@ function CueCustomizerContent() {
         onClose={() => setShowCheckoutModal(false)}
         cue={cue}
         price={price}
+      />
+
+      {/* Customer Sign In / Sign Up / Track Modal Popup */}
+      <CustomerAuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onAuthSuccess={(c) => setCustomer(c)}
       />
     </div>
   );
