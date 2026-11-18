@@ -37,6 +37,7 @@ import {
   Phone,
   MapPin,
   Printer,
+  Briefcase,
 } from 'lucide-react';
 
 export default function AdminPricingPage() {
@@ -59,7 +60,9 @@ export default function AdminPricingPage() {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'orders' | 'shafts' | 'splices' | 'joints' | 'plates' | 'simulator'>('orders');
+  const [activeTab, setActiveTab] = useState<
+    'orders' | 'shafts' | 'splices' | 'joints' | 'plates' | 'cases' | 'simulator'
+  >('orders');
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderRecord | null>(null);
@@ -378,6 +381,11 @@ export default function AdminPricingPage() {
           extensions: prev.extensions.map((e) => ({ ...e, price: calc(e.price) })),
           miniButts: prev.miniButts.map((m) => ({ ...m, price: calc(m.price) })),
         };
+      } else if (activeTab === 'cases') {
+        return {
+          ...prev,
+          cases: (prev.cases || []).map((c) => ({ ...c, price: calc(c.price) })),
+        };
       }
       return prev;
     });
@@ -446,6 +454,15 @@ export default function AdminPricingPage() {
     }));
   };
 
+  const updateCasePrice = (id: string, price: number, enabled?: boolean) => {
+    setConfig((prev) => ({
+      ...prev,
+      cases: (prev.cases || []).map((c) =>
+        c.id === id ? { ...c, price, ...(enabled !== undefined ? { enabled } : {}) } : c
+      ),
+    }));
+  };
+
   // -------------------------------------------------------------
   // Live Simulator Calculations (Instant Sanity Check)
   // -------------------------------------------------------------
@@ -503,6 +520,7 @@ export default function AdminPricingPage() {
   const filteredPlates = q ? config.namePlates.filter((p) => p.name.toLowerCase().includes(q)) : config.namePlates;
   const filteredExtensions = q ? config.extensions.filter((e) => e.name.toLowerCase().includes(q)) : config.extensions;
   const filteredMiniButts = q ? config.miniButts.filter((m) => m.name.toLowerCase().includes(q)) : config.miniButts;
+  const filteredCases = (config.cases || []).filter((c) => !q || c.name.toLowerCase().includes(q));
 
   if (authChecking) {
     return (
@@ -679,7 +697,8 @@ export default function AdminPricingPage() {
             { id: 'orders', label: `Customer Orders (${orders.length})`, icon: ShoppingBag },
             { id: 'shafts', label: 'Shafts & Lengths', icon: Layers },
             { id: 'splices', label: 'Exotic Splices (12 Woods)', icon: Sparkles },
-            { id: 'joints', label: 'Joints & Fittings', icon: Sliders },
+            { id: 'joints', label: 'Joints & Surcharges', icon: Sliders },
+            { id: 'cases', label: 'Case Bundles', icon: Briefcase },
             { id: 'plates', label: 'Discs & Extras', icon: DollarSign },
             { id: 'simulator', label: 'Live Sanity Simulator', icon: Calculator },
           ].map((tab) => {
@@ -1440,6 +1459,66 @@ export default function AdminPricingPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* TAB: CUE & CASE BUNDLES */}
+        {/* ======================================================== */}
+        {activeTab === 'cases' && (
+          <div className="space-y-6">
+            <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-amber-400" />
+                    <span>Tournament Cue Case Bundles (5 Models)</span>
+                  </h2>
+                  <p className="text-xs text-slate-400">
+                    Set discounted bundle rates and active/inactive status for cases when purchased alongside a bespoke cue.
+                  </p>
+                </div>
+                <span className="text-xs text-amber-400 font-medium">
+                  Currency: {config.surcharges.defaultCurrency || '£'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+                {filteredCases.map((c) => (
+                  <div
+                    key={c.id}
+                    className="p-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-200">{c.name}</span>
+                      <label className="flex items-center gap-1.5 cursor-pointer text-[11px] text-slate-400">
+                        <input
+                          type="checkbox"
+                          checked={c.enabled !== false}
+                          onChange={(e) => updateCasePrice(c.id, c.price, e.target.checked)}
+                          className="rounded border-slate-700 text-amber-500 focus:ring-amber-500 h-3.5 w-3.5 bg-slate-800"
+                        />
+                        <span>Active</span>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3 pt-1">
+                      <span className="text-[11px] text-slate-500">Bundle Price:</span>
+                      <div className="flex items-center gap-1.5 w-32">
+                        <span className="text-slate-500 font-bold">£</span>
+                        <input
+                          type="number"
+                          min="0"
+                          value={c.price}
+                          onChange={(e) => updateCasePrice(c.id, Number(e.target.value))}
+                          className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-bold text-white focus:outline-none focus:border-amber-500 text-right"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

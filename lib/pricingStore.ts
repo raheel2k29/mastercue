@@ -67,6 +67,7 @@ export function getPricingConfig(): PricingConfig {
         namePlates: parsed.namePlates?.length ? parsed.namePlates : defaults.namePlates,
         extensions: parsed.extensions?.length ? parsed.extensions : defaults.extensions,
         miniButts: parsed.miniButts?.length ? parsed.miniButts : defaults.miniButts,
+        cases: parsed.cases?.length ? parsed.cases : defaults.cases,
       };
       memoryCache = merged;
       return merged;
@@ -114,6 +115,10 @@ export function savePricingConfig(incoming: Partial<PricingConfig>): {
         domeJointPrice: sanitizePrice(
           incoming.surcharges?.domeJointPrice,
           current.surcharges.domeJointPrice
+        ),
+        priorityCraftingPrice: sanitizePrice(
+          incoming.surcharges?.priorityCraftingPrice,
+          current.surcharges.priorityCraftingPrice ?? 40
         ),
         defaultCurrency: incoming.surcharges?.defaultCurrency || current.surcharges.defaultCurrency,
       },
@@ -177,6 +182,12 @@ export function savePricingConfig(incoming: Partial<PricingConfig>): {
         name: m.name,
         price: sanitizePrice(m.price, 0),
         enabled: m.enabled !== false,
+      })),
+      cases: (incoming.cases || current.cases || []).map((c) => ({
+        id: c.id,
+        name: c.name,
+        price: sanitizePrice(c.price, 0),
+        enabled: c.enabled !== false,
       })),
     };
 
