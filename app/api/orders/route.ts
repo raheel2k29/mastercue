@@ -3,6 +3,7 @@ import { createOrder, getOrders, createCustomerAccount, findCustomerByEmail } fr
 import { getSessionUser } from '@/lib/auth';
 import { hashPassword, createCustomerSessionToken, getCustomerSession, CUSTOMER_SESSION_COOKIE } from '@/lib/customerAuth';
 import { OrderRecord } from '@/types/order';
+import { getStripe } from '@/lib/stripe';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -158,12 +159,53 @@ export async function POST(req: Request) {
 
     const savedOrder = await createOrder(orderRecord);
 
+    let stripeCheckoutUrl: string | undefined = undefined;
+
+    if (paymentMethod === 'stripe_checkout' || paymentMethod === 'card') {
+      try {
+        const stripe = getStripe();
+        const origin = req.headers.get('origin') || 'https://mastercue.vercel.app';
+
+        const session = await stripe.checkout.sessions.create({
+          line_items: [
+            {
+              price_data: {
+                currency: 'gbp',
+                product_data: {
+                  name: `Master Cue Bespoke Handcrafted Cue (${orderRecord.cue.shaft?.name || 'Ash'}, ${orderRecord.cue.length?.name || '58"'})`,
+                  description: `Order #${orderRecord.orderNumber} • ${orderRecord.cue.weight}oz • ${orderRecord.cue.buttTimber?.name || 'Ebony'}${isPriority ? ' • ⚡ Priority Turnaround (6 Wks)' : ''}${orderRecord.cue.case ? ` • ${orderRecord.cue.case.name}` : ''}`,
+                },
+                unit_amount: Math.round(totalPrice * 100),
+              },
+              quantity: 1,
+            },
+          ],
+          mode: 'payment',
+          customer_email: orderCustomerEmail,
+          client_reference_id: savedOrder.id,
+          metadata: {
+            orderId: savedOrder.id,
+            orderNumber: savedOrder.orderNumber,
+          },
+          success_url: `${origin}/order-success?order_id=${savedOrder.id}&session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${origin}/?cancelled=true`,
+        });
+
+        stripeCheckoutUrl = session.url || undefined;
+      } catch (stripeErr: any) {
+        console.error('Stripe session creation error:', stripeErr?.message);
+      }
+    }
+
     const response = NextResponse.json({
       success: true,
       orderNumber: savedOrder.orderNumber,
       order: savedOrder,
       accountCreated: Boolean(customerId),
-      message: 'Order placed successfully! Handcrafted cue specifications permanently saved.',
+      stripeCheckoutUrl,
+      message: stripeCheckoutUrl
+        ? 'Redirecting to secure Stripe checkout...'
+        : 'Order placed successfully! Handcrafted cue specifications permanently saved.',
     });
 
     if (sessionToken) {

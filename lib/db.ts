@@ -689,6 +689,33 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
   return true;
 }
 
+export async function markOrderPaid(id: string, paymentIntentId?: string): Promise<boolean> {
+  const pool = getPgPool();
+  if (pool) {
+    try {
+      await executeQueryWithRetry(
+        "UPDATE orders SET status = 'confirmed', updated_at = NOW() WHERE id = $1 OR order_number = $1",
+        [id]
+      );
+    } catch (err: any) {
+      console.error('PostgreSQL markOrderPaid failed:', err?.message);
+    }
+  }
+
+  try {
+    const orders = getLocalOrders();
+    const target = orders.find((o) => o.id === id || o.orderNumber === id);
+    if (target) {
+      target.status = 'confirmed';
+      target.updatedAt = new Date().toISOString();
+      memoryOrders = orders;
+      fs.writeFileSync(getOrdersFile(), JSON.stringify(orders, null, 2), 'utf-8');
+    }
+  } catch {}
+
+  return true;
+}
+
 // -------------------------------------------------------------
 // Customers & Account Layer (Neon PostgreSQL + Fallback)
 // -------------------------------------------------------------

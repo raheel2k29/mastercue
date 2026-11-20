@@ -75,8 +75,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [accountCreated, setAccountCreated] = useState(false);
   const [priorityService, setPriorityService] = useState<boolean>(Boolean(cue.priorityService));
   const [selectedCase, setSelectedCase] = useState<CueCase | null>(cue.case || null);
-  const [paymentMethod, setPaymentMethod] = useState<'invoice_bank_transfer' | 'card_link' | 'paypal'>(
-    'invoice_bank_transfer'
+  const [paymentMethod, setPaymentMethod] = useState<'stripe_checkout' | 'invoice_bank_transfer' | 'card_link' | 'paypal'>(
+    'stripe_checkout'
   );
 
   // Synchronize options whenever modal opens or cue prop changes
@@ -273,6 +273,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Failed to submit order. Please try again.');
+      }
+
+      if (data.stripeCheckoutUrl) {
+        window.location.href = data.stripeCheckoutUrl;
+        return;
       }
 
       setCompletedOrder(data.order);
@@ -893,14 +898,41 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 {/* Payment Option */}
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
-                    Payment Method
+                    Select Payment Method
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                     <label
                       className={`flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition ${
+                        paymentMethod === 'stripe_checkout'
+                          ? 'border-amber-500 bg-amber-50/60 ring-2 ring-amber-500/20'
+                          : 'border-slate-200 hover:border-slate-300 bg-white'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="payment"
+                        checked={paymentMethod === 'stripe_checkout'}
+                        onChange={() => setPaymentMethod('stripe_checkout')}
+                        className="mt-0.5 text-amber-600 focus:ring-amber-500"
+                      />
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-bold text-slate-900">Card / Apple & Google Pay</span>
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            Instant
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 leading-snug">
+                          Live automated checkout via Stripe. Supports Apple Pay, Google Pay, Visa, Mastercard, Amex.
+                        </div>
+                      </div>
+                    </label>
+
+                    <label
+                      className={`flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition ${
                         paymentMethod === 'invoice_bank_transfer'
-                          ? 'border-amber-500 bg-amber-50/50'
-                          : 'border-slate-200 hover:border-slate-300'
+                          ? 'border-amber-500 bg-amber-50/60 ring-2 ring-amber-500/20'
+                          : 'border-slate-200 hover:border-slate-300 bg-white'
                       }`}
                     >
                       <input
@@ -908,34 +940,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         name="payment"
                         checked={paymentMethod === 'invoice_bank_transfer'}
                         onChange={() => setPaymentMethod('invoice_bank_transfer')}
-                        className="mt-0.5 text-amber-600"
+                        className="mt-0.5 text-amber-600 focus:ring-amber-500"
                       />
-                      <div>
+                      <div className="space-y-1">
                         <div className="font-bold text-slate-900">Direct Bank Transfer (BACS)</div>
-                        <div className="text-[11px] text-slate-500">
-                          Official invoice & bank details emailed upon submission.
-                        </div>
-                      </div>
-                    </label>
-
-                    <label
-                      className={`flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition ${
-                        paymentMethod === 'card_link'
-                          ? 'border-amber-500 bg-amber-50/50'
-                          : 'border-slate-200 hover:border-slate-300'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="payment"
-                        checked={paymentMethod === 'card_link'}
-                        onChange={() => setPaymentMethod('card_link')}
-                        className="mt-0.5 text-amber-600"
-                      />
-                      <div>
-                        <div className="font-bold text-slate-900">Card / PayPal Invoice</div>
-                        <div className="text-[11px] text-slate-500">
-                          Secure online card payment link sent with order receipt.
+                        <div className="text-[11px] text-slate-500 leading-snug">
+                          Official workshop invoice & UK bank account details (Sort Code & Account Number).
                         </div>
                       </div>
                     </label>
@@ -952,7 +962,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     {isSubmitting ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Transmitting Order to Workshop...</span>
+                        <span>Connecting to Workshop Checkout...</span>
+                      </>
+                    ) : paymentMethod === 'stripe_checkout' ? (
+                      <>
+                        <Lock className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Pay with Card / Apple & Google Pay • £{payableTotal}</span>
+                        <ArrowRight className="w-4 h-4 text-amber-400" />
                       </>
                     ) : (
                       <>
