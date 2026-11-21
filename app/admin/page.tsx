@@ -1076,88 +1076,266 @@ export default function AdminPricingPage() {
                   </div>
                 )}
 
-                {/* Bespoke Cue Crafting Specifications */}
-                <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-                  <h4 className="font-bold text-white uppercase tracking-wider text-xs flex items-center justify-between border-b border-slate-800 pb-2">
-                    <span className="flex items-center gap-2">
+                {/* Complete Bespoke Cue Workshop Specifications */}
+                <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
+                    <h4 className="font-bold text-white uppercase tracking-wider text-xs flex items-center gap-2">
                       <PackageCheck className="w-4 h-4 text-amber-400" />
-                      Workshop Cue Specifications
-                    </span>
-                    <span className="text-amber-400 font-mono font-black text-sm">
-                      Total: £{selectedOrder.pricing.total}
-                    </span>
-                  </h4>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                      <span className="text-slate-500 block text-[10px]">Shaft Wood</span>
-                      <span className="font-bold text-white">{selectedOrder.cue.shaft?.name}</span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                      <span className="text-slate-500 block text-[10px]">Length</span>
-                      <span className="font-bold text-white">{selectedOrder.cue.length?.name}</span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                      <span className="text-slate-500 block text-[10px]">Ferrule & Tip</span>
-                      <span className="font-bold text-white">
-                        {selectedOrder.cue.ferruleType?.name} ({selectedOrder.cue.tipSize?.name})
+                      <span>Complete Workshop Build Sheet</span>
+                    </h4>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                        {(selectedOrder.serviceLevel === 'priority' || selectedOrder.cue.priorityService)
+                          ? '⚡ Priority Queue (6 Weeks)'
+                          : 'Standard Queue (10–12 Weeks)'}
+                      </span>
+                      <span className="text-amber-400 font-mono font-black text-sm">
+                        Total: £{selectedOrder.pricing.total}
                       </span>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                      <span className="text-slate-500 block text-[10px]">Weight</span>
-                      <span className="font-bold text-amber-400 font-mono">{selectedOrder.cue.weight} oz</span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                      <span className="text-slate-500 block text-[10px]">Butt Timber</span>
-                      <span className="font-bold text-white">{selectedOrder.cue.buttTimber?.name}</span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                      <span className="text-slate-500 block text-[10px]">Joint System</span>
-                      <span className="font-bold text-white">{selectedOrder.cue.buttJoint?.name}</span>
-                    </div>
-                    {selectedOrder.cue.largeSpliceMaterial && (
+                  </div>
+
+                  {/* 1. Shaft & Taper Engineering */}
+                  <div>
+                    <h5 className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-2">
+                      1. Shaft Wood, Length, Ferrule & Tip
+                    </h5>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
                       <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                        <span className="text-slate-500 block text-[10px]">Front Splices</span>
-                        <span className="font-bold text-white">
-                          {selectedOrder.cue.largeSplices}-Splice {selectedOrder.cue.largeSpliceMaterial.name}
-                        </span>
+                        <span className="text-slate-500 block text-[10px]">Shaft Timber</span>
+                        <span className="font-bold text-white">{selectedOrder.cue.shaft?.name || 'Ash'}</span>
                       </div>
-                    )}
-                    {selectedOrder.cue.endButtJoin && (
+                      <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                        <span className="text-slate-500 block text-[10px]">Overall Length</span>
+                        <span className="font-bold text-white">{selectedOrder.cue.length?.name || '58"'}</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                        <span className="text-slate-500 block text-[10px]">Cue Weight</span>
+                        <span className="font-bold text-amber-400 font-mono">{selectedOrder.cue.weight} oz</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                        <span className="text-slate-500 block text-[10px]">Ferrule & Tip</span>
+                        <span className="font-bold text-white">
+                          {selectedOrder.cue.ferruleType?.name || 'Brass'} ({selectedOrder.cue.tipSize?.name || '9.5mm'})
+                        </span>
+                        {selectedOrder.cue.tip?.name && (
+                          <span className="text-[10px] text-slate-400 block mt-0.5">Tip: {selectedOrder.cue.tip.name}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 2. Butt Timber, Splices & Color Veneers */}
+                  <div>
+                    <h5 className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-2">
+                      2. Butt Timber, Splices & Color Veneers
+                    </h5>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                      <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                        <span className="text-slate-500 block text-[10px]">Main Butt Timber</span>
+                        <span className="font-bold text-white">{selectedOrder.cue.buttTimber?.name || 'Hand Spliced Ebony'}</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                        <span className="text-slate-500 block text-[10px]">Joint System</span>
+                        <span className="font-bold text-white">{selectedOrder.cue.buttJoint?.name || '1-Piece'}</span>
+                      </div>
+
+                      {/* Front Splices & Veneers */}
+                      <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 col-span-1 sm:col-span-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500 text-[10px]">Front Splices (Large)</span>
+                          {selectedOrder.cue.largeSpliceMaterial ? (
+                            <span className="text-amber-400 font-bold text-[11px]">
+                              {selectedOrder.cue.largeSplices}-Splice {selectedOrder.cue.largeSpliceMaterial.name}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 text-[11px]">Plain Wood (No Front Splices)</span>
+                          )}
+                        </div>
+                        {selectedOrder.cue.largeSpliceMaterial && (
+                          <div className="mt-2 pt-2 border-t border-slate-800/80">
+                            <span className="text-slate-500 text-[10px] block mb-1">Color Veneer Layers:</span>
+                            {selectedOrder.cue.largeVeneers && selectedOrder.cue.largeVeneers.length > 0 ? (
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {selectedOrder.cue.largeVeneers.map((v, i) => (
+                                  <span
+                                    key={i}
+                                    className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-200 border border-slate-700"
+                                  >
+                                    Layer {v.layer || i + 1}: {v.name || v.asset?.name || 'Color'}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 text-[11px]">Natural Timber (No Colored Veneers)</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Small Secondary Splices & Veneers */}
+                      {(selectedOrder.cue.smallSpliceMaterial || (selectedOrder.cue.smallSplices && selectedOrder.cue.smallSplices > 0)) && (
+                        <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 col-span-1 sm:col-span-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-slate-500 text-[10px]">Secondary Splices (Small Points)</span>
+                            <span className="text-amber-400 font-bold text-[11px]">
+                              {selectedOrder.cue.smallSplices}-Splice {selectedOrder.cue.smallSpliceMaterial?.name || 'Secondary Splice'}
+                            </span>
+                          </div>
+                          {selectedOrder.cue.smallVeneers && selectedOrder.cue.smallVeneers.length > 0 && (
+                            <div className="mt-2 pt-2 border-t border-slate-800/80">
+                              <span className="text-slate-500 text-[10px] block mb-1">Secondary Veneer Layers:</span>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {selectedOrder.cue.smallVeneers.map((v, i) => (
+                                  <span
+                                    key={i}
+                                    className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-200 border border-slate-700"
+                                  >
+                                    Layer {v.layer || i + 1}: {v.name || v.asset?.name || 'Color'}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 3. Fittings, Extensions & Personalization */}
+                  <div>
+                    <h5 className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-2">
+                      3. Fittings, Extensions, Case & Engraving
+                    </h5>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
                       <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
                         <span className="text-slate-500 block text-[10px]">End Butt Joint</span>
-                        <span className="font-bold text-emerald-400">Fitted (+£12)</span>
+                        <span className={selectedOrder.cue.endButtJoin ? 'font-bold text-emerald-400' : 'font-semibold text-slate-400'}>
+                          {selectedOrder.cue.endButtJoin ? 'Fitted Thread (+£12)' : 'None'}
+                        </span>
                       </div>
-                    )}
-                    {selectedOrder.cue.engraving && (
                       <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                        <span className="text-slate-500 block text-[10px]">Engraved Disc</span>
-                        <span className="font-bold text-amber-400 font-mono">
-                          &quot;{selectedOrder.cue.engraving}&quot; ({selectedOrder.cue.font})
+                        <span className="text-slate-500 block text-[10px]">Dome Joint</span>
+                        <span className={selectedOrder.cue.dome ? 'font-bold text-emerald-400' : 'font-semibold text-slate-400'}>
+                          {selectedOrder.cue.dome ? 'Traditional Dome (+£31)' : 'None'}
                         </span>
                       </div>
-                    )}
-                    <div className={`p-2.5 rounded-xl border ${
-                      (selectedOrder.serviceLevel === 'priority' || selectedOrder.cue.priorityService)
-                        ? 'bg-amber-500/10 border-amber-500/40 text-amber-300'
-                        : 'bg-slate-900 border-slate-800 text-white'
-                    }`}>
-                      <span className="text-slate-500 block text-[10px]">Workshop Turnaround</span>
-                      <span className="font-bold flex items-center gap-1">
-                        {(selectedOrder.serviceLevel === 'priority' || selectedOrder.cue.priorityService)
-                          ? '⚡ Priority Fast-Track (6 Weeks) [+£40]'
-                          : 'Standard (10–12 Weeks)'}
-                      </span>
+                      <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                        <span className="text-slate-500 block text-[10px]">Disc Style</span>
+                        <span className="font-bold text-white">
+                          {selectedOrder.cue.namePlate?.name || 'Standard Disc Plate'}
+                        </span>
+                      </div>
+                      {selectedOrder.cue.engraving && (
+                        <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 col-span-2 sm:col-span-3">
+                          <span className="text-slate-500 block text-[10px]">Custom Disc Engraving</span>
+                          <span className="font-mono font-bold text-amber-400 text-sm">
+                            &quot;{selectedOrder.cue.engraving}&quot;
+                          </span>
+                          <span className="text-[10px] text-slate-400 block mt-0.5">
+                            Typography Font: {selectedOrder.cue.font || 'Roboto'}
+                          </span>
+                        </div>
+                      )}
+                      {selectedOrder.cue.miniButt && (
+                        <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                          <span className="text-slate-500 block text-[10px]">Mini Butt</span>
+                          <span className="font-bold text-white">{selectedOrder.cue.miniButt.name}</span>
+                        </div>
+                      )}
+                      {selectedOrder.cue.extensions && selectedOrder.cue.extensions.length > 0 && (
+                        <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 col-span-2">
+                          <span className="text-slate-500 block text-[10px]">Extensions Included</span>
+                          <span className="font-bold text-white">
+                            {selectedOrder.cue.extensions.map((e) => e.name).join(', ')}
+                          </span>
+                        </div>
+                      )}
+                      {selectedOrder.cue.case && selectedOrder.cue.case.id !== 'case_none' && (
+                        <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 col-span-2 sm:col-span-3">
+                          <span className="text-emerald-400 block text-[10px] font-bold">Bundled Tournament Cue Case</span>
+                          <div className="flex items-center justify-between mt-0.5">
+                            <span className="font-bold text-white text-xs">
+                              🧰 {selectedOrder.cue.case.name}
+                            </span>
+                            <span className="font-mono font-bold text-emerald-400">
+                              +£{selectedOrder.cue.case.bundlePrice}
+                            </span>
+                          </div>
+                          {selectedOrder.cue.case.compartments && (
+                            <span className="text-[10px] text-emerald-200/80 block mt-0.5">
+                              {selectedOrder.cue.case.compartments}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    {selectedOrder.cue.case && selectedOrder.cue.case.id !== 'case_none' && (
-                      <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300">
-                        <span className="text-emerald-400 block text-[10px] font-bold">Bundled Cue Case</span>
-                        <span className="font-bold flex items-center gap-1">
-                          🧰 {selectedOrder.cue.case.name} (+£{selectedOrder.cue.case.bundlePrice})
-                        </span>
-                      </div>
-                    )}
                   </div>
+
+                  {/* 4. Financial & Invoice Itemized Breakdown */}
+                  {selectedOrder.pricing && (
+                    <div className="pt-2 border-t border-slate-800/80">
+                      <h5 className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-2">
+                        Financial & Invoice Itemized Breakdown
+                      </h5>
+                      <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-[11px] space-y-1.5 divide-y divide-slate-800/60">
+                        <div className="flex justify-between pt-1 text-slate-300">
+                          <span>Shaft Wood ({selectedOrder.cue.shaft?.name || 'Shaft'}):</span>
+                          <span className="font-mono">£{selectedOrder.pricing.shaftPrice || 0}</span>
+                        </div>
+                        <div className="flex justify-between pt-1 text-slate-300">
+                          <span>Length & Butt Timber ({selectedOrder.cue.buttTimber?.name || 'Butt'}):</span>
+                          <span className="font-mono">£{(selectedOrder.pricing.lengthPrice || 0) + (selectedOrder.pricing.buttTimberPrice || 0)}</span>
+                        </div>
+                        {Number(selectedOrder.pricing.largeSplicePrice) > 0 && (
+                          <div className="flex justify-between pt-1 text-slate-300">
+                            <span>Front Splices:</span>
+                            <span className="font-mono">£{selectedOrder.pricing.largeSplicePrice}</span>
+                          </div>
+                        )}
+                        {Number(selectedOrder.pricing.largeVeneersPrice) > 0 && (
+                          <div className="flex justify-between pt-1 text-slate-300">
+                            <span>Color Veneers:</span>
+                            <span className="font-mono">£{selectedOrder.pricing.largeVeneersPrice}</span>
+                          </div>
+                        )}
+                        {Number(selectedOrder.pricing.endButtJoinPrice) > 0 && (
+                          <div className="flex justify-between pt-1 text-slate-300">
+                            <span>End Butt Joint Fitting:</span>
+                            <span className="font-mono">£{selectedOrder.pricing.endButtJoinPrice}</span>
+                          </div>
+                        )}
+                        {Number(selectedOrder.pricing.domeJointPrice) > 0 && (
+                          <div className="flex justify-between pt-1 text-slate-300">
+                            <span>Dome Joint:</span>
+                            <span className="font-mono">£{selectedOrder.pricing.domeJointPrice}</span>
+                          </div>
+                        )}
+                        {Number(selectedOrder.pricing.engravingPrice) > 0 && (
+                          <div className="flex justify-between pt-1 text-slate-300">
+                            <span>Disc Engraving:</span>
+                            <span className="font-mono">£{selectedOrder.pricing.engravingPrice}</span>
+                          </div>
+                        )}
+                        {Number(selectedOrder.pricing.priorityServicePrice) > 0 && (
+                          <div className="flex justify-between pt-1 text-amber-400 font-bold">
+                            <span>⚡ Priority Fast-Track (6-Week Queue):</span>
+                            <span className="font-mono">+£{selectedOrder.pricing.priorityServicePrice}</span>
+                          </div>
+                        )}
+                        {Number(selectedOrder.pricing.casePrice) > 0 && (
+                          <div className="flex justify-between pt-1 text-emerald-400 font-bold">
+                            <span>Bundled Cue Case:</span>
+                            <span className="font-mono">+£{selectedOrder.pricing.casePrice}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between pt-2 text-sm font-black text-amber-400">
+                          <span>Total Amount Payable:</span>
+                          <span className="font-mono text-base">£{selectedOrder.pricing.total}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

@@ -380,17 +380,20 @@ export default function CustomerAccountPage() {
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                             <div className="p-3 rounded-xl bg-white border border-slate-200">
                               <span className="text-slate-400 block text-[10px]">Shaft Wood</span>
-                              <span className="font-bold text-slate-900">{ord.cue.shaft?.name}</span>
+                              <span className="font-bold text-slate-900">{ord.cue.shaft?.name || 'Ash'}</span>
                             </div>
                             <div className="p-3 rounded-xl bg-white border border-slate-200">
                               <span className="text-slate-400 block text-[10px]">Cue Length</span>
-                              <span className="font-bold text-slate-900">{ord.cue.length?.name}</span>
+                              <span className="font-bold text-slate-900">{ord.cue.length?.name || '58"'}</span>
                             </div>
                             <div className="p-3 rounded-xl bg-white border border-slate-200">
                               <span className="text-slate-400 block text-[10px]">Ferrule & Tip</span>
                               <span className="font-bold text-slate-900">
                                 {ord.cue.ferruleType?.name} ({ord.cue.tipSize?.name})
                               </span>
+                              {ord.cue.tip?.name && (
+                                <span className="text-[10px] text-slate-500 block mt-0.5">Tip: {ord.cue.tip.name}</span>
+                              )}
                             </div>
                             <div className="p-3 rounded-xl bg-white border border-slate-200">
                               <span className="text-slate-400 block text-[10px]">Cue Weight</span>
@@ -405,18 +408,78 @@ export default function CustomerAccountPage() {
                               <span className="font-bold text-slate-900">{ord.cue.buttJoint?.name}</span>
                             </div>
                             {ord.cue.largeSpliceMaterial && (
-                              <div className="p-3 rounded-xl bg-white border border-slate-200">
+                              <div className="p-3 rounded-xl bg-white border border-slate-200 col-span-2">
                                 <span className="text-slate-400 block text-[10px]">Front Splicing</span>
                                 <span className="font-bold text-slate-900">
                                   {ord.cue.largeSplices}-Splice {ord.cue.largeSpliceMaterial.name}
                                 </span>
+                                {ord.cue.largeVeneers && ord.cue.largeVeneers.length > 0 && (
+                                  <div className="flex items-center gap-1.5 flex-wrap mt-1 pt-1 border-t border-slate-100">
+                                    <span className="text-[10px] text-slate-400">Veneers:</span>
+                                    {ord.cue.largeVeneers.map((v, i) => (
+                                      <span key={i} className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
+                                        L{v.layer || i + 1}: {v.name || v.asset?.name}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            {(ord.cue.smallSpliceMaterial || (ord.cue.smallSplices && ord.cue.smallSplices > 0)) && (
+                              <div className="p-3 rounded-xl bg-white border border-slate-200 col-span-2">
+                                <span className="text-slate-400 block text-[10px]">Secondary Splices</span>
+                                <span className="font-bold text-slate-900">
+                                  {ord.cue.smallSplices}-Splice {ord.cue.smallSpliceMaterial?.name}
+                                </span>
+                                {ord.cue.smallVeneers && ord.cue.smallVeneers.length > 0 && (
+                                  <div className="flex items-center gap-1.5 flex-wrap mt-1 pt-1 border-t border-slate-100">
+                                    <span className="text-[10px] text-slate-400">Veneers:</span>
+                                    {ord.cue.smallVeneers.map((v, i) => (
+                                      <span key={i} className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
+                                        L{v.layer || i + 1}: {v.name || v.asset?.name}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            {ord.cue.endButtJoin && (
+                              <div className="p-3 rounded-xl bg-white border border-slate-200">
+                                <span className="text-slate-400 block text-[10px]">End Butt Joint</span>
+                                <span className="font-bold text-emerald-700">Fitted Thread</span>
+                              </div>
+                            )}
+                            {ord.cue.dome && (
+                              <div className="p-3 rounded-xl bg-white border border-slate-200">
+                                <span className="text-slate-400 block text-[10px]">Dome Joint</span>
+                                <span className="font-bold text-emerald-700">Fitted Dome</span>
+                              </div>
+                            )}
+                            {ord.cue.namePlate && (
+                              <div className="p-3 rounded-xl bg-white border border-slate-200">
+                                <span className="text-slate-400 block text-[10px]">Disc Style</span>
+                                <span className="font-bold text-slate-900">{ord.cue.namePlate.name}</span>
                               </div>
                             )}
                             {ord.cue.engraving && (
-                              <div className="p-3 rounded-xl bg-white border border-slate-200">
+                              <div className="p-3 rounded-xl bg-white border border-slate-200 col-span-2">
                                 <span className="text-slate-400 block text-[10px]">Engraved Disc</span>
                                 <span className="font-bold text-slate-900 font-mono">
-                                  &quot;{ord.cue.engraving}&quot; ({ord.cue.font})
+                                  &quot;{ord.cue.engraving}&quot; ({ord.cue.font || 'Roboto'})
+                                </span>
+                              </div>
+                            )}
+                            {ord.cue.miniButt && (
+                              <div className="p-3 rounded-xl bg-white border border-slate-200">
+                                <span className="text-slate-400 block text-[10px]">Mini Butt</span>
+                                <span className="font-bold text-slate-900">{ord.cue.miniButt.name}</span>
+                              </div>
+                            )}
+                            {ord.cue.extensions && ord.cue.extensions.length > 0 && (
+                              <div className="p-3 rounded-xl bg-white border border-slate-200 col-span-2">
+                                <span className="text-slate-400 block text-[10px]">Extensions</span>
+                                <span className="font-bold text-slate-900">
+                                  {ord.cue.extensions.map((e) => e.name).join(', ')}
                                 </span>
                               </div>
                             )}
@@ -431,7 +494,7 @@ export default function CustomerAccountPage() {
                               </span>
                             </div>
                             {ord.cue.case && ord.cue.case.id !== 'case_none' && (
-                              <div className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200 text-emerald-950">
+                              <div className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200 text-emerald-950 col-span-2">
                                 <span className="text-emerald-700 block text-[10px] font-bold">Bundled Cue Case</span>
                                 <span className="font-bold flex items-center gap-1">
                                   {ord.cue.case.name} (+£{ord.cue.case.bundlePrice})
