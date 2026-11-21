@@ -852,6 +852,25 @@ export async function findCustomerById(id: string): Promise<CustomerRecord | nul
   return local || null;
 }
 
+export async function getAllCustomers(): Promise<CustomerRecord[]> {
+  const pool = getPgPool();
+  if (pool) {
+    try {
+      await initPgTables(pool);
+      const res = await executeQueryWithRetry(
+        'SELECT * FROM customers ORDER BY created_at DESC'
+      );
+      if (res.rows && res.rows.length > 0) {
+        return res.rows.map(mapRowToCustomer);
+      }
+    } catch (err: any) {
+      console.error('PostgreSQL getAllCustomers failed:', err?.message);
+    }
+  }
+
+  return getLocalCustomers();
+}
+
 export async function getCustomerOrders(email: string, customerId?: string): Promise<OrderRecord[]> {
   const pool = getPgPool();
   if (pool) {
