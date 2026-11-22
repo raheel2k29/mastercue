@@ -235,6 +235,155 @@ function CueCustomizerContent() {
                 </button>
               </div>
             </div>
+
+            {/* Live Studio Bespoke Build Sheet (Real-time Specs) */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3.5">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                    Live Bespoke Cue Specification
+                  </h3>
+                </div>
+                <span className="text-[10px] font-mono text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                  Total: £{price.total}
+                </span>
+              </div>
+
+              {/* Grid of live specs */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                {/* 1. Shaft */}
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                  <span className="text-[10px] text-slate-400 block">Shaft & Length</span>
+                  <span className="font-bold text-slate-900 truncate block">
+                    {cue.shaft?.name || 'Ash'} • {cue.length?.name || '58"'}
+                  </span>
+                  <span className="text-[10px] text-amber-700 font-mono font-semibold">
+                    {cue.weight} oz
+                  </span>
+                </div>
+
+                {/* 2. Ferrule & Tip */}
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                  <span className="text-[10px] text-slate-400 block">Ferrule & Tip</span>
+                  <span className="font-bold text-slate-900 truncate block">
+                    {cue.ferruleType?.name || 'Brass'} ({cue.tipSize?.name || '9.5mm'})
+                  </span>
+                  {cue.tip?.name && (
+                    <span className="text-[10px] text-slate-500 truncate block">
+                      Tip: {cue.tip.name}
+                    </span>
+                  )}
+                </div>
+
+                {/* 3. Butt & Joint */}
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                  <span className="text-[10px] text-slate-400 block">Butt Timber & Joint</span>
+                  <span className="font-bold text-slate-900 truncate block">
+                    {cue.buttTimber?.name || 'Hand Spliced Ebony'}
+                  </span>
+                  <span className="text-[10px] text-slate-500 block">
+                    {cue.buttJoint?.name || '1-Piece'}
+                  </span>
+                </div>
+
+                {/* 4. Splices & Hardwood */}
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 col-span-2 sm:col-span-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Front Splicing</span>
+                      <span className="font-bold text-slate-900">
+                        {cue.largeSpliceMaterial
+                          ? `${cue.largeSplices}-Splice ${cue.largeSpliceMaterial.name}`
+                          : 'Plain Ebony (No Front Splices)'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {cue.endButtJoin && (
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
+                          Thread Fitted (+£12)
+                        </span>
+                      )}
+                      {cue.dome && (
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
+                          Dome Fitted (+£31)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Active Veneer Layers */}
+                  {cue.largeVeneers && cue.largeVeneers.filter((v) => v.name && v.name !== 'None').length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-slate-200/80">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1">
+                          <span>🎨 Color Veneer Inlays (Cascading Outlines)</span>
+                        </span>
+                        <span className="text-[10px] font-mono text-amber-700 font-semibold">
+                          {price.largeVeneersPrice > 0 ? `+£${price.largeVeneersPrice}` : 'Included'}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[10px]">
+                        {cue.largeVeneers.map((v, idx) => {
+                          const layerTitles = ['1. High (Outer)', '2. Inlay', '3. Middle', '4. Low (Inner)'];
+                          if (!v.name || v.name === 'None') return null;
+                          return (
+                            <div
+                              key={idx}
+                              className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-2 py-1 shadow-2xs"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
+                              <div className="truncate">
+                                <span className="text-slate-400 block text-[9px]">{layerTitles[idx] || `L${idx + 1}`}</span>
+                                <span className="font-bold text-slate-900">{v.name}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Secondary Splices */}
+                  {(cue.smallSpliceMaterial || cue.smallSplices > 0) && (
+                    <div className="mt-2 pt-1.5 border-t border-slate-200/80 text-[11px] flex items-center justify-between">
+                      <span className="text-slate-500">Secondary Splices:</span>
+                      <span className="font-bold text-slate-900">
+                        {cue.smallSplices}-Splice {cue.smallSpliceMaterial?.name || 'Secondary'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 5. Personalization & Extras */}
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 col-span-2 sm:col-span-3">
+                  <div className="flex items-center justify-between flex-wrap gap-2 text-[11px]">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Personalisation</span>
+                      <span className="font-bold text-slate-900">
+                        {cue.namePlate?.name || 'Standard Disc'}
+                        {cue.engraving ? ` • "${cue.engraving}" (${cue.font || 'Roboto'})` : ''}
+                      </span>
+                    </div>
+                    {cue.miniButt && (
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200 text-slate-800 font-semibold">
+                        Mini Butt: {cue.miniButt.name}
+                      </span>
+                    )}
+                    {cue.extensions && cue.extensions.length > 0 && (
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200 text-slate-800 font-semibold">
+                        {cue.extensions.map((e) => e.name).join(', ')}
+                      </span>
+                    )}
+                    {cue.case && cue.case.id !== 'case_none' && (
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-bold border border-emerald-200">
+                        🧰 {cue.case.name} (+£{cue.case.bundlePrice})
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* RIGHT COLUMN: Customizer Options Panel with Single-Row Tabs */}

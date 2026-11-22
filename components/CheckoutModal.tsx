@@ -422,7 +422,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   <div className="flex justify-between">
                     <span className="text-slate-500">Ferrule & Tip:</span>
                     <span className="font-bold text-slate-950">
-                      {completedOrder.cue.ferruleType?.name} ({completedOrder.cue.tipSize?.name})
+                      {completedOrder.cue.ferruleType?.name} ({completedOrder.cue.tipSize?.name}){completedOrder.cue.tip?.name ? ` • ${completedOrder.cue.tip.name}` : ''}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -430,9 +430,21 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     <span className="font-bold text-slate-950 font-mono">{completedOrder.cue.weight} oz</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Butt Timber:</span>
-                    <span className="font-bold text-slate-950">{completedOrder.cue.buttTimber?.name}</span>
+                    <span className="text-slate-500">Butt & Joint:</span>
+                    <span className="font-bold text-slate-950">{completedOrder.cue.buttTimber?.name} • {completedOrder.cue.buttJoint?.name}</span>
                   </div>
+                  {completedOrder.cue.endButtJoin && (
+                    <div className="flex justify-between text-emerald-700 font-semibold">
+                      <span>End Butt Joint:</span>
+                      <span>Fitted Brass Thread (+£12)</span>
+                    </div>
+                  )}
+                  {completedOrder.cue.dome && (
+                    <div className="flex justify-between text-emerald-700 font-semibold">
+                      <span>Dome Joint:</span>
+                      <span>Traditional Dome (+£31)</span>
+                    </div>
+                  )}
                   {completedOrder.cue.largeSpliceMaterial && (
                     <div className="flex justify-between">
                       <span className="text-slate-500">Front Splices:</span>
@@ -462,8 +474,20 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     <div className="flex justify-between">
                       <span className="text-slate-500">Engraved Disc:</span>
                       <span className="font-bold text-amber-700 uppercase tracking-wider">
-                        &quot;{completedOrder.cue.engraving}&quot;
+                        &quot;{completedOrder.cue.engraving}&quot; ({completedOrder.cue.font || 'Roboto'})
                       </span>
+                    </div>
+                  )}
+                  {completedOrder.cue.miniButt && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Mini Butt:</span>
+                      <span className="font-bold text-slate-950">{completedOrder.cue.miniButt.name}</span>
+                    </div>
+                  )}
+                  {completedOrder.cue.extensions && completedOrder.cue.extensions.length > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Extensions:</span>
+                      <span className="font-bold text-slate-950">{completedOrder.cue.extensions.map(e => e.name).join(', ')}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
@@ -564,7 +588,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     <div className="flex justify-between pt-1.5">
                       <span className="text-slate-400">Ferrule & Tip:</span>
                       <span className="font-semibold text-white">
-                        {cue.ferruleType?.name} ({cue.tipSize?.name})
+                        {cue.ferruleType?.name} ({cue.tipSize?.name}){cue.tip?.name ? ` • ${cue.tip.name}` : ''}
                       </span>
                     </div>
                     <div className="flex justify-between pt-1.5">
@@ -572,12 +596,24 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       <span className="font-semibold text-amber-400 font-mono">{cue.weight} oz</span>
                     </div>
                     <div className="flex justify-between pt-1.5">
-                      <span className="text-slate-400">Butt Timber:</span>
-                      <span className="font-semibold text-white">{cue.buttTimber?.name}</span>
+                      <span className="text-slate-400">Butt & Joint:</span>
+                      <span className="font-semibold text-white">{cue.buttTimber?.name} • {cue.buttJoint?.name}</span>
                     </div>
+                    {cue.endButtJoin && (
+                      <div className="flex justify-between pt-1.5 text-emerald-400 font-medium">
+                        <span>End Butt Joint Fitting:</span>
+                        <span className="font-mono font-bold">+£12</span>
+                      </div>
+                    )}
+                    {cue.dome && (
+                      <div className="flex justify-between pt-1.5 text-emerald-400 font-medium">
+                        <span>Dome Joint Surcharge:</span>
+                        <span className="font-mono font-bold">+£31</span>
+                      </div>
+                    )}
                     {cue.largeSpliceMaterial && (
                       <div className="flex justify-between pt-1.5">
-                        <span className="text-slate-400">Splices:</span>
+                        <span className="text-slate-400">Front Splices:</span>
                         <span className="font-semibold text-white">
                           {cue.largeSplices}-Splice {cue.largeSpliceMaterial.name}
                         </span>
@@ -585,34 +621,60 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     )}
                     {cue.largeVeneers && cue.largeVeneers.filter((v) => v.name && v.name !== 'None').length > 0 && (
                       <div className="pt-2 border-t border-slate-800/80">
-                        <div className="flex justify-between text-[11px] text-amber-400 font-bold mb-1">
-                          <span>🎨 Color Veneer Inlays:</span>
+                        <div className="flex justify-between text-[11px] text-amber-400 font-bold mb-1.5">
+                          <span className="flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                            <span>🎨 Color Veneer Inlays:</span>
+                          </span>
                           {price.largeVeneersPrice > 0 ? (
-                            <span>+£{price.largeVeneersPrice}</span>
+                            <span className="font-mono text-amber-300 font-bold">+£{price.largeVeneersPrice}</span>
                           ) : (
                             <span className="text-slate-400 font-normal">Included</span>
                           )}
                         </div>
-                        <div className="grid grid-cols-2 gap-1 pl-1">
+                        <div className="grid grid-cols-2 gap-1.5 pl-1">
                           {cue.largeVeneers.map((v, idx) => {
                             const layerTitles = ['1. Outer', '2. Inlay', '3. Middle', '4. Inner'];
                             if (!v.name || v.name === 'None') return null;
                             return (
-                              <div key={idx} className="flex justify-between text-[10px] bg-slate-800/70 rounded px-1.5 py-0.5 border border-slate-700/60">
+                              <div key={idx} className="flex items-center justify-between text-[10px] bg-slate-800 rounded-md px-2 py-1 border border-slate-700/80">
                                 <span className="text-slate-400">{layerTitles[idx] || `L${idx + 1}`}:</span>
-                                <span className="font-bold text-white">{v.name}</span>
+                                <span className="font-bold text-white flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                  {v.name}
+                                </span>
                               </div>
                             );
                           })}
                         </div>
                       </div>
                     )}
+                    {(cue.smallSpliceMaterial || cue.smallSplices > 0) && (
+                      <div className="flex justify-between pt-1.5">
+                        <span className="text-slate-400">Secondary Splices:</span>
+                        <span className="font-semibold text-white">
+                          {cue.smallSplices}-Splice {cue.smallSpliceMaterial?.name || 'Secondary'}
+                        </span>
+                      </div>
+                    )}
                     {cue.engraving && (
                       <div className="flex justify-between pt-1.5">
                         <span className="text-slate-400">Engraved Disc:</span>
                         <span className="font-semibold text-amber-400 uppercase tracking-wider truncate max-w-[150px]">
-                          &quot;{cue.engraving}&quot;
+                          &quot;{cue.engraving}&quot; ({cue.font || 'Roboto'})
                         </span>
+                      </div>
+                    )}
+                    {cue.miniButt && (
+                      <div className="flex justify-between pt-1.5">
+                        <span className="text-slate-400">Mini Butt:</span>
+                        <span className="font-semibold text-white">{cue.miniButt.name}</span>
+                      </div>
+                    )}
+                    {cue.extensions && cue.extensions.length > 0 && (
+                      <div className="flex justify-between pt-1.5">
+                        <span className="text-slate-400">Extensions:</span>
+                        <span className="font-semibold text-white">{cue.extensions.map(e => e.name).join(', ')}</span>
                       </div>
                     )}
                     <div className="flex justify-between pt-1.5 text-emerald-400 font-medium">

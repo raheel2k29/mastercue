@@ -1247,7 +1247,12 @@ export default function AdminPricingPage() {
                                   {ord.cue.shaft?.name} • {ord.cue.length?.name}
                                 </div>
                                 <div className="text-[11px] text-slate-400 truncate">
-                                  Ferrule: {ord.cue.ferruleType?.name} ({ord.cue.tipSize?.name}) • {ord.cue.weight}oz
+                                  Ferrule: {ord.cue.ferruleType?.name} ({ord.cue.tipSize?.name}){ord.cue.tip?.name ? ` • ${ord.cue.tip.name}` : ''} • {ord.cue.weight}oz
+                                </div>
+                                <div className="text-[10px] text-slate-400 truncate">
+                                  {ord.cue.buttTimber?.name} • {ord.cue.buttJoint?.name}
+                                  {ord.cue.endButtJoin ? ' • Thread Fitted' : ''}
+                                  {ord.cue.dome ? ' • Dome Fitted' : ''}
                                 </div>
                                 {ord.cue.largeSpliceMaterial && (
                                   <div className="text-[10px] text-amber-400 font-semibold truncate">
@@ -1710,14 +1715,17 @@ export default function AdminPricingPage() {
                                 <span className="text-slate-500 text-[10px] block mb-1">Color Veneer Layers:</span>
                                 {selectedOrder.cue.largeVeneers && selectedOrder.cue.largeVeneers.length > 0 ? (
                                   <div className="flex items-center gap-1.5 flex-wrap">
-                                    {selectedOrder.cue.largeVeneers.map((v, i) => (
-                                      <span
-                                        key={i}
-                                        className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-200 border border-slate-700"
-                                      >
-                                        Layer {v.layer || i + 1}: {v.name || v.asset?.name || 'Color'}
-                                      </span>
-                                    ))}
+                                    {selectedOrder.cue.largeVeneers.filter((v) => v.name && v.name !== 'None').map((v, i) => {
+                                      const layerTitles = ['1. Outer', '2. Inlay', '3. Middle', '4. Inner'];
+                                      return (
+                                        <span
+                                          key={i}
+                                          className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                                        >
+                                          {layerTitles[i] || `L${i + 1}`}: {v.name || v.asset?.name || 'Color'}
+                                        </span>
+                                      );
+                                    })}
                                   </div>
                                 ) : (
                                   <span className="text-slate-400 text-[11px]">Natural Timber (No Colored Veneers)</span>
