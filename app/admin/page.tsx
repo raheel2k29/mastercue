@@ -1249,6 +1249,16 @@ export default function AdminPricingPage() {
                                 <div className="text-[11px] text-slate-400 truncate">
                                   Ferrule: {ord.cue.ferruleType?.name} ({ord.cue.tipSize?.name}) • {ord.cue.weight}oz
                                 </div>
+                                {ord.cue.largeSpliceMaterial && (
+                                  <div className="text-[10px] text-amber-400 font-semibold truncate">
+                                    {ord.cue.largeSplices}-Splice {ord.cue.largeSpliceMaterial.name}
+                                  </div>
+                                )}
+                                {ord.cue.largeVeneers && ord.cue.largeVeneers.filter((v) => v.name && v.name !== 'None').length > 0 && (
+                                  <div className="text-[10px] text-sky-300 font-medium truncate">
+                                    🎨 Veneers: {ord.cue.largeVeneers.filter((v) => v.name && v.name !== 'None').map((v) => v.name).join(' / ')}
+                                  </div>
+                                )}
                                 {ord.cue.engraving && (
                                   <div className="text-[10px] text-amber-400/90 font-mono">
                                     Engraved: &quot;{ord.cue.engraving}&quot;

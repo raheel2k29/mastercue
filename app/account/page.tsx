@@ -416,11 +416,14 @@ export default function CustomerAccountPage() {
                                 {ord.cue.largeVeneers && ord.cue.largeVeneers.length > 0 && (
                                   <div className="flex items-center gap-1.5 flex-wrap mt-1 pt-1 border-t border-slate-100">
                                     <span className="text-[10px] text-slate-400">Veneers:</span>
-                                    {ord.cue.largeVeneers.map((v, i) => (
-                                      <span key={i} className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
-                                        L{v.layer || i + 1}: {v.name || v.asset?.name}
-                                      </span>
-                                    ))}
+                                    {ord.cue.largeVeneers.filter((v) => v.name && v.name !== 'None').map((v, i) => {
+                                      const layerTitles = ['Outer', 'Inlay', 'Middle', 'Inner'];
+                                      return (
+                                        <span key={i} className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200">
+                                          {layerTitles[i] || `L${i + 1}`}: {v.name || v.asset?.name}
+                                        </span>
+                                      );
+                                    })}
                                   </div>
                                 )}
                               </div>

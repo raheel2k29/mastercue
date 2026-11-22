@@ -441,6 +441,23 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       </span>
                     </div>
                   )}
+                  {completedOrder.cue.largeVeneers && completedOrder.cue.largeVeneers.filter((v) => v.name && v.name !== 'None').length > 0 && (
+                    <div className="pt-1.5 pb-1 border-t border-slate-100">
+                      <span className="text-slate-500 block mb-1 text-[11px] font-semibold">🎨 Color Veneer Inlays:</span>
+                      <div className="grid grid-cols-2 gap-1.5 pl-1">
+                        {completedOrder.cue.largeVeneers.map((v, idx) => {
+                          const layerTitles = ['1. Outer', '2. Inlay', '3. Middle', '4. Inner'];
+                          if (!v.name || v.name === 'None') return null;
+                          return (
+                            <div key={idx} className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5 text-[10px] flex justify-between">
+                              <span className="text-slate-500">{layerTitles[idx] || `L${idx + 1}`}:</span>
+                              <span className="font-bold text-slate-900">{v.name}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                   {completedOrder.cue.engraving && (
                     <div className="flex justify-between">
                       <span className="text-slate-500">Engraved Disc:</span>
@@ -564,6 +581,30 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         <span className="font-semibold text-white">
                           {cue.largeSplices}-Splice {cue.largeSpliceMaterial.name}
                         </span>
+                      </div>
+                    )}
+                    {cue.largeVeneers && cue.largeVeneers.filter((v) => v.name && v.name !== 'None').length > 0 && (
+                      <div className="pt-2 border-t border-slate-800/80">
+                        <div className="flex justify-between text-[11px] text-amber-400 font-bold mb-1">
+                          <span>🎨 Color Veneer Inlays:</span>
+                          {price.largeVeneersPrice > 0 ? (
+                            <span>+£{price.largeVeneersPrice}</span>
+                          ) : (
+                            <span className="text-slate-400 font-normal">Included</span>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-1 pl-1">
+                          {cue.largeVeneers.map((v, idx) => {
+                            const layerTitles = ['1. Outer', '2. Inlay', '3. Middle', '4. Inner'];
+                            if (!v.name || v.name === 'None') return null;
+                            return (
+                              <div key={idx} className="flex justify-between text-[10px] bg-slate-800/70 rounded px-1.5 py-0.5 border border-slate-700/60">
+                                <span className="text-slate-400">{layerTitles[idx] || `L${idx + 1}`}:</span>
+                                <span className="font-bold text-white">{v.name}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                     {cue.engraving && (

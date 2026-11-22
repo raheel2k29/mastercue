@@ -296,10 +296,35 @@ function CueCustomizerContent() {
                   <span className="font-semibold text-amber-700">+£{price.largeSplicePrice}</span>
                 </div>
               )}
-              {price.largeVeneersPrice > 0 && (
-                <div className="flex justify-between py-1.5">
-                  <span className="text-slate-500">Color Veneers:</span>
-                  <span className="font-semibold text-amber-700">+£{price.largeVeneersPrice}</span>
+              {cue.largeVeneers && cue.largeVeneers.filter((v) => v.name && v.name !== 'None').length > 0 && (
+                <div className="py-2 border-t border-slate-100">
+                  <div className="flex items-center justify-between text-slate-700 font-semibold mb-1.5">
+                    <span className="flex items-center gap-1.5">
+                      <span>🎨 Color Veneer Inlays (Cascading Outlines):</span>
+                    </span>
+                    {price.largeVeneersPrice > 0 ? (
+                      <span className="font-bold text-amber-700">+£{price.largeVeneersPrice}</span>
+                    ) : (
+                      <span className="text-slate-400 font-normal">Included</span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5 pl-2 text-[11px]">
+                    {cue.largeVeneers.map((v, idx) => {
+                      const layerTitles = [
+                        '1. High (Outer)',
+                        '2. Inlay',
+                        '3. Middle',
+                        '4. Low (Inner)',
+                      ];
+                      if (!v.name || v.name === 'None') return null;
+                      return (
+                        <div key={idx} className="flex items-center justify-between bg-slate-50 border border-slate-200/80 rounded-lg px-2 py-1">
+                          <span className="text-slate-500 font-medium">{layerTitles[idx] || `Layer ${idx + 1}`}:</span>
+                          <span className="font-bold text-slate-900">{v.name}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
               <div className="flex justify-between py-1.5">

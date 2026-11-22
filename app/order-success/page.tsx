@@ -137,6 +137,33 @@ function OrderSuccessContent() {
                 <span className="text-slate-500">Butt Timber:</span>{' '}
                 <span className="font-semibold text-white">{order.cue.buttTimber?.name}</span>
               </div>
+              {order.cue.largeSpliceMaterial && (
+                <div className="col-span-2">
+                  <span className="text-slate-500">Front Splices:</span>{' '}
+                  <span className="font-semibold text-white">
+                    {order.cue.largeSplices}-Splice {order.cue.largeSpliceMaterial.name}
+                  </span>
+                </div>
+              )}
+              {order.cue.largeVeneers && order.cue.largeVeneers.filter((v) => v.name && v.name !== 'None').length > 0 && (
+                <div className="col-span-2 p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">
+                    🎨 Color Veneer Inlays (Cascading Outlines)
+                  </span>
+                  <div className="grid grid-cols-2 gap-1.5 text-[11px]">
+                    {order.cue.largeVeneers.map((v, idx) => {
+                      const layerTitles = ['1. High (Outer)', '2. Inlay', '3. Middle', '4. Low (Inner)'];
+                      if (!v.name || v.name === 'None') return null;
+                      return (
+                        <div key={idx} className="flex justify-between p-1.5 bg-slate-900 rounded-lg border border-slate-800">
+                          <span className="text-slate-400">{layerTitles[idx] || `Layer ${idx + 1}`}:</span>
+                          <span className="font-bold text-white">{v.name}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
               {order.cue.priorityService && (
                 <div className="col-span-2 flex items-center gap-1.5 text-amber-400 font-bold">
                   <Zap className="w-3.5 h-3.5" />

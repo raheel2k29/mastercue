@@ -435,6 +435,17 @@ export const CueCanvasPreview: React.FC<CueCanvasPreviewProps> = ({ cue }) => {
             <span className="text-[10px] uppercase text-slate-400 font-medium block">Tip</span>
             <span className="font-semibold text-slate-900">{cue.tipSize?.name}</span>
           </div>
+          {cue.largeVeneers && cue.largeVeneers.filter((v) => v.name && v.name !== 'None').length > 0 && (
+            <>
+              <div className="w-px h-6 bg-slate-200" />
+              <div>
+                <span className="text-[10px] uppercase text-slate-400 font-medium block">Veneers</span>
+                <span className="font-semibold text-amber-700">
+                  {cue.largeVeneers.filter((v) => v.name && v.name !== 'None').length} Layers
+                </span>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
