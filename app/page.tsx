@@ -384,7 +384,11 @@ function CueCustomizerContent() {
 
           {/* RIGHT COLUMN: Customizer Options Panel with Single-Row Tabs */}
           <div className="lg:col-span-5">
-            <CustomizerOptions cue={cue} onChange={setCue} />
+            <CustomizerOptions
+              cue={cue}
+              onChange={setCue}
+              onOpenCheckout={() => setShowCheckoutModal(true)}
+            />
           </div>
         </div>
       </main>

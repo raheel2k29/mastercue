@@ -64,26 +64,76 @@ import {
   Clock,
   Briefcase,
   Shield,
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight,
 } from 'lucide-react';
+
+const TABS = [
+  { id: 'general', label: 'Shaft', fullLabel: 'Shaft Timber, Length & Weight', icon: Ruler },
+  { id: 'butt', label: 'Joint', fullLabel: 'Butt Timber, Joint & Fittings', icon: CircleDot },
+  { id: 'splices', label: 'Splices', fullLabel: 'Exotic Front Splicing', icon: Layers },
+  { id: 'veneers', label: 'Veneers', fullLabel: 'Cascading Color Veneer Inlays', icon: Palette },
+  { id: 'tip', label: 'Tip', fullLabel: 'Tip Model & Ferrule Selection', icon: Sparkles },
+  { id: 'engraving', label: 'Engrave', fullLabel: 'Personalised Disc & Typography', icon: Type },
+  { id: 'accessories', label: 'Extras', fullLabel: 'Mini Butt, Extensions & Tournament Case', icon: PlusCircle },
+] as const;
+
+type TabId = typeof TABS[number]['id'];
 
 interface CustomizerOptionsProps {
   cue: CueConfiguration;
   onChange: (updated: CueConfiguration) => void;
+  onOpenCheckout?: () => void;
 }
 
-export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onChange }) => {
-  const [activeTab, setActiveTab] = useState<
-    'general' | 'butt' | 'splices' | 'veneers' | 'tip' | 'engraving' | 'accessories'
-  >('general');
+export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onChange, onOpenCheckout }) => {
+  const [activeTab, setActiveTab] = useState<TabId>('general');
+  const [reviewedTabs, setReviewedTabs] = useState<string[]>(['general']);
   const [spliceType, setSpliceType] = useState<'large' | 'small'>('large');
 
   const { catalog, calculateDynamicPrice } = usePricing();
   const price = calculateDynamicPrice(cue);
   const weightRange = getWeightRange(cue);
 
+  const markTabReviewed = (tabId: string) => {
+    setReviewedTabs((prev) => (prev.includes(tabId) ? prev : [...prev, tabId]));
+  };
+
+  const handleTabClick = (tabId: TabId) => {
+    setActiveTab(tabId);
+    markTabReviewed(tabId);
+  };
+
   const updateCue = (partial: Partial<CueConfiguration>) => {
     onChange({ ...cue, ...partial });
+    markTabReviewed(activeTab);
   };
+
+  const isTabCompleted = (tabId: string) => {
+    if (reviewedTabs.includes(tabId)) return true;
+    if (tabId === 'general') return Boolean(cue.shaft && cue.length && cue.weight);
+    if (tabId === 'butt') return Boolean(cue.buttTimber && cue.buttJoint);
+    if (tabId === 'splices') return Boolean(cue.largeSpliceMaterial);
+    if (tabId === 'veneers') {
+      const activeVeneers = cue.largeVeneers?.filter((v) => v.name && v.name !== 'None');
+      return Boolean(activeVeneers && activeVeneers.length > 0);
+    }
+    if (tabId === 'tip') return Boolean(cue.ferruleType && cue.tip && cue.tipSize);
+    if (tabId === 'engraving') return Boolean(cue.namePlate && cue.engraving);
+    if (tabId === 'accessories')
+      return Boolean(
+        cue.miniButt ||
+          (cue.extensions && cue.extensions.length > 0) ||
+          (cue.case && cue.case.id !== 'case_none')
+      );
+    return false;
+  };
+
+  const completedCount = TABS.filter((t) => isTabCompleted(t.id)).length;
+  const progressPercentage = Math.round((completedCount / TABS.length) * 100);
+  const currentStepIndex = TABS.findIndex((t) => t.id === activeTab);
+  const currentTabConfig = TABS[currentStepIndex] || TABS[0];
 
   const spliceCondition = isLargeSplicesAllowed(cue);
   const extensionCondition = isExtensionsAllowed(cue);
@@ -121,33 +171,74 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
   };
 
   return (
-    <div className="w-full bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-      {/* Precision Single-Row Segmented Tab Bar (Fits 100% in 1 Row) */}
-      <div className="border-b border-slate-200 bg-slate-50/90 p-2">
+    <div className="w-full bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col">
+      {/* 1. Configuration Progress & Step Counter Header */}
+      <div className="border-b border-slate-200 bg-white px-4 py-3 shrink-0">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2.5">
+            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-700 text-[10px] font-black font-mono">
+              {currentStepIndex + 1}
+            </span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-xs font-bold text-slate-900">
+                Step {currentStepIndex + 1} of 7: {currentTabConfig.label}
+              </span>
+              {isTabCompleted(activeTab) && (
+                <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200">
+                  <Check className="w-2.5 h-2.5 stroke-[3]" /> Completed
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-mono font-bold text-slate-600">
+              {completedCount}/7 Done
+            </span>
+            <span className="text-[10px] font-mono font-black text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+              {progressPercentage}%
+            </span>
+          </div>
+        </div>
+
+        {/* Dynamic Animated Progress Bar Strip */}
+        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-amber-500 via-emerald-400 to-emerald-500 transition-all duration-300 ease-out rounded-full"
+            style={{ width: `${progressPercentage}%` }}
+          />
+        </div>
+      </div>
+
+      {/* 2. Precision Single-Row Segmented Tab Bar with Progress Ticks (✓) */}
+      <div className="border-b border-slate-200 bg-slate-50/90 p-2 shrink-0">
         <div className="grid grid-cols-7 gap-1 bg-slate-200/60 p-1 rounded-xl">
-          {[
-            { id: 'general', label: 'Shaft', fullLabel: 'Shaft & Overall Length', icon: Ruler },
-            { id: 'butt', label: 'Joint', fullLabel: 'Butt Timber & Joint Type', icon: CircleDot },
-            { id: 'splices', label: 'Splices', fullLabel: 'Exotic Front Splicing', icon: Layers },
-            { id: 'veneers', label: 'Veneers', fullLabel: 'Cascading Veneer Outlines', icon: Palette },
-            { id: 'tip', label: 'Tip', fullLabel: 'Tip & Ferrule Selection', icon: Sparkles },
-            { id: 'engraving', label: 'Engrave', fullLabel: 'Personalised Disc Engraving', icon: Type },
-            { id: 'accessories', label: 'Extras', fullLabel: 'Mini Butt & Extensions', icon: PlusCircle },
-          ].map((tab) => {
+          {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
+            const isCompleted = isTabCompleted(tab.id);
             return (
               <button
                 key={tab.id}
-                title={tab.fullLabel}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-lg text-center transition-all ${
+                title={`${tab.fullLabel}${isCompleted ? ' (Completed)' : ''}`}
+                onClick={() => handleTabClick(tab.id)}
+                className={`relative flex flex-col sm:flex-row items-center justify-center gap-1 py-2 px-1 rounded-lg text-center transition-all ${
                   isActive
                     ? 'bg-white text-slate-950 font-bold shadow-sm ring-1 ring-slate-900/5'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 font-medium'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? 'text-amber-600' : 'text-slate-400'}`} />
+                <div className="relative">
+                  <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? 'text-amber-600' : 'text-slate-400'}`} />
+                  {isCompleted && (
+                    <span
+                      title="Step Completed"
+                      className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-xs"
+                    >
+                      <Check className="w-2 h-2 stroke-[3]" />
+                    </span>
+                  )}
+                </div>
                 <span className="text-[11px] leading-tight truncate">{tab.label}</span>
               </button>
             );
@@ -1299,6 +1390,57 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
               </div>
             )}
           </div>
+        )}
+      </div>
+
+      {/* 3. Bottom Step Navigation Footer */}
+      <div className="border-t border-slate-200 bg-slate-50/90 px-4 sm:px-5 py-3 flex items-center justify-between gap-3 shrink-0">
+        {currentStepIndex > 0 ? (
+          <button
+            type="button"
+            onClick={() => {
+              const prevTab = TABS[currentStepIndex - 1];
+              if (prevTab) handleTabClick(prevTab.id);
+            }}
+            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-xs font-bold text-slate-700 transition shadow-2xs hover:shadow-xs active:scale-95"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+            <span className="hidden xs:inline">Previous:</span>
+            <span>{TABS[currentStepIndex - 1]?.label}</span>
+          </button>
+        ) : (
+          <div className="text-[11px] text-slate-400 font-medium">
+            Step 1 of 7: Customise Shaft
+          </div>
+        )}
+
+        {currentStepIndex < TABS.length - 1 ? (
+          <button
+            type="button"
+            onClick={() => {
+              const nextTab = TABS[currentStepIndex + 1];
+              if (nextTab) handleTabClick(nextTab.id);
+            }}
+            className="flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-white shadow-sm transition active:scale-95 ml-auto"
+          >
+            <span>Next: {TABS[currentStepIndex + 1]?.label}</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              if (onOpenCheckout) {
+                onOpenCheckout();
+              } else {
+                const btn = document.querySelector('button');
+              }
+            }}
+            className="flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black text-white shadow-md transition active:scale-95 uppercase tracking-wider ml-auto"
+          >
+            <span>Review &amp; Order Cue</span>
+            <Check className="w-3.5 h-3.5 stroke-[3]" />
+          </button>
         )}
       </div>
     </div>
