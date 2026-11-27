@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { OrderRecord } from '@/types/order';
 import { formatCueWeight } from '@/lib/cueEngine';
+import { clearStoredCue } from '@/lib/cueStorage';
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
@@ -48,6 +49,7 @@ function OrderSuccessContent() {
       .then((data) => {
         if (data.success && data.order) {
           setOrder(data.order);
+          clearStoredCue();
         } else if (data.error) {
           setError(data.error);
         }

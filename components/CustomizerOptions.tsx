@@ -32,6 +32,8 @@ import {
   SHAFT_GRADE_DETAILS,
 } from '@/lib/cueData';
 
+import { saveStoredTab, loadStoredTab } from '@/lib/cueStorage';
+
 import { usePricing } from '@/context/PricingContext';
 
 import {
@@ -103,15 +105,38 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
   highlightTrigger = 0,
 }) => {
   const [activeTab, setActiveTab] = useState<TabId>('general');
-  // Starts empty by default so progress starts at 0% and tabs are clean
   const [completedTabs, setCompletedTabs] = useState<string[]>([]);
   const [spliceType, setSpliceType] = useState<'large' | 'small'>('large');
   const [isHighlighted, setIsHighlighted] = useState(false);
   const [showGradeModal, setShowGradeModal] = useState(false);
 
+  // Restore persisted active tab on mount
+  useEffect(() => {
+    const savedTab = loadStoredTab() as TabId | null;
+    if (savedTab && TABS.some((t) => t.id === savedTab)) {
+      setActiveTab(savedTab);
+    }
+  }, []);
+
+  // Sync completed tabs with cue configuration state
+  useEffect(() => {
+    const tabs: string[] = [];
+    if (cue.shaft) tabs.push('general');
+    if (cue.buttJoint || cue.buttTimber) tabs.push('butt');
+    if (cue.largeSplices > 0 || cue.smallSplices > 0) tabs.push('splices');
+    if (cue.largeVeneers?.some((v) => v.name !== 'None')) tabs.push('veneers');
+    if (cue.ferruleType || cue.tip) tabs.push('tip');
+    if (cue.namePlate || cue.engraving) tabs.push('engraving');
+    if (cue.case || cue.miniButt || (cue.extensions && cue.extensions.length > 0) || cue.priorityService) {
+      tabs.push('accessories');
+    }
+    setCompletedTabs((prev) => Array.from(new Set([...prev, ...tabs])));
+  }, [cue]);
+
   useEffect(() => {
     if (highlightTrigger && highlightTrigger > 0) {
       setActiveTab('general');
+      saveStoredTab('general');
       setIsHighlighted(true);
       const timer = setTimeout(() => {
         setIsHighlighted(false);
@@ -130,6 +155,7 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
 
   const handleTabClick = (tabId: TabId) => {
     setActiveTab(tabId);
+    saveStoredTab(tabId);
   };
 
   const updateCue = (partial: Partial<CueConfiguration>) => {

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { CueConfiguration } from '@/types/cue';
 import { getDefaultCue, getWeightRange, formatCueWeight, ozToGrams } from '@/lib/cueEngine';
+import { loadStoredCue, saveStoredCue, clearStoredCue } from '@/lib/cueStorage';
 import { CUE_JOINTS } from '@/lib/cueData';
 import { CueCanvasPreview } from '@/components/CueCanvasPreview';
 import { CustomizerOptions } from '@/components/CustomizerOptions';
@@ -30,11 +31,40 @@ import {
 function CueCustomizerContent() {
   const router = useRouter();
   const [cue, setCue] = useState<CueConfiguration>(() => getDefaultCue());
+  const [isStorageLoaded, setIsStorageLoaded] = useState(false);
+  const [restoredBanner, setRestoredBanner] = useState(false);
   const [showSpecsModal, setShowSpecsModal] = useState(false);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [customer, setCustomer] = useState<{ id: string; email: string; fullName: string } | null>(null);
   const [highlightShaftTrigger, setHighlightShaftTrigger] = useState(0);
+
+  // Restore saved cue configuration from localStorage on mount
+  useEffect(() => {
+    const saved = loadStoredCue();
+    if (saved) {
+      setCue(saved);
+      if (saved.shaft) {
+        setRestoredBanner(true);
+      }
+    }
+    setIsStorageLoaded(true);
+  }, []);
+
+  // Persist cue configuration to localStorage whenever changes occur
+  useEffect(() => {
+    if (!isStorageLoaded) return;
+    saveStoredCue(cue);
+  }, [cue, isStorageLoaded]);
+
+  // Synchronously flush state to localStorage on beforeunload (accidental refresh/navigation)
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      saveStoredCue(cue);
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [cue]);
 
   const triggerShaftHighlight = () => {
     setHighlightShaftTrigger(Date.now());
@@ -62,7 +92,9 @@ function CueCustomizerContent() {
   // Reset to default
   const handleReset = () => {
     if (confirm('Reset customizer back to default configuration?')) {
+      clearStoredCue();
       setCue(getDefaultCue());
+      setRestoredBanner(false);
     }
   };
 
@@ -202,6 +234,37 @@ function CueCustomizerContent() {
 
       {/* Main 2-Column Split Layout: Sticky Cue Preview (Left) + Options Panel (Right) */}
       <main className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
+        {/* Restored In-Progress Configuration Notice */}
+        {restoredBanner && (
+          <div className="mb-4 p-3.5 bg-amber-50/90 border border-amber-200/90 rounded-2xl flex items-center justify-between gap-3 text-xs text-amber-950 shadow-xs animate-in fade-in duration-300">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="p-1 rounded-md bg-amber-200/80 text-amber-900">
+                <Sparkles className="w-3.5 h-3.5" />
+              </span>
+              <span>
+                <strong>Design Restored:</strong> We preserved your custom cue configuration from your previous session.
+              </span>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleReset}
+                className="px-2.5 py-1 text-[11px] font-bold text-amber-900 bg-amber-100/80 hover:bg-amber-200 rounded-lg transition cursor-pointer"
+              >
+                Start Over
+              </button>
+              <button
+                type="button"
+                onClick={() => setRestoredBanner(false)}
+                className="p-1 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                aria-label="Dismiss banner"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* LEFT COLUMN: Sticky Live Cue Preview Studio (Always in View) */}
           <div className="lg:col-span-7 lg:sticky lg:top-20 space-y-4">
