@@ -317,25 +317,18 @@ function CueCustomizerContent() {
                     <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs col-span-2 sm:col-span-3 cursor-default select-none">
                       <div className="flex items-center justify-between">
                         <div>
-                          <span className="text-[10px] text-slate-400 block">Front Splicing</span>
+                          <span className="text-[10px] text-slate-400 block font-medium">Front Splicing</span>
                           <span className="font-bold text-slate-900">
                             {cue.largeSpliceMaterial
                               ? `${cue.largeSplices}-Splice ${cue.largeSpliceMaterial.name}`
                               : 'Plain Ebony (No Front Splices)'}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          {cue.endButtJoin && (
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200">
-                              Thread Fitted (+£12)
-                            </span>
-                          )}
-                          {cue.dome && (
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200">
-                              Dome Fitted (+£31)
-                            </span>
-                          )}
-                        </div>
+                        {price.largeSplicePrice > 0 && (
+                          <span className="text-[10px] font-mono text-slate-500 font-semibold">
+                            +£{price.largeSplicePrice}
+                          </span>
+                        )}
                       </div>
 
                       {/* Active Veneer Layers */}
@@ -381,30 +374,62 @@ function CueCustomizerContent() {
                       )}
                     </div>
 
-                    {/* 5. Personalization & Extras */}
-                    <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs col-span-2 sm:col-span-3 cursor-default select-none">
-                      <div className="flex items-center justify-between flex-wrap gap-2 text-[11px]">
-                        <div>
-                          <span className="text-[10px] text-slate-400 block">Personalisation</span>
-                          <span className="font-bold text-slate-900">
-                            {cue.namePlate?.name || 'Standard Disc'}
-                            {cue.engraving ? ` • "${cue.engraving}" (${cue.font || 'Roboto'})` : ''}
+                    {/* 5. Personalisation (Disc & Engraving Only) */}
+                    <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs col-span-2 sm:col-span-1 cursor-default select-none">
+                      <span className="text-[10px] text-slate-400 block font-medium">Personalisation</span>
+                      <span className="font-bold text-slate-900 block break-words leading-snug">
+                        {cue.namePlate?.name || 'Standard Disc'}
+                      </span>
+                      {cue.engraving ? (
+                        <span className="text-[10px] text-amber-700 font-mono font-semibold block mt-0.5 break-words">
+                          &quot;{cue.engraving}&quot; ({cue.font || 'Roboto'})
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-slate-400 block mt-0.5">No engraving</span>
+                      )}
+                    </div>
+
+                    {/* 6. Extras (Thread Fitted, Mini Butt, Extensions, Case, Priority Service) */}
+                    <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs col-span-2 sm:col-span-2 cursor-default select-none">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[10px] text-slate-400 block font-medium">Extras</span>
+                        <span className="text-[10px] font-mono text-slate-500 font-semibold">
+                          {(cue.endButtJoin || cue.dome || cue.miniButt || (cue.extensions && cue.extensions.length > 0) || (cue.case && cue.case.id !== 'case_none') || cue.priorityService) ? 'Fitted' : 'Standard'}
+                        </span>
+                      </div>
+                      <div className="flex items-center flex-wrap gap-1.5 text-[10px]">
+                        {cue.endButtJoin && (
+                          <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-bold border border-slate-200">
+                            Thread Fitted (+£12)
                           </span>
-                        </div>
+                        )}
+                        {cue.dome && (
+                          <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-bold border border-slate-200">
+                            Dome Fitted (+£31)
+                          </span>
+                        )}
                         {cue.miniButt && (
-                          <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200 text-slate-800 font-semibold">
+                          <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-bold border border-slate-200">
                             Mini Butt: {cue.miniButt.name}
                           </span>
                         )}
                         {cue.extensions && cue.extensions.length > 0 && (
-                          <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200 text-slate-800 font-semibold">
-                            {cue.extensions.map((e) => e.name).join(', ')}
+                          <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-bold border border-slate-200">
+                            Extensions: {cue.extensions.map((e) => e.name).join(', ')}
                           </span>
                         )}
                         {cue.case && cue.case.id !== 'case_none' && (
-                          <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-bold border border-emerald-200">
+                          <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-bold border border-emerald-200">
                             🧰 {cue.case.name} (+£{cue.case.bundlePrice})
                           </span>
+                        )}
+                        {cue.priorityService && (
+                          <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold border border-amber-200">
+                            ⚡ Priority Service (6 Wks)
+                          </span>
+                        )}
+                        {!cue.endButtJoin && !cue.dome && !cue.miniButt && (!cue.extensions || cue.extensions.length === 0) && (!cue.case || cue.case.id === 'case_none') && !cue.priorityService && (
+                          <span className="text-slate-400 italic">None selected</span>
                         )}
                       </div>
                     </div>
@@ -484,18 +509,6 @@ function CueCustomizerContent() {
                 </div>
                 <span className="font-semibold text-slate-900 shrink-0 text-xs">£{price.buttTimberPrice}</span>
               </div>
-              {cue.endButtJoin && (
-                <div className="flex items-center justify-between py-2 gap-3">
-                  <span className="text-slate-600">End Butt Joint Fitting:</span>
-                  <span className="font-semibold text-amber-700 shrink-0">+£{price.endButtJoinPrice}</span>
-                </div>
-              )}
-              {cue.dome && (
-                <div className="flex items-center justify-between py-2 gap-3">
-                  <span className="text-slate-600">Dome Joint:</span>
-                  <span className="font-semibold text-amber-700 shrink-0">+£{price.domeJointPrice}</span>
-                </div>
-              )}
               {price.largeSplicePrice > 0 && (
                 <div className="flex items-center justify-between py-2 gap-3">
                   <div className="flex flex-col min-w-0">
@@ -538,38 +551,80 @@ function CueCustomizerContent() {
                   </div>
                 </div>
               )}
-              <div className="flex justify-between py-1.5">
+              <div className="flex items-center justify-between py-1.5 gap-3">
                 <span className="text-slate-500">Ferrule & Leather Tip:</span>
-                <span className="font-semibold text-slate-900">
+                <span className="font-semibold text-slate-900 shrink-0">
                   {price.ferrulePrice + price.tipPrice > 0
                     ? `+£${price.ferrulePrice + price.tipPrice}`
                     : 'Included'}
                 </span>
               </div>
-              <div className="flex justify-between py-1.5">
-                <span className="text-slate-500">Weight:</span>
-                <span className="font-semibold text-amber-700 font-mono">{formatCueWeight(cue.weight)}</span>
+              <div className="flex items-center justify-between py-1.5 gap-3">
+                <span className="text-slate-500">Cue Weight:</span>
+                <span className="font-semibold text-amber-700 font-mono shrink-0">{formatCueWeight(cue.weight)}</span>
               </div>
-              {cue.engraving && (
-                <div className="flex justify-between py-1.5">
-                  <span className="text-slate-500">Engraved Name:</span>
-                  <span className="font-semibold text-amber-700 uppercase tracking-wider">
-                    &quot;{cue.engraving}&quot; ({price.engravingPrice > 0 ? `+£${price.engravingPrice}` : 'Free'})
+              <div className="flex items-center justify-between py-1.5 gap-3">
+                <div className="flex flex-col min-w-0">
+                  <span className="text-slate-500">Personalisation:</span>
+                  <span className="font-semibold text-slate-900 break-words text-xs">
+                    {cue.namePlate?.name || 'Standard Disc'}
+                    {cue.engraving ? ` • "${cue.engraving}" (${cue.font || 'Roboto'})` : ''}
                   </span>
                 </div>
-              )}
-              {price.priorityServicePrice && price.priorityServicePrice > 0 ? (
-                <div className="flex justify-between py-1.5">
-                  <span className="text-slate-500">⚡ Priority Service (6 Weeks):</span>
-                  <span className="font-semibold text-amber-700">+£{price.priorityServicePrice}</span>
+                <span className="font-semibold text-slate-900 shrink-0 text-xs">
+                  {price.engravingPrice > 0 ? `+£${price.engravingPrice}` : 'Included'}
+                </span>
+              </div>
+
+              {/* Extras Section */}
+              <div className="pt-2 border-t border-slate-200/80">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                  Extras & Add-ons
+                </span>
+                <div className="space-y-1.5">
+                  {cue.endButtJoin && (
+                    <div className="flex items-center justify-between py-1 text-xs">
+                      <span className="text-slate-600">Thread Fitted (End Butt Joint):</span>
+                      <span className="font-semibold text-amber-700 shrink-0">+£{price.endButtJoinPrice}</span>
+                    </div>
+                  )}
+                  {cue.dome && (
+                    <div className="flex items-center justify-between py-1 text-xs">
+                      <span className="text-slate-600">Dome Joint:</span>
+                      <span className="font-semibold text-amber-700 shrink-0">+£{price.domeJointPrice}</span>
+                    </div>
+                  )}
+                  {cue.miniButt && (
+                    <div className="flex items-center justify-between py-1 text-xs">
+                      <span className="text-slate-600">6-inch Mini Butt ({cue.miniButt.name}):</span>
+                      <span className="font-semibold text-amber-700 shrink-0">+£{price.miniButtPrice || 24}</span>
+                    </div>
+                  )}
+                  {cue.extensions && cue.extensions.length > 0 && (
+                    <div className="flex items-center justify-between py-1 text-xs">
+                      <span className="text-slate-600">Extensions ({cue.extensions.map((e) => e.name).join(', ')}):</span>
+                      <span className="font-semibold text-amber-700 shrink-0">+£{price.extensionsPrice}</span>
+                    </div>
+                  )}
+                  {price.priorityServicePrice && price.priorityServicePrice > 0 ? (
+                    <div className="flex items-center justify-between py-1 text-xs">
+                      <span className="text-slate-600">⚡ Priority Service (6 Weeks):</span>
+                      <span className="font-semibold text-amber-700 shrink-0">+£{price.priorityServicePrice}</span>
+                    </div>
+                  ) : null}
+                  {cue.case && cue.case.id !== 'case_none' ? (
+                    <div className="flex items-center justify-between py-1 text-xs">
+                      <span className="text-slate-600">Bespoke Case Bundle ({cue.case.name}):</span>
+                      <span className="font-semibold text-emerald-700 shrink-0">+£{cue.case.bundlePrice}</span>
+                    </div>
+                  ) : null}
+                  {!cue.endButtJoin && !cue.dome && !cue.miniButt && (!cue.extensions || cue.extensions.length === 0) && (!cue.case || cue.case.id === 'case_none') && !price.priorityServicePrice && (
+                    <div className="text-[11px] text-slate-400 italic py-0.5">
+                      Standard build (no optional extras selected)
+                    </div>
+                  )}
                 </div>
-              ) : null}
-              {cue.case && cue.case.id !== 'case_none' ? (
-                <div className="flex justify-between py-1.5">
-                  <span className="text-slate-500">Bespoke Case Bundle ({cue.case.name}):</span>
-                  <span className="font-semibold text-emerald-700">+£{cue.case.bundlePrice}</span>
-                </div>
-              ) : null}
+              </div>
               <div className="flex justify-between py-2 text-sm font-bold border-t border-slate-200">
                 <span className="text-slate-800">Current Price:</span>
                 <span className="text-slate-950 font-mono text-base font-extrabold">£{price.total}</span>
