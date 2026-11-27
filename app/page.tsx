@@ -1,5 +1,6 @@
 'use client';
 
+// MasterCue Customizer Studio - v2.1 Responsive & Progress-Tracked
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
