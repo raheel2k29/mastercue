@@ -394,7 +394,7 @@ function CueCustomizerContent() {
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-[10px] text-slate-400 block font-medium">Extras</span>
                         <span className="text-[10px] font-mono text-slate-500 font-semibold">
-                          {(cue.endButtJoin || cue.dome || cue.miniButt || (cue.extensions && cue.extensions.length > 0) || (cue.case && cue.case.id !== 'case_none') || cue.priorityService) ? 'Fitted' : 'Standard'}
+                          {(cue.endButtJoin || cue.dome || (cue.miniButt && cue.miniButt.name !== 'None') || (cue.extensions && cue.extensions.length > 0) || (cue.case && cue.case.id !== 'case_none') || cue.priorityService) ? 'Fitted' : 'Standard'}
                         </span>
                       </div>
                       <div className="flex items-center flex-wrap gap-1.5 text-[10px]">
@@ -408,7 +408,7 @@ function CueCustomizerContent() {
                             Dome Fitted (+£31)
                           </span>
                         )}
-                        {cue.miniButt && (
+                        {cue.miniButt && cue.miniButt.name !== 'None' && (
                           <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-bold border border-slate-200">
                             Mini Butt: {cue.miniButt.name}
                           </span>
@@ -428,7 +428,7 @@ function CueCustomizerContent() {
                             ⚡ Priority Service (6 Wks)
                           </span>
                         )}
-                        {!cue.endButtJoin && !cue.dome && !cue.miniButt && (!cue.extensions || cue.extensions.length === 0) && (!cue.case || cue.case.id === 'case_none') && !cue.priorityService && (
+                        {!cue.endButtJoin && !cue.dome && (!cue.miniButt || cue.miniButt.name === 'None') && (!cue.extensions || cue.extensions.length === 0) && (!cue.case || cue.case.id === 'case_none') && !cue.priorityService && (
                           <span className="text-slate-400 italic">None selected</span>
                         )}
                       </div>
@@ -594,7 +594,7 @@ function CueCustomizerContent() {
                       <span className="font-semibold text-amber-700 shrink-0">+£{price.domeJointPrice}</span>
                     </div>
                   )}
-                  {cue.miniButt && (
+                  {cue.miniButt && cue.miniButt.name !== 'None' && (
                     <div className="flex items-center justify-between py-1 text-xs">
                       <span className="text-slate-600">6-inch Mini Butt ({cue.miniButt.name}):</span>
                       <span className="font-semibold text-amber-700 shrink-0">+£{price.miniButtPrice || 24}</span>
@@ -618,7 +618,7 @@ function CueCustomizerContent() {
                       <span className="font-semibold text-emerald-700 shrink-0">+£{cue.case.bundlePrice}</span>
                     </div>
                   ) : null}
-                  {!cue.endButtJoin && !cue.dome && !cue.miniButt && (!cue.extensions || cue.extensions.length === 0) && (!cue.case || cue.case.id === 'case_none') && !price.priorityServicePrice && (
+                  {!cue.endButtJoin && !cue.dome && (!cue.miniButt || cue.miniButt.name === 'None') && (!cue.extensions || cue.extensions.length === 0) && (!cue.case || cue.case.id === 'case_none') && !price.priorityServicePrice && (
                     <div className="text-[11px] text-slate-400 italic py-0.5">
                       Standard build (no optional extras selected)
                     </div>
