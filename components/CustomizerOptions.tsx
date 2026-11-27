@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CueConfiguration,
   CueShaft,
@@ -88,13 +88,31 @@ interface CustomizerOptionsProps {
   cue: CueConfiguration;
   onChange: (updated: CueConfiguration) => void;
   onOpenCheckout?: () => void;
+  highlightTrigger?: number;
 }
 
-export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onChange, onOpenCheckout }) => {
+export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
+  cue,
+  onChange,
+  onOpenCheckout,
+  highlightTrigger = 0,
+}) => {
   const [activeTab, setActiveTab] = useState<TabId>('general');
   // Starts empty by default so progress starts at 0% and tabs are clean
   const [completedTabs, setCompletedTabs] = useState<string[]>([]);
   const [spliceType, setSpliceType] = useState<'large' | 'small'>('large');
+  const [isHighlighted, setIsHighlighted] = useState(false);
+
+  useEffect(() => {
+    if (highlightTrigger && highlightTrigger > 0) {
+      setActiveTab('general');
+      setIsHighlighted(true);
+      const timer = setTimeout(() => {
+        setIsHighlighted(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightTrigger]);
 
   const { catalog, calculateDynamicPrice } = usePricing();
   const price = calculateDynamicPrice(cue);
@@ -109,6 +127,9 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
   };
 
   const updateCue = (partial: Partial<CueConfiguration>) => {
+    if (partial.shaft) {
+      setIsHighlighted(false);
+    }
     onChange({ ...cue, ...partial });
     markTabCompleted(activeTab);
   };
@@ -161,7 +182,13 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
   };
 
   return (
-    <div className="w-full bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col lg:sticky lg:top-20 max-h-[calc(100vh-7rem)]">
+    <div
+      className={`w-full bg-white border rounded-2xl overflow-hidden shadow-sm flex flex-col lg:sticky lg:top-20 max-h-[calc(100vh-7rem)] transition-all duration-500 ${
+        isHighlighted
+          ? 'border-amber-400 ring-4 ring-amber-400/40 shadow-xl shadow-amber-500/10'
+          : 'border-slate-200'
+      }`}
+    >
       {/* 1. Configuration Progress & Step Counter Header */}
       <div className="border-b border-slate-200 bg-white px-4 py-3 shrink-0">
         <div className="flex items-center justify-between mb-2">
@@ -246,10 +273,24 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
         {activeTab === 'general' && (
           <div className="space-y-6">
             {/* Shaft Wood & Grade */}
-            <div className="space-y-3">
+            <div
+              id="shaft-selection-card"
+              className={`space-y-3 transition-all duration-500 rounded-2xl p-3 -m-3 ${
+                isHighlighted
+                  ? 'bg-amber-50/70 ring-2 ring-amber-400/90 shadow-md shadow-amber-400/20 scale-[1.01]'
+                  : 'bg-transparent'
+              }`}
+            >
               <div className="flex items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Shaft Wood & Grade</h3>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-sm font-bold text-slate-900">Shaft Wood & Grade</h3>
+                    {isHighlighted && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-amber-900 bg-amber-200/90 border border-amber-300 px-2 py-0.5 rounded-full animate-pulse shadow-2xs">
+                        👉 Select your shaft here
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-slate-500">
                     Premium timber species and straightness grading.
                   </p>
@@ -270,6 +311,8 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
                       className={`flex items-center justify-between p-3 rounded-xl border text-left transition-all ${
                         isSelected
                           ? 'border-amber-500 bg-amber-50/70 ring-1 ring-amber-500'
+                          : isHighlighted
+                          ? 'border-amber-300 bg-white hover:border-amber-400 hover:bg-amber-50/60 shadow-xs'
                           : isEnabled
                           ? 'border-slate-200 bg-slate-50/50 hover:border-slate-300'
                           : 'border-slate-100 bg-slate-50/20 opacity-50 cursor-not-allowed'

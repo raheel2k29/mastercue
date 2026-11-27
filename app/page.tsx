@@ -34,6 +34,15 @@ function CueCustomizerContent() {
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [customer, setCustomer] = useState<{ id: string; email: string; fullName: string } | null>(null);
+  const [highlightShaftTrigger, setHighlightShaftTrigger] = useState(0);
+
+  const triggerShaftHighlight = () => {
+    setHighlightShaftTrigger(Date.now());
+    const el = document.getElementById('customizer-options-panel');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
   const { catalog, calculateDynamicPrice } = usePricing();
   const price = calculateDynamicPrice(cue);
   const weightRange = getWeightRange(cue);
@@ -239,8 +248,7 @@ function CueCustomizerContent() {
                 <button
                   onClick={() => {
                     if (!cue.shaft) {
-                      const el = document.getElementById('customizer-options-panel');
-                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      triggerShaftHighlight();
                       return;
                     }
                     setShowCheckoutModal(true);
@@ -285,10 +293,7 @@ function CueCustomizerContent() {
                   </p>
                   <button
                     type="button"
-                    onClick={() => {
-                      const el = document.getElementById('customizer-options-panel');
-                      if (el) el.scrollIntoView({ behavior: 'smooth' });
-                    }}
+                    onClick={triggerShaftHighlight}
                     className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-300/80 transition shrink-0 shadow-2xs cursor-pointer active:scale-95"
                     title="Jump to configuration options on the right"
                   >
@@ -465,6 +470,7 @@ function CueCustomizerContent() {
               cue={cue}
               onChange={setCue}
               onOpenCheckout={() => setShowCheckoutModal(true)}
+              highlightTrigger={highlightShaftTrigger}
             />
           </div>
         </div>
@@ -674,8 +680,7 @@ function CueCustomizerContent() {
                 onClick={() => {
                   setShowSpecsModal(false);
                   if (!cue.shaft) {
-                    const el = document.getElementById('customizer-options-panel');
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    triggerShaftHighlight();
                     return;
                   }
                   setShowCheckoutModal(true);
