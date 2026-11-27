@@ -767,7 +767,7 @@ export const CustomizerSidebar: React.FC<CustomizerSidebarProps> = ({ cue, onCha
                     maxLength={18}
                     value={cue.engraving}
                     onChange={(e) => updateCue({ engraving: e.target.value })}
-                    placeholder="Enter custom text (Optional)"
+                    placeholder="CUSTOM MADE"
                     className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-xs focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono uppercase shadow-sm"
                   />
                 </div>

@@ -1116,19 +1116,19 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                       ? 'Select a disc or plate above to add text'
                       : !cue.namePlate.allowEngraving
                       ? 'Not available on Brass Disc'
-                      : 'Enter custom text (Optional)'
+                      : 'CUSTOM MADE'
                   }
                   className={`w-full px-3 py-2.5 rounded-xl border text-xs font-mono uppercase shadow-sm transition ${
                     !cue.namePlate || !cue.namePlate.allowEngraving
                       ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
-                      : 'bg-white border-slate-300 text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500'
+                      : 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500'
                   }`}
                 />
                 <span className="text-[11px] text-slate-400 block">
                   {!cue.namePlate
                     ? 'Optional personalisation. Select a disc or plate above to enable.'
                     : cue.namePlate.allowEngraving
-                    ? 'Leave blank if you prefer no text engraving. Max 18 characters.'
+                    ? 'e.g. "CUSTOM MADE". Enter custom text or leave empty for no engraving. Max 18 characters.'
                     : 'Solid Brass Disc does not accept text engraving.'}
                 </span>
               </div>
@@ -1153,7 +1153,7 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                   <option value="Alex Brush">Alex Brush (Calligraphy Script)</option>
                 </select>
                 <span className="text-[11px] text-slate-500 block truncate" style={{ fontFamily: cue.font || 'Roboto' }}>
-                  Preview: {cue.engraving?.trim() ? cue.engraving.trim() : 'No text entered'}
+                  Preview: {cue.engraving?.trim() ? cue.engraving.trim() : 'CUSTOM MADE (Sample)'}
                 </span>
               </div>
             </div>
