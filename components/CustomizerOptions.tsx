@@ -51,6 +51,7 @@ import {
   ozToGrams,
   formatCueWeight,
   parseLengthParts,
+  applyCueSelection,
 } from '@/lib/cueEngine';
 
 import {
@@ -135,7 +136,8 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
     if (partial.shaft) {
       setIsHighlighted(false);
     }
-    onChange({ ...cue, ...partial });
+    const sanitized = applyCueSelection(cue, partial);
+    onChange(sanitized);
     markTabCompleted(activeTab);
   };
 
@@ -151,39 +153,17 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
   const spliceCondition = isLargeSplicesAllowed(cue);
   const extensionCondition = isExtensionsAllowed(cue);
 
-  // Auto-healing handlers
+  // Auto-healing handlers delegated directly to applyCueSelection
   const handleFerruleChange = (ferrule: CueFerrule) => {
-    const updatedCue = { ...cue, ferruleType: ferrule };
-    if (!isTipSizeAvailable(updatedCue, cue.tipSize)) {
-      if (cue.tip) {
-        const validSizes = getAvailableTipSizes(updatedCue, cue.tip);
-        if (validSizes.length > 0) {
-          updatedCue.tipSize = validSizes[0];
-        }
-      }
-    }
-    onChange(updatedCue);
-    markTabCompleted('tip');
+    updateCue({ ferruleType: ferrule });
   };
 
   const handleJointChange = (joint: CueJoint) => {
-    const updatedCue = { ...cue, buttJoint: joint };
-    if (!isButtTimberAvailable(updatedCue, cue.buttTimber)) {
-      const validTimber = CUE_BUTT_TIMBERS.find((t) => isButtTimberAvailable(updatedCue, t));
-      if (validTimber) updatedCue.buttTimber = validTimber;
-    }
-    onChange(updatedCue);
-    markTabCompleted('butt');
+    updateCue({ buttJoint: joint });
   };
 
   const handleTimberChange = (timber: CueButtTimber) => {
-    const updatedCue = { ...cue, buttTimber: timber };
-    if (!isButtJointAvailable(updatedCue, cue.buttJoint)) {
-      const validJoint = CUE_JOINTS.find((j) => isButtJointAvailable(updatedCue, j));
-      if (validJoint) updatedCue.buttJoint = validJoint;
-    }
-    onChange(updatedCue);
-    markTabCompleted('butt');
+    updateCue({ buttTimber: timber });
   };
 
   return (
@@ -680,13 +660,31 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
             {!spliceCondition.allowed ? (
               <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                <div>
+                <div className="space-y-2">
                   <span className="text-sm font-bold text-amber-900 block">
                     Splicing Is Conditionally Disabled
                   </span>
-                  <span className="text-xs text-amber-800 mt-0.5 block">
-                    {spliceCondition.reason}. In the &quot;Butt & Joint&quot; tab, set Dome Joint to &quot;No&quot; to enable splices.
+                  <span className="text-xs text-amber-800 block">
+                    {spliceCondition.reason}. A cue cannot have both a Dome Joint collar and front spliced timbers.
                   </span>
+                  {cue.dome && (
+                    <button
+                      type="button"
+                      onClick={() => updateCue({ dome: false })}
+                      className="px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs inline-flex items-center gap-1.5 transition shadow-xs cursor-pointer active:scale-95"
+                    >
+                      Disable Dome Joint &amp; Enable Splicing
+                    </button>
+                  )}
+                  {cue.buttJoint?.name === '16in Above Points' && (
+                    <button
+                      type="button"
+                      onClick={() => updateCue({ buttJoint: CUE_JOINTS[0] })}
+                      className="px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs inline-flex items-center gap-1.5 transition shadow-xs cursor-pointer active:scale-95"
+                    >
+                      Switch to Standard Joint &amp; Enable Splicing
+                    </button>
+                  )}
                 </div>
               </div>
             ) : (
@@ -894,7 +892,33 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
         {/* --- TAB 4: VENEERS (SEQUENTIAL CASCADING) --- */}
         {activeTab === 'veneers' && (
           <div className="space-y-6">
-            {cue.largeSplices === 0 || !cue.largeSpliceMaterial ? (
+            {!spliceCondition.allowed ? (
+              <div className="p-8 rounded-2xl bg-amber-50 border border-amber-200 text-center max-w-lg mx-auto">
+                <AlertTriangle className="w-8 h-8 text-amber-600 mx-auto mb-2" />
+                <h4 className="text-sm font-bold text-amber-900">Veneers Conditionally Disabled</h4>
+                <p className="text-xs text-amber-800 mt-1">
+                  {spliceCondition.reason}. Color veneers require front splicing which is incompatible with this setting.
+                </p>
+                {cue.dome && (
+                  <button
+                    type="button"
+                    onClick={() => updateCue({ dome: false })}
+                    className="mt-3 px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs inline-flex items-center gap-1.5 transition shadow-xs cursor-pointer active:scale-95"
+                  >
+                    Disable Dome Joint &amp; Enable Splicing
+                  </button>
+                )}
+                {cue.buttJoint?.name === '16in Above Points' && (
+                  <button
+                    type="button"
+                    onClick={() => updateCue({ buttJoint: CUE_JOINTS[0] })}
+                    className="mt-3 px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs inline-flex items-center gap-1.5 transition shadow-xs cursor-pointer active:scale-95"
+                  >
+                    Switch to Standard Joint &amp; Enable Splicing
+                  </button>
+                )}
+              </div>
+            ) : cue.largeSplices === 0 || !cue.largeSpliceMaterial ? (
               <div className="p-8 rounded-2xl bg-slate-50 border border-slate-200 text-center max-w-lg mx-auto">
                 <Lock className="w-8 h-8 text-amber-600 mx-auto mb-2" />
                 <h4 className="text-sm font-bold text-slate-900">Veneers Conditionally Locked</h4>

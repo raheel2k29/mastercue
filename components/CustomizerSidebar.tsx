@@ -49,6 +49,7 @@ import {
   ozToGrams,
   formatCueWeight,
   parseLengthParts,
+  applyCueSelection,
 } from '@/lib/cueEngine';
 
 import { CheckoutModal } from '@/components/CheckoutModal';
@@ -80,7 +81,8 @@ export const CustomizerSidebar: React.FC<CustomizerSidebarProps> = ({ cue, onCha
   const weightRange = getWeightRange(cue);
 
   const updateCue = (partial: Partial<CueConfiguration>) => {
-    onChange({ ...cue, ...partial });
+    const sanitized = applyCueSelection(cue, partial);
+    onChange(sanitized);
   };
 
   // Check conditional state
@@ -89,36 +91,17 @@ export const CustomizerSidebar: React.FC<CustomizerSidebarProps> = ({ cue, onCha
 
   // Auto-healing when Ferrule changes
   const handleFerruleChange = (ferrule: CueFerrule) => {
-    const updatedCue = { ...cue, ferruleType: ferrule };
-    if (!isTipSizeAvailable(updatedCue, cue.tipSize)) {
-      if (cue.tip) {
-        const validSizes = getAvailableTipSizes(updatedCue, cue.tip);
-        if (validSizes.length > 0) {
-          updatedCue.tipSize = validSizes[0];
-        }
-      }
-    }
-    onChange(updatedCue);
+    updateCue({ ferruleType: ferrule });
   };
 
   // Auto-healing when Butt Joint changes
   const handleJointChange = (joint: CueJoint) => {
-    const updatedCue = { ...cue, buttJoint: joint };
-    if (!isButtTimberAvailable(updatedCue, cue.buttTimber)) {
-      const validTimber = CUE_BUTT_TIMBERS.find((t) => isButtTimberAvailable(updatedCue, t));
-      if (validTimber) updatedCue.buttTimber = validTimber;
-    }
-    onChange(updatedCue);
+    updateCue({ buttJoint: joint });
   };
 
   // Auto-healing when Butt Timber changes
   const handleTimberChange = (timber: CueButtTimber) => {
-    const updatedCue = { ...cue, buttTimber: timber };
-    if (!isButtJointAvailable(updatedCue, cue.buttJoint)) {
-      const validJoint = CUE_JOINTS.find((j) => isButtJointAvailable(updatedCue, j));
-      if (validJoint) updatedCue.buttJoint = validJoint;
-    }
-    onChange(updatedCue);
+    updateCue({ buttTimber: timber });
   };
 
   return (
@@ -554,7 +537,24 @@ export const CustomizerSidebar: React.FC<CustomizerSidebarProps> = ({ cue, onCha
         {/* --- TAB 4: VENEERS (SEQUENTIAL CASCADING) --- */}
         {activeTab === 'veneers' && (
           <div className="space-y-5">
-            {cue.largeSplices === 0 || !cue.largeSpliceMaterial ? (
+            {!spliceCondition.allowed ? (
+              <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-center">
+                <AlertTriangle className="w-6 h-6 text-amber-600 mx-auto mb-2" />
+                <p className="text-xs text-amber-900 font-semibold">Veneers Conditionally Disabled</p>
+                <p className="text-[11px] text-amber-800 mt-1">
+                  {spliceCondition.reason}. Color veneers require front splicing.
+                </p>
+                {cue.dome && (
+                  <button
+                    type="button"
+                    onClick={() => updateCue({ dome: false })}
+                    className="mt-2.5 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs inline-flex items-center gap-1 transition shadow-xs"
+                  >
+                    Disable Dome Joint
+                  </button>
+                )}
+              </div>
+            ) : cue.largeSplices === 0 || !cue.largeSpliceMaterial ? (
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center">
                 <Lock className="w-6 h-6 text-amber-600 mx-auto mb-2" />
                 <p className="text-xs text-slate-800 font-semibold">Veneers Conditionally Locked</p>

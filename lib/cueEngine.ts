@@ -465,6 +465,7 @@ export function calculatePrice(
   const platePrice = cue.namePlate?.price || 0;
 
   const isCustomEngraving =
+    Boolean(cue.namePlate) &&
     cue.namePlate?.allowEngraving !== false &&
     Boolean(cue.engraving?.trim());
   const engravingPrice =
@@ -582,6 +583,195 @@ export function getDefaultCue(): CueConfiguration {
     priorityService: false,
     case: null,
   };
+}
+
+/**
+ * Applies updates to a CueConfiguration while strictly enforcing business dependencies,
+ * preventing incompatible combinations, auto-healing dependent choices, and removing
+ * any redundant options and associated costs.
+ */
+export function applyCueSelection(
+  currentCue: CueConfiguration,
+  updates: Partial<CueConfiguration>
+): CueConfiguration {
+  let nextCue: CueConfiguration = { ...currentCue, ...updates };
+
+  // 1. Shaft Change Dependencies
+  if (updates.shaft !== undefined && updates.shaft !== null) {
+    // If current butt timber is not compatible with new shaft, auto-heal timber
+    if (nextCue.buttTimber && !isButtTimberAvailable(nextCue, nextCue.buttTimber)) {
+      const validTimber = CUE_BUTT_TIMBERS.find((t) => isButtTimberAvailable(nextCue, t));
+      if (validTimber) {
+        nextCue.buttTimber = validTimber;
+      }
+    }
+    // If current joint is not compatible with new shaft & timber, auto-heal joint
+    if (nextCue.buttJoint && !isButtJointAvailable(nextCue, nextCue.buttJoint)) {
+      const validJoint = CUE_JOINTS.find((j) => isButtJointAvailable(nextCue, j));
+      if (validJoint) {
+        nextCue.buttJoint = validJoint;
+      }
+    }
+    // If Dome Joint is enabled, update matching dome layer asset for this shaft
+    if (nextCue.dome) {
+      const matchDome =
+        CUE_DOMES.find((d) => d.shafts.includes(updates.shaft?.asset || '')) ||
+        CUE_DOMES[0];
+      if (matchDome) nextCue.domeLayer = matchDome;
+    }
+  }
+
+  // 2. Butt Timber Change Dependencies
+  if (updates.buttTimber !== undefined) {
+    // If current joint is not compatible with new timber, auto-heal joint
+    if (nextCue.buttJoint && !isButtJointAvailable(nextCue, nextCue.buttJoint)) {
+      const validJoint = CUE_JOINTS.find((j) => isButtJointAvailable(nextCue, j));
+      if (validJoint) {
+        nextCue.buttJoint = validJoint;
+      }
+    }
+    // If 'No Butt Timber' is selected, blank length cannot exceed 58"
+    if (!isLengthAvailable(nextCue, nextCue.length)) {
+      const validLength =
+        CUE_LENGTHS.find((l) => isLengthAvailable(nextCue, l) && l.default) ||
+        CUE_LENGTHS.find((l) => isLengthAvailable(nextCue, l)) ||
+        nextCue.length;
+      nextCue.length = validLength;
+    }
+  }
+
+  // 3. Butt Joint Change Dependencies
+  if (updates.buttJoint !== undefined) {
+    // If current timber is not compatible with new joint, auto-heal timber
+    if (nextCue.buttTimber && !isButtTimberAvailable(nextCue, nextCue.buttTimber)) {
+      const validTimber = CUE_BUTT_TIMBERS.find((t) => isButtTimberAvailable(nextCue, t));
+      if (validTimber) {
+        nextCue.buttTimber = validTimber;
+      }
+    }
+  }
+
+  // 4. Dome Joint Dependencies
+  if (updates.dome !== undefined) {
+    if (updates.dome === true) {
+      // Set dome layer asset
+      const shaftAsset = nextCue.shaft?.asset || CUE_SHAFTS[0]?.asset || '';
+      const matchDome =
+        CUE_DOMES.find((d) => d.shafts.includes(shaftAsset)) ||
+        CUE_DOMES[0];
+      nextCue.domeLayer = matchDome;
+
+      // Dome Joint is incompatible with front splicing and veneers.
+      // Remove all redundant splices and veneers so their costs are 100% eliminated!
+      nextCue.largeSplices = 0;
+      nextCue.largeSpliceMaterial = null;
+      nextCue.smallSplices = 0;
+      nextCue.smallSpliceMaterial = null;
+      nextCue.largeVeneers = getDefaultVeneers(CUE_VENEERS, 0);
+      nextCue.smallVeneers = getDefaultVeneers(CUE_VENEERS, 1);
+    } else {
+      nextCue.dome = false;
+      nextCue.domeLayer = null;
+    }
+  }
+
+  // 5. Joint '16in Above Points' Dependencies
+  if (nextCue.buttJoint?.name === '16in Above Points') {
+    // Splicing is prohibited on 16in Above Points joint.
+    nextCue.largeSplices = 0;
+    nextCue.largeSpliceMaterial = null;
+    nextCue.smallSplices = 0;
+    nextCue.smallSpliceMaterial = null;
+    nextCue.largeVeneers = getDefaultVeneers(CUE_VENEERS, 0);
+    nextCue.smallVeneers = getDefaultVeneers(CUE_VENEERS, 1);
+  }
+
+  // 6. Splices & Splicing Timber Dependencies
+  // If largeSplices is 0, remove redundant largeSpliceMaterial, smallSplices, smallSpliceMaterial, and veneers
+  if (nextCue.largeSplices === 0) {
+    nextCue.largeSpliceMaterial = null;
+    nextCue.smallSplices = 0;
+    nextCue.smallSpliceMaterial = null;
+    nextCue.largeVeneers = getDefaultVeneers(CUE_VENEERS, 0);
+    nextCue.smallVeneers = getDefaultVeneers(CUE_VENEERS, 1);
+  } else if (nextCue.largeSplices > 0 && !nextCue.largeSpliceMaterial) {
+    // If splices enabled but material null, auto-pick default splice timber
+    nextCue.largeSpliceMaterial = CUE_SPLICES[0] || null;
+  }
+
+  // Small Splices require Large Splices
+  if (nextCue.smallSplices === 0) {
+    nextCue.smallSpliceMaterial = null;
+    nextCue.smallVeneers = getDefaultVeneers(CUE_VENEERS, 1);
+  } else if (nextCue.smallSplices > 0 && !nextCue.smallSpliceMaterial) {
+    nextCue.smallSpliceMaterial = CUE_SPLICES[0] || null;
+  }
+
+  // 7. End Butt Joint (Thread Fitting) Dependencies vs Extras (Mini Butt & Extensions)
+  if (updates.endButtJoin !== undefined) {
+    if (!updates.endButtJoin) {
+      // Thread fitting disabled: Mini Butt and Extensions cannot be physically attached.
+      // Remove redundant miniButt and extensions and all associated costs!
+      nextCue.endButtJoin = false;
+      nextCue.miniButt = null;
+      nextCue.extensions = [];
+    } else {
+      nextCue.endButtJoin = true;
+    }
+  } else if (!nextCue.endButtJoin) {
+    // Guarantee that if endButtJoin is false, no orphan miniButt or extensions remain
+    nextCue.miniButt = null;
+    nextCue.extensions = [];
+  }
+
+  // 8. Name Plate / Personalisation Disc Dependencies
+  if (updates.namePlate !== undefined) {
+    if (!updates.namePlate) {
+      // No disc selected: engraving text and font are redundant
+      nextCue.namePlate = null;
+      nextCue.engraving = '';
+      nextCue.font = '';
+    } else if (updates.namePlate.allowEngraving === false) {
+      // Plate does not support engraving (e.g. Solid Brass Disc): remove redundant engraving text
+      nextCue.namePlate = updates.namePlate;
+      nextCue.engraving = '';
+      nextCue.font = '';
+    }
+  } else if (!nextCue.namePlate || nextCue.namePlate.allowEngraving === false) {
+    nextCue.engraving = '';
+    nextCue.font = '';
+  }
+
+  // 9. Ferrule & Tip Size Dependencies
+  if (updates.ferruleType !== undefined) {
+    if (!isTipSizeAvailable(nextCue, nextCue.tipSize)) {
+      if (nextCue.tip) {
+        const validSizes = getAvailableTipSizes(nextCue, nextCue.tip);
+        if (validSizes.length > 0) {
+          nextCue.tipSize = validSizes[0];
+        }
+      }
+    }
+  }
+
+  if (updates.tip !== undefined && updates.tip !== null) {
+    // Ensure tipSize belongs to the selected tip and is compatible with ferrule
+    const validSizes = getAvailableTipSizes(nextCue, updates.tip);
+    if (!validSizes.some((s) => s.id === nextCue.tipSize?.id)) {
+      const defaultSize = validSizes.find((s) => s.default) || validSizes[0] || null;
+      nextCue.tipSize = defaultSize;
+    }
+  }
+
+  // 10. Dynamic Weight Range Clamping
+  const range = getWeightRange(nextCue);
+  if (nextCue.weight < range.min) {
+    nextCue.weight = range.min;
+  } else if (nextCue.weight > range.max) {
+    nextCue.weight = range.max;
+  }
+
+  return nextCue;
 }
 
 /**
