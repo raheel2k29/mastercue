@@ -498,7 +498,7 @@ export const CUE_JOINTS: CueJoint[] = [
   {
     "default": true,
     "id": "6642380b-f55f-e711-9417-901b0e53171f",
-    "name": "No Joint"
+    "name": "No Joint / One Piece"
   },
   {
     "default": false,
