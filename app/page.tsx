@@ -280,23 +280,23 @@ function CueCustomizerContent() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                     {/* 1. Shaft */}
                     <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs cursor-default select-none">
-                      <span className="text-[10px] text-slate-400 block">Shaft & Length</span>
-                      <span className="font-bold text-slate-900 truncate block">
+                      <span className="text-[10px] text-slate-400 block font-medium">Shaft & Length</span>
+                      <span className="font-bold text-slate-900 block break-words leading-snug">
                         {cue.shaft?.name || 'Ash'} • {cue.length?.name || '58" (147cm)'}
                       </span>
-                      <span className="text-[10px] text-slate-600 font-mono font-semibold">
+                      <span className="text-[10px] text-slate-600 font-mono font-semibold block mt-0.5">
                         {formatCueWeight(cue.weight)}
                       </span>
                     </div>
 
                     {/* 2. Ferrule & Tip */}
                     <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs cursor-default select-none">
-                      <span className="text-[10px] text-slate-400 block">Ferrule & Tip</span>
-                      <span className="font-bold text-slate-900 truncate block">
+                      <span className="text-[10px] text-slate-400 block font-medium">Ferrule & Tip</span>
+                      <span className="font-bold text-slate-900 block break-words leading-snug">
                         {cue.ferruleType?.name || 'Brass'} ({cue.tipSize?.name || '9.5mm'})
                       </span>
                       {cue.tip?.name && (
-                        <span className="text-[10px] text-slate-500 truncate block">
+                        <span className="text-[10px] text-slate-500 block break-words mt-0.5">
                           Tip: {cue.tip.name}
                         </span>
                       )}
@@ -304,11 +304,11 @@ function CueCustomizerContent() {
 
                     {/* 3. Butt & Joint */}
                     <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs cursor-default select-none">
-                      <span className="text-[10px] text-slate-400 block">Butt Timber & Joint</span>
-                      <span className="font-bold text-slate-900 truncate block">
+                      <span className="text-[10px] text-slate-400 block font-medium">Butt Timber & Joint</span>
+                      <span className="font-bold text-slate-900 block break-words leading-snug">
                         {cue.buttTimber?.name || 'Hand Spliced Ebony'}
                       </span>
-                      <span className="text-[10px] text-slate-500 block">
+                      <span className="text-[10px] text-slate-500 block break-words mt-0.5">
                         {cue.buttJoint?.name || '1-Piece'}
                       </span>
                     </div>
@@ -458,39 +458,53 @@ function CueCustomizerContent() {
               </button>
             </div>
 
-            <div className="space-y-2 text-xs divide-y divide-slate-100">
-              <div className="flex justify-between py-1.5">
-                <span className="text-slate-500">Shaft Wood ({cue.shaft?.name}):</span>
-                <span className="font-semibold text-slate-900">£{price.shaftPrice}</span>
+            <div className="space-y-2 text-xs divide-y divide-slate-100 max-h-[65vh] overflow-y-auto pr-1">
+              <div className="flex items-center justify-between py-2 gap-3">
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[11px] text-slate-500 font-medium">Shaft Wood & Grade</span>
+                  <span className="font-bold text-slate-900 break-words text-xs">{cue.shaft?.name}</span>
+                </div>
+                <span className="font-semibold text-slate-900 shrink-0 text-xs">£{price.shaftPrice}</span>
               </div>
-              <div className="flex justify-between py-1.5">
-                <span className="text-slate-500">Overall Length ({cue.length?.name}):</span>
-                <span className="font-semibold text-slate-900">
+              <div className="flex items-center justify-between py-2 gap-3">
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[11px] text-slate-500 font-medium">Overall Length</span>
+                  <span className="font-bold text-slate-900 break-words text-xs">{cue.length?.name}</span>
+                </div>
+                <span className="font-semibold text-slate-900 shrink-0 text-xs">
                   {price.lengthPrice ? `£${price.lengthPrice}` : 'Included'}
                 </span>
               </div>
-              <div className="flex justify-between py-1.5">
-                <span className="text-slate-500">Butt Timber ({cue.buttTimber?.name} + {cue.buttJoint?.name}):</span>
-                <span className="font-semibold text-slate-900">£{price.buttTimberPrice}</span>
+              <div className="flex items-center justify-between py-2 gap-3">
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[11px] text-slate-500 font-medium">Butt Timber & Joint</span>
+                  <span className="font-bold text-slate-900 break-words text-xs">
+                    {cue.buttTimber?.name} • {cue.buttJoint?.name}
+                  </span>
+                </div>
+                <span className="font-semibold text-slate-900 shrink-0 text-xs">£{price.buttTimberPrice}</span>
               </div>
               {cue.endButtJoin && (
-                <div className="flex justify-between py-1.5">
-                  <span className="text-slate-500">End Butt Joint Fitting:</span>
-                  <span className="font-semibold text-amber-700">+£{price.endButtJoinPrice}</span>
+                <div className="flex items-center justify-between py-2 gap-3">
+                  <span className="text-slate-600">End Butt Joint Fitting:</span>
+                  <span className="font-semibold text-amber-700 shrink-0">+£{price.endButtJoinPrice}</span>
                 </div>
               )}
               {cue.dome && (
-                <div className="flex justify-between py-1.5">
-                  <span className="text-slate-500">Dome Joint:</span>
-                  <span className="font-semibold text-amber-700">+£{price.domeJointPrice}</span>
+                <div className="flex items-center justify-between py-2 gap-3">
+                  <span className="text-slate-600">Dome Joint:</span>
+                  <span className="font-semibold text-amber-700 shrink-0">+£{price.domeJointPrice}</span>
                 </div>
               )}
               {price.largeSplicePrice > 0 && (
-                <div className="flex justify-between py-1.5">
-                  <span className="text-slate-500">
-                    Front Splices ({cue.largeSplices}-Splice {cue.largeSpliceMaterial?.name}):
-                  </span>
-                  <span className="font-semibold text-amber-700">+£{price.largeSplicePrice}</span>
+                <div className="flex items-center justify-between py-2 gap-3">
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[11px] text-slate-500 font-medium">Front Splices</span>
+                    <span className="font-bold text-slate-900 break-words text-xs">
+                      {cue.largeSplices}-Splice {cue.largeSpliceMaterial?.name}
+                    </span>
+                  </div>
+                  <span className="font-semibold text-amber-700 shrink-0 text-xs">+£{price.largeSplicePrice}</span>
                 </div>
               )}
               {cue.largeVeneers && cue.largeVeneers.filter((v) => v.name && v.name !== 'None').length > 0 && (

@@ -412,17 +412,17 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   Bespoke Cue Specifications
                 </h4>
                 <div className="text-xs space-y-1.5 text-slate-700">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Shaft Wood:</span>
-                    <span className="font-bold text-slate-950">{completedOrder.cue.shaft?.name}</span>
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-slate-500 shrink-0">Shaft Wood:</span>
+                    <span className="font-bold text-slate-950 text-right break-words">{completedOrder.cue.shaft?.name}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Overall Length:</span>
-                    <span className="font-bold text-slate-950">{completedOrder.cue.length?.name}</span>
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-slate-500 shrink-0">Overall Length:</span>
+                    <span className="font-bold text-slate-950 text-right break-words">{completedOrder.cue.length?.name}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Ferrule & Tip:</span>
-                    <span className="font-bold text-slate-950">
+                  <div className="flex justify-between items-center gap-2">
+                    <span className="text-slate-500 shrink-0">Ferrule & Tip:</span>
+                    <span className="font-bold text-slate-950 text-right break-words">
                       {completedOrder.cue.ferruleType?.name} ({completedOrder.cue.tipSize?.name}){completedOrder.cue.tip?.name ? ` • ${completedOrder.cue.tip.name}` : ''}
                     </span>
                   </div>
@@ -578,17 +578,17 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   </div>
 
                   <div className="space-y-2 text-xs divide-y divide-slate-800/80">
-                    <div className="flex justify-between pt-1.5">
-                      <span className="text-slate-400">Shaft Wood:</span>
-                      <span className="font-semibold text-white">{cue.shaft?.name}</span>
+                    <div className="flex justify-between items-center pt-1.5 gap-2">
+                      <span className="text-slate-400 shrink-0">Shaft Wood:</span>
+                      <span className="font-semibold text-white text-right break-words">{cue.shaft?.name}</span>
                     </div>
-                    <div className="flex justify-between pt-1.5">
-                      <span className="text-slate-400">Length:</span>
-                      <span className="font-semibold text-white">{cue.length?.name}</span>
+                    <div className="flex justify-between items-center pt-1.5 gap-2">
+                      <span className="text-slate-400 shrink-0">Length:</span>
+                      <span className="font-semibold text-white text-right break-words">{cue.length?.name}</span>
                     </div>
-                    <div className="flex justify-between pt-1.5">
-                      <span className="text-slate-400">Ferrule & Tip:</span>
-                      <span className="font-semibold text-white">
+                    <div className="flex justify-between items-center pt-1.5 gap-2">
+                      <span className="text-slate-400 shrink-0">Ferrule & Tip:</span>
+                      <span className="font-semibold text-white text-right break-words">
                         {cue.ferruleType?.name} ({cue.tipSize?.name}){cue.tip?.name ? ` • ${cue.tip.name}` : ''}
                       </span>
                     </div>

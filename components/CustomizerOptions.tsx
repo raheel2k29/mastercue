@@ -247,14 +247,14 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
           <div className="space-y-6">
             {/* Shaft Wood & Grade */}
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">Shaft Wood & Grade</h3>
                   <p className="text-xs text-slate-500">
                     Premium timber species and straightness grading.
                   </p>
                 </div>
-                <span className="text-xs text-amber-700 font-mono font-bold">
+                <span className="text-xs text-amber-700 font-mono font-bold shrink-0">
                   £{cue.shaft?.price}
                 </span>
               </div>
@@ -295,14 +295,14 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
 
             {/* Cue Length */}
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">Cue Length</h3>
                   <p className="text-xs text-slate-500">
                     All 31 tournament lengths from 48” (122cm) to 63” (160cm).
                   </p>
                 </div>
-                <span className="text-xs text-amber-700 font-mono font-bold">
+                <span className="text-xs text-amber-700 font-mono font-bold shrink-0">
                   {cue.length?.name}
                 </span>
               </div>
