@@ -468,6 +468,24 @@ function CueCustomizerContent() {
         </div>
       </main>
 
+      {/* Floating Mobile "View Summary" Pill Button (Only on Mobile/Tablet) */}
+      {!showSpecsModal && !showCheckoutModal && !showAuthModal && (
+        <div className="fixed bottom-20 right-3 sm:right-4 z-30 lg:hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <button
+            type="button"
+            onClick={() => setShowSpecsModal(true)}
+            className="flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-slate-900/95 hover:bg-slate-800 text-white shadow-xl border border-slate-700/80 backdrop-blur-md text-xs font-bold transition-all active:scale-95 group"
+            title="View Live Cue Summary & Specifications"
+            aria-label="View Cue Summary"
+          >
+            <Sliders className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-12 transition-transform" />
+            <span>View Summary</span>
+            <span className="w-1 h-1 rounded-full bg-slate-500"></span>
+            <span className="font-mono text-amber-400 font-bold">£{price.total}</span>
+          </button>
+        </div>
+      )}
+
       {/* Detailed Specifications Modal */}
       {showSpecsModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
