@@ -158,7 +158,7 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
   };
 
   return (
-    <div className="w-full bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col">
+    <div className="w-full bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col lg:sticky lg:top-20 max-h-[calc(100vh-5.5rem)]">
       {/* 1. Configuration Progress & Step Counter Header */}
       <div className="border-b border-slate-200 bg-white px-4 py-3 shrink-0">
         <div className="flex items-center justify-between mb-2">
@@ -238,7 +238,7 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
       </div>
 
       {/* Options Scrollable Content Container */}
-      <div className="p-5 max-h-[calc(100vh-180px)] overflow-y-auto space-y-6">
+      <div className="p-5 flex-1 overflow-y-auto space-y-6 min-h-0">
         {/* --- TAB 1: GENERAL (SHAFT, LENGTH, WEIGHT) --- */}
         {activeTab === 'general' && (
           <div className="space-y-6">
