@@ -255,7 +255,7 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
                   </p>
                 </div>
                 <span className="text-xs text-amber-700 font-mono font-bold shrink-0">
-                  £{cue.shaft?.price}
+                  {cue.shaft ? `£${cue.shaft.price}` : 'Select to start'}
                 </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -420,7 +420,7 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
                   const match = timber.assets?.find(
                     (a) =>
                       a.allowedJoint_Id === cue.buttJoint?.id &&
-                      a.allowedShafts.includes(cue.shaft?.asset || '')
+                      a.allowedShafts.includes(cue.shaft?.asset || CUE_SHAFTS[0]?.asset || '')
                   );
                   const timberPrice = match?.price ?? timber.assets?.[0]?.price ?? 0;
 

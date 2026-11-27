@@ -200,12 +200,13 @@ export function getDefaultVeneers(veneers: CueVeneer[], type: number): SelectedV
 }
 
 export function getButtTimberAsset(cue: Partial<CueConfiguration>) {
-  if (!cue.buttTimber || !cue.shaft || !cue.buttJoint) return null;
+  if (!cue.buttTimber || !cue.buttJoint) return null;
+  const shaftAsset = cue.shaft?.asset || CUE_SHAFTS[0]?.asset || '';
   return (
     cue.buttTimber.assets?.find(
       (asset) =>
         asset.allowedJoint_Id === cue.buttJoint?.id &&
-        asset.allowedShafts.includes(cue.shaft?.asset || '')
+        asset.allowedShafts.includes(shaftAsset)
     ) || null
   );
 }
@@ -258,8 +259,10 @@ export function generateLayers(cue: CueConfiguration): RenderLayer[] {
   layers.push({ thumb: 'Bground', label: 'Background' });
 
   // 2. Shaft
-  if (cue.shaft?.asset) {
-    layers.push({ thumb: cue.shaft.asset, label: cue.shaft.name });
+  const effectiveShaftAsset = cue.shaft?.asset || CUE_SHAFTS[0]?.asset;
+  const effectiveShaftName = cue.shaft?.name || CUE_SHAFTS[0]?.name;
+  if (effectiveShaftAsset) {
+    layers.push({ thumb: effectiveShaftAsset, label: effectiveShaftName });
   }
 
   // 3. Butt Timber
@@ -334,11 +337,12 @@ export function generateLayers(cue: CueConfiguration): RenderLayer[] {
   }
 
   // 8. Tip & Ferrule
-  if (cue.shaft?.tip) {
-    layers.push({ thumb: cue.shaft.tip, label: 'Shaft Tip Base' });
+  const effectiveTip = cue.shaft?.tip || CUE_SHAFTS[0]?.tip;
+  if (effectiveTip) {
+    layers.push({ thumb: effectiveTip, label: 'Shaft Tip Base' });
   }
   if (cue.tip && cue.tip.shaftImagePair) {
-    const pair = cue.tip.shaftImagePair.find((p) => p.name === cue.shaft?.asset);
+    const pair = cue.tip.shaftImagePair.find((p) => p.name === effectiveShaftAsset);
     if (pair?.images) {
       for (const img of pair.images) {
         layers.push({ thumb: img, label: 'Tip Asset' });
@@ -554,7 +558,7 @@ export function getDefaultCue(): CueConfiguration {
   const defaultMiniButt = CUE_MINI_BUTTS.find((b) => b.default) || null;
 
   return {
-    shaft: defaultShaft,
+    shaft: null,
     length: defaultLength,
     buttJoint: defaultJoint,
     buttTimber: defaultButtTimber,

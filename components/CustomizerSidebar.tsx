@@ -161,7 +161,7 @@ export const CustomizerSidebar: React.FC<CustomizerSidebarProps> = ({ cue, onCha
               <h3 className="text-sm font-semibold text-slate-900 mb-1 flex items-center justify-between">
                 <span>Select Shaft Wood & Grade</span>
                 <span className="text-xs text-amber-700 font-mono font-bold">
-                  £{cue.shaft?.price}
+                  {cue.shaft ? `£${cue.shaft.price}` : 'Select to start'}
                 </span>
               </h3>
               <p className="text-xs text-slate-500 mb-3">
@@ -300,7 +300,7 @@ export const CustomizerSidebar: React.FC<CustomizerSidebarProps> = ({ cue, onCha
                   const match = timber.assets?.find(
                     (a) =>
                       a.allowedJoint_Id === cue.buttJoint?.id &&
-                      a.allowedShafts.includes(cue.shaft?.asset || '')
+                      a.allowedShafts.includes(cue.shaft?.asset || CUE_SHAFTS[0]?.asset || '')
                   );
                   const timberPrice = match?.price ?? timber.assets?.[0]?.price ?? 0;
 

@@ -416,7 +416,7 @@ export const CueCanvasPreview: React.FC<CueCanvasPreviewProps> = ({ cue }) => {
         <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur border border-slate-200 shadow-md rounded-xl px-3 py-2 text-xs text-slate-700 hidden md:flex items-center gap-3">
           <div>
             <span className="text-[10px] uppercase text-slate-400 font-medium block">Shaft</span>
-            <span className="font-semibold text-slate-900">{cue.shaft?.name}</span>
+            <span className="font-semibold text-slate-900">{cue.shaft?.name || 'Unselected'}</span>
           </div>
           <div className="w-px h-6 bg-slate-200" />
           <div>

@@ -175,7 +175,7 @@ export interface CueCase {
 }
 
 export interface CueConfiguration {
-  shaft: CueShaft;
+  shaft: CueShaft | null;
   length: CueLength;
   buttJoint: CueJoint;
   buttTimber: CueButtTimber;

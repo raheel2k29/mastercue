@@ -75,8 +75,10 @@ function CueCustomizerContent() {
       });
     } else if (type === 'exotic') {
       const purpleheart = catalog.splices.find((s) => s.name.toLowerCase().includes('purple')) || catalog.splices[2];
+      const ashDefault = catalog.shafts.find((s) => s.default) || catalog.shafts[0];
       setCue({
         ...base,
+        shaft: ashDefault,
         largeSplices: 4,
         largeSpliceMaterial: purpleheart,
         engraving: 'CHAMPION 2026',
@@ -84,8 +86,10 @@ function CueCustomizerContent() {
       });
     } else if (type === 'classic') {
       const noJoint = CUE_JOINTS.find((j) => j.name.toLowerCase().includes('no joint')) || CUE_JOINTS[0];
+      const ashDefault = catalog.shafts.find((s) => s.default) || catalog.shafts[0];
       setCue({
         ...base,
+        shaft: ashDefault,
         buttJoint: noJoint,
         largeSplices: 1,
         largeSpliceMaterial: catalog.splices[0],
@@ -221,15 +225,33 @@ function CueCustomizerContent() {
                   <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
                     Current Price
                   </span>
-                  <span className="text-2xl font-extrabold text-slate-950 font-mono">
-                    £{price.total}
-                  </span>
+                  {cue.shaft ? (
+                    <span className="text-2xl font-extrabold text-slate-950 font-mono">
+                      £{price.total}
+                    </span>
+                  ) : (
+                    <span className="text-xs sm:text-sm font-bold text-amber-800 bg-amber-50 border border-amber-200/90 px-3 py-1 rounded-lg inline-flex items-center gap-1.5 shadow-2xs">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      Select your shaft to get started
+                    </span>
+                  )}
                 </div>
                 <button
-                  onClick={() => setShowCheckoutModal(true)}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs tracking-wider uppercase shadow-md transition-all active:scale-95"
+                  onClick={() => {
+                    if (!cue.shaft) {
+                      const el = document.getElementById('customizer-options-panel');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      return;
+                    }
+                    setShowCheckoutModal(true);
+                  }}
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-extrabold text-xs tracking-wider uppercase shadow-md transition-all active:scale-95 ${
+                    cue.shaft
+                      ? 'bg-slate-900 hover:bg-slate-800 text-white'
+                      : 'bg-amber-600 hover:bg-amber-500 text-white ring-2 ring-amber-400/50'
+                  }`}
                 >
-                  <span>Order Cue</span>
+                  <span>{cue.shaft ? 'Order Cue' : 'Select Shaft'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -249,7 +271,7 @@ function CueCustomizerContent() {
                     </span>
                   </div>
                   <span className="text-[10px] font-mono text-slate-700 font-bold bg-white px-2.5 py-0.5 rounded-md border border-slate-200/90 shadow-2xs">
-                    Total: £{price.total}
+                    {cue.shaft ? `Total: £${price.total}` : 'Select shaft to calculate total'}
                   </span>
                 </div>
 
@@ -282,7 +304,7 @@ function CueCustomizerContent() {
                     <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs cursor-default select-none">
                       <span className="text-[10px] text-slate-400 block font-medium">Shaft & Length</span>
                       <span className="font-bold text-slate-900 block break-words leading-snug">
-                        {cue.shaft?.name || 'Ash'} • {cue.length?.name || '58" (147cm)'}
+                        {cue.shaft ? `${cue.shaft.name} • ${cue.length?.name || '58" (147cm)'}` : `Unselected Shaft • ${cue.length?.name || '58" (147cm)'}`}
                       </span>
                       <span className="text-[10px] text-slate-600 font-mono font-semibold block mt-0.5">
                         {formatCueWeight(cue.weight)}
@@ -461,7 +483,9 @@ function CueCustomizerContent() {
             <Sliders className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-12 transition-transform" />
             <span>View Summary</span>
             <span className="w-1 h-1 rounded-full bg-slate-500"></span>
-            <span className="font-mono text-amber-400 font-bold">£{price.total}</span>
+            <span className="font-mono text-amber-400 font-bold">
+              {cue.shaft ? `£${price.total}` : 'Select Shaft'}
+            </span>
           </button>
         </div>
       )}
@@ -487,9 +511,13 @@ function CueCustomizerContent() {
               <div className="flex items-center justify-between py-2 gap-3">
                 <div className="flex flex-col min-w-0">
                   <span className="text-[11px] text-slate-500 font-medium">Shaft Wood & Grade</span>
-                  <span className="font-bold text-slate-900 break-words text-xs">{cue.shaft?.name}</span>
+                  <span className="font-bold text-slate-900 break-words text-xs">
+                    {cue.shaft?.name || 'Unselected Shaft'}
+                  </span>
                 </div>
-                <span className="font-semibold text-slate-900 shrink-0 text-xs">£{price.shaftPrice}</span>
+                <span className="font-semibold text-slate-900 shrink-0 text-xs">
+                  {cue.shaft ? `£${price.shaftPrice}` : 'Pending selection'}
+                </span>
               </div>
               <div className="flex items-center justify-between py-2 gap-3">
                 <div className="flex flex-col min-w-0">
@@ -627,7 +655,11 @@ function CueCustomizerContent() {
               </div>
               <div className="flex justify-between py-2 text-sm font-bold border-t border-slate-200">
                 <span className="text-slate-800">Current Price:</span>
-                <span className="text-slate-950 font-mono text-base font-extrabold">£{price.total}</span>
+                {cue.shaft ? (
+                  <span className="text-slate-950 font-mono text-base font-extrabold">£{price.total}</span>
+                ) : (
+                  <span className="text-amber-800 text-xs font-bold">Select your shaft to calculate</span>
+                )}
               </div>
             </div>
 
@@ -641,11 +673,18 @@ function CueCustomizerContent() {
               <button
                 onClick={() => {
                   setShowSpecsModal(false);
+                  if (!cue.shaft) {
+                    const el = document.getElementById('customizer-options-panel');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    return;
+                  }
                   setShowCheckoutModal(true);
                 }}
-                className="flex-1 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md"
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md ${
+                  cue.shaft ? 'bg-slate-900 hover:bg-slate-800 text-white' : 'bg-amber-600 hover:bg-amber-500 text-white ring-2 ring-amber-400/50'
+                }`}
               >
-                <span>Proceed to Checkout</span>
+                <span>{cue.shaft ? 'Proceed to Checkout' : 'Select Shaft First'}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
