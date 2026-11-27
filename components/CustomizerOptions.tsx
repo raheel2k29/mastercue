@@ -1384,27 +1384,37 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
         )}
       </div>
 
-      {/* 3. Bottom Step Navigation Footer */}
-      <div className="border-t border-slate-200 bg-slate-50/90 px-4 sm:px-5 py-3 flex items-center justify-between gap-3 shrink-0">
-        {currentStepIndex > 0 ? (
-          <button
-            type="button"
-            onClick={() => {
+      {/* 3. Bottom Step Navigation Footer (Pinned at Bottom of Each Section) */}
+      <div className="border-t border-slate-200 bg-white/95 backdrop-blur px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3 shrink-0 shadow-xs">
+        {/* Previous Button - Always Present on Every Section */}
+        <button
+          type="button"
+          disabled={currentStepIndex === 0}
+          onClick={() => {
+            if (currentStepIndex > 0) {
               const prevTab = TABS[currentStepIndex - 1];
               if (prevTab) handleTabClick(prevTab.id);
-            }}
-            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-xs font-bold text-slate-700 transition shadow-2xs hover:shadow-xs active:scale-95"
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-            <span className="hidden xs:inline">Previous:</span>
-            <span>{TABS[currentStepIndex - 1]?.label}</span>
-          </button>
-        ) : (
-          <div className="text-[11px] text-slate-400 font-medium">
-            Step 1 of 7: Customise Shaft
-          </div>
-        )}
+            }
+          }}
+          className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2.5 rounded-xl border text-xs font-bold transition-all ${
+            currentStepIndex === 0
+              ? 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed opacity-50'
+              : 'border-slate-200 bg-white hover:bg-slate-100 text-slate-700 shadow-2xs hover:shadow-xs active:scale-95'
+          }`}
+          title={currentStepIndex === 0 ? 'You are on the first step' : `Back to ${TABS[currentStepIndex - 1]?.label}`}
+        >
+          <ChevronLeft className="w-4 h-4" />
+          <span>{currentStepIndex > 0 ? `Previous: ${TABS[currentStepIndex - 1]?.label}` : 'Previous Step'}</span>
+        </button>
 
+        {/* Step Progress Indicator */}
+        <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+          <span className="font-mono font-bold text-slate-800">Step {currentStepIndex + 1}</span>
+          <span>of</span>
+          <span className="font-mono font-bold text-slate-800">7</span>
+        </div>
+
+        {/* Next / Review & Order Button */}
         {currentStepIndex < TABS.length - 1 ? (
           <button
             type="button"
@@ -1413,10 +1423,11 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
               const nextTab = TABS[currentStepIndex + 1];
               if (nextTab) handleTabClick(nextTab.id);
             }}
-            className="flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-white shadow-sm transition active:scale-95 ml-auto"
+            className="flex items-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-white shadow-sm transition-all active:scale-95"
+            title={`Proceed to ${TABS[currentStepIndex + 1]?.label}`}
           >
             <span>Next: {TABS[currentStepIndex + 1]?.label}</span>
-            <ChevronRight className="w-3.5 h-3.5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         ) : (
           <button
@@ -1427,10 +1438,10 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
                 onOpenCheckout();
               }
             }}
-            className="flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black text-white shadow-md transition active:scale-95 uppercase tracking-wider ml-auto"
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black text-white shadow-md transition-all active:scale-95 uppercase tracking-wider"
           >
             <span>Review &amp; Order Cue</span>
-            <Check className="w-3.5 h-3.5 stroke-[3]" />
+            <Check className="w-4 h-4 stroke-[3]" />
           </button>
         )}
       </div>
