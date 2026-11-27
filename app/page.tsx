@@ -257,7 +257,9 @@ function CueCustomizerContent() {
                   <p className="flex items-center gap-1.5">
                     <Info className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                     <span>
-                      This summary is for <strong className="text-slate-700 font-semibold">reference only</strong>. Changes are made using the <span className="text-slate-800 font-semibold">configuration options below</span>.
+                      This summary is for <strong className="text-slate-700 font-semibold">reference only</strong>. Changes are made using the{' '}
+                      <span className="lg:hidden font-semibold text-slate-800">configuration options below</span>
+                      <span className="hidden lg:inline font-semibold text-slate-800">configuration options on the right</span>.
                     </span>
                   </p>
                   <button
@@ -266,11 +268,13 @@ function CueCustomizerContent() {
                       const el = document.getElementById('customizer-options-panel');
                       if (el) el.scrollIntoView({ behavior: 'smooth' });
                     }}
-                    className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 hover:text-amber-900 bg-amber-100/70 hover:bg-amber-100 px-2 py-1 rounded-lg border border-amber-300/60 transition shrink-0 shadow-2xs cursor-pointer active:scale-95"
+                    className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 hover:text-amber-900 bg-amber-100/70 hover:bg-amber-100 px-2.5 py-1 rounded-lg border border-amber-300/60 transition shrink-0 shadow-2xs cursor-pointer active:scale-95"
                     title="Jump to configuration options"
                   >
-                    <span>Configure Below</span>
-                    <ArrowDown className="w-3 h-3" />
+                    <span className="lg:hidden">Configure Below</span>
+                    <ArrowDown className="w-3 h-3 lg:hidden" />
+                    <span className="hidden lg:inline">Configure Options</span>
+                    <ArrowRight className="w-3 h-3 hidden lg:inline" />
                   </button>
                 </div>
               </div>
