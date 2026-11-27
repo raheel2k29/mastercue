@@ -580,3 +580,43 @@ export function getDefaultCue(): CueConfiguration {
     case: null,
   };
 }
+
+/**
+ * Converts ounces (oz) to grams (g), rounded to the nearest integer.
+ * Standard international conversion factor: 1 oz = 28.3495231 g.
+ */
+export function ozToGrams(oz: number): number {
+  return Math.round(oz * 28.3495);
+}
+
+/**
+ * Formats cue weight with ounces and grams alongside.
+ * Example: 18 -> "18 oz (510g)"
+ */
+export function formatCueWeight(oz: number): string {
+  return `${oz} oz (${ozToGrams(oz)}g)`;
+}
+
+/**
+ * Parses length label into separate inches and centimetres representations.
+ * Handles: '58” (147cm)', '58" (147cm)', '58"', etc.
+ */
+export function parseLengthParts(lengthName?: string): { inches: string; cm: string } {
+  if (!lengthName) return { inches: '58"', cm: '147cm' };
+  const match = lengthName.match(/^([0-9.]+[”"]?)\s*(?:\(([^)]+)\))?/);
+  if (match) {
+    const rawInch = match[1].replace(/[”"]/g, '') + '"';
+    let cm = match[2];
+    if (!cm) {
+      const numInch = parseFloat(match[1]);
+      if (!isNaN(numInch)) {
+        cm = `${Math.round(numInch * 2.54)}cm`;
+      } else {
+        cm = '';
+      }
+    }
+    return { inches: rawInch, cm: cm.endsWith('cm') ? cm : `${cm}cm` };
+  }
+  return { inches: lengthName, cm: '' };
+}
+

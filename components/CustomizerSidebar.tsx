@@ -45,6 +45,9 @@ import {
   canSelectVeneer,
   BUTT_JOINT_FITTING_PRICE,
   DOME_JOINT_PRICE,
+  ozToGrams,
+  formatCueWeight,
+  parseLengthParts,
 } from '@/lib/cueEngine';
 
 import { CheckoutModal } from '@/components/CheckoutModal';
@@ -256,10 +259,10 @@ export const CustomizerSidebar: React.FC<CustomizerSidebarProps> = ({ cue, onCha
             <div className="border-t border-slate-200 pt-4">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-semibold text-slate-900">Cue Weight</h3>
-                <span className="text-xs font-mono font-bold text-amber-700">{cue.weight} oz</span>
+                <span className="text-xs font-mono font-bold text-amber-700">{formatCueWeight(cue.weight)}</span>
               </div>
               <p className="text-xs text-slate-500 mb-3">
-                Calculated dynamic weight range: {weightRange.min}oz - {weightRange.max}oz
+                Calculated dynamic weight range: {weightRange.min}oz ({ozToGrams(weightRange.min)}g) – {weightRange.max}oz ({ozToGrams(weightRange.max)}g)
               </p>
               <input
                 type="range"
@@ -270,6 +273,13 @@ export const CustomizerSidebar: React.FC<CustomizerSidebarProps> = ({ cue, onCha
                 onChange={(e) => updateCue({ weight: parseFloat(e.target.value) })}
                 className="w-full accent-amber-600 bg-slate-200 h-2 rounded-lg cursor-pointer"
               />
+              <div className="flex justify-between items-center text-[11px] text-slate-500 font-mono mt-2">
+                <span>Min: {weightRange.min} oz ({ozToGrams(weightRange.min)}g)</span>
+                <span className="font-bold text-slate-900 text-xs bg-white px-2 py-0.5 rounded border border-slate-200 shadow-2xs">
+                  {formatCueWeight(cue.weight)}
+                </span>
+                <span>Max: {weightRange.max} oz ({ozToGrams(weightRange.max)}g)</span>
+              </div>
             </div>
           </div>
         )}

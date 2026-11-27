@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { PricingConfig, AdminItemPrice, AdminSplicePrice, AdminPlatePrice } from '@/types/admin';
 import { OrderRecord, OrderStatus } from '@/types/order';
 import { getDefaultPricingConfig } from '@/lib/defaultPricing';
-import { calculatePrice, getDefaultCue } from '@/lib/cueEngine';
+import { calculatePrice, getDefaultCue, formatCueWeight } from '@/lib/cueEngine';
 import { CUE_SHAFTS, CUE_JOINTS, CUE_SPLICES } from '@/lib/cueData';
 import {
   Save,
@@ -1247,7 +1247,7 @@ export default function AdminPricingPage() {
                                   {ord.cue.shaft?.name} • {ord.cue.length?.name}
                                 </div>
                                 <div className="text-[11px] text-slate-400 truncate">
-                                  Ferrule: {ord.cue.ferruleType?.name} ({ord.cue.tipSize?.name}){ord.cue.tip?.name ? ` • ${ord.cue.tip.name}` : ''} • {ord.cue.weight}oz
+                                  Ferrule: {ord.cue.ferruleType?.name} ({ord.cue.tipSize?.name}){ord.cue.tip?.name ? ` • ${ord.cue.tip.name}` : ''} • {formatCueWeight(ord.cue.weight)}
                                 </div>
                                 <div className="text-[10px] text-slate-400 truncate">
                                   {ord.cue.buttTimber?.name} • {ord.cue.buttJoint?.name}
@@ -1669,7 +1669,7 @@ export default function AdminPricingPage() {
                           </div>
                           <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
                             <span className="text-slate-500 block text-[10px]">Cue Weight</span>
-                            <span className="font-bold text-amber-400 font-mono">{selectedOrder.cue.weight} oz</span>
+                            <span className="font-bold text-amber-400 font-mono">{formatCueWeight(selectedOrder.cue.weight)}</span>
                           </div>
                           <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
                             <span className="text-slate-500 block text-[10px]">Ferrule & Tip</span>

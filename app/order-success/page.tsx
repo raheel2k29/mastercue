@@ -17,6 +17,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { OrderRecord } from '@/types/order';
+import { formatCueWeight } from '@/lib/cueEngine';
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
@@ -125,7 +126,7 @@ function OrderSuccessContent() {
               </div>
               <div>
                 <span className="text-slate-500">Weight:</span>{' '}
-                <span className="font-mono font-bold text-amber-400">{order.cue.weight} oz</span>
+                <span className="font-mono font-bold text-amber-400">{formatCueWeight(order.cue.weight)}</span>
               </div>
               <div>
                 <span className="text-slate-500">Ferrule & Tip:</span>{' '}

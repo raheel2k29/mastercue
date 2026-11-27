@@ -47,6 +47,9 @@ import {
   canSelectVeneer,
   BUTT_JOINT_FITTING_PRICE,
   DOME_JOINT_PRICE,
+  ozToGrams,
+  formatCueWeight,
+  parseLengthParts,
 } from '@/lib/cueEngine';
 
 import {
@@ -328,21 +331,32 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
                 {CUE_LENGTHS.map((len) => {
                   const isSelected = cue.length?.id === len.id;
                   const isAvailable = isLengthAvailable(cue, len);
+                  const { inches, cm } = parseLengthParts(len.name);
 
                   return (
                     <button
                       key={len.id}
                       disabled={!isAvailable}
                       onClick={() => updateCue({ length: len })}
-                      className={`p-1.5 rounded-lg border text-center text-[11px] transition-all ${
+                      className={`p-1.5 rounded-lg border text-center transition-all ${
                         isSelected
                           ? 'border-amber-500 bg-amber-500 text-slate-950 font-bold shadow-sm'
                           : isAvailable
                           ? 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                           : 'border-slate-100 bg-slate-50/20 text-slate-400 opacity-30 cursor-not-allowed'
                       }`}
+                      title={`${inches} (${cm})`}
                     >
-                      {len.name.split(' ')[0]}
+                      <div className="flex flex-col items-center justify-center leading-none py-0.5">
+                        <span className="text-[11px] font-bold">{inches}</span>
+                        <span
+                          className={`text-[9px] mt-0.5 ${
+                            isSelected ? 'text-slate-950/80 font-medium' : 'text-slate-400'
+                          }`}
+                        >
+                          {cm}
+                        </span>
+                      </div>
                     </button>
                   );
                 })}
@@ -355,10 +369,12 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">Cue Weight</h3>
                   <p className="text-xs text-slate-500">
-                    Dynamic range: {weightRange.min}oz - {weightRange.max}oz
+                    Dynamic range: {weightRange.min}oz ({ozToGrams(weightRange.min)}g) – {weightRange.max}oz ({ozToGrams(weightRange.max)}g)
                   </p>
                 </div>
-                <span className="text-xs font-mono font-bold text-amber-700">{cue.weight} oz</span>
+                <span className="text-xs font-mono font-bold text-amber-700">
+                  {formatCueWeight(cue.weight)}
+                </span>
               </div>
               <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
                 <input
@@ -370,10 +386,12 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
                   onChange={(e) => updateCue({ weight: parseFloat(e.target.value) })}
                   className="w-full accent-slate-900 bg-slate-200 h-2 rounded-lg cursor-pointer"
                 />
-                <div className="flex justify-between text-[11px] text-slate-500 font-mono">
-                  <span>Min: {weightRange.min} oz</span>
-                  <span className="font-bold text-slate-900 text-xs">{cue.weight} oz</span>
-                  <span>Max: {weightRange.max} oz</span>
+                <div className="flex justify-between items-center text-[11px] text-slate-500 font-mono">
+                  <span>Min: {weightRange.min} oz ({ozToGrams(weightRange.min)}g)</span>
+                  <span className="font-bold text-slate-900 text-xs bg-white px-2 py-0.5 rounded border border-slate-200 shadow-2xs">
+                    {formatCueWeight(cue.weight)}
+                  </span>
+                  <span>Max: {weightRange.max} oz ({ozToGrams(weightRange.max)}g)</span>
                 </div>
               </div>
             </div>

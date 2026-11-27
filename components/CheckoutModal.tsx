@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { CueConfiguration, CueCase } from '@/types/cue';
 import { OrderRecord } from '@/types/order';
+import { formatCueWeight } from '@/lib/cueEngine';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -427,7 +428,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Weight:</span>
-                    <span className="font-bold text-slate-950 font-mono">{completedOrder.cue.weight} oz</span>
+                    <span className="font-bold text-slate-950 font-mono">{formatCueWeight(completedOrder.cue.weight)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Butt & Joint:</span>
@@ -593,7 +594,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     </div>
                     <div className="flex justify-between pt-1.5">
                       <span className="text-slate-400">Weight:</span>
-                      <span className="font-semibold text-amber-400 font-mono">{cue.weight} oz</span>
+                      <span className="font-semibold text-amber-400 font-mono">{formatCueWeight(cue.weight)}</span>
                     </div>
                     <div className="flex justify-between pt-1.5">
                       <span className="text-slate-400">Butt & Joint:</span>

@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { CueConfiguration } from '@/types/cue';
-import { getDefaultCue, getWeightRange } from '@/lib/cueEngine';
+import { getDefaultCue, getWeightRange, formatCueWeight, ozToGrams } from '@/lib/cueEngine';
 import { CUE_JOINTS } from '@/lib/cueData';
 import { CueCanvasPreview } from '@/components/CueCanvasPreview';
 import { CustomizerOptions } from '@/components/CustomizerOptions';
@@ -253,10 +253,10 @@ function CueCustomizerContent() {
                 <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
                   <span className="text-[10px] text-slate-400 block">Shaft & Length</span>
                   <span className="font-bold text-slate-900 truncate block">
-                    {cue.shaft?.name || 'Ash'} • {cue.length?.name || '58"'}
+                    {cue.shaft?.name || 'Ash'} • {cue.length?.name || '58" (147cm)'}
                   </span>
                   <span className="text-[10px] text-amber-700 font-mono font-semibold">
-                    {cue.weight} oz
+                    {formatCueWeight(cue.weight)}
                   </span>
                 </div>
 
@@ -487,7 +487,7 @@ function CueCustomizerContent() {
               </div>
               <div className="flex justify-between py-1.5">
                 <span className="text-slate-500">Weight:</span>
-                <span className="font-semibold text-amber-700 font-mono">{cue.weight} oz</span>
+                <span className="font-semibold text-amber-700 font-mono">{formatCueWeight(cue.weight)}</span>
               </div>
               {cue.engraving && (
                 <div className="flex justify-between py-1.5">

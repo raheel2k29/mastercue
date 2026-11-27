@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { OrderRecord, OrderStatus } from '@/types/order';
 import { CustomerProfile } from '@/types/customer';
+import { formatCueWeight } from '@/lib/cueEngine';
 
 // Helper to calculate active step index for the 5-stage crafting timeline
 function getTimelineStepIndex(status: OrderStatus): number {
@@ -397,7 +398,7 @@ export default function CustomerAccountPage() {
                             </div>
                             <div className="p-3 rounded-xl bg-white border border-slate-200">
                               <span className="text-slate-400 block text-[10px]">Cue Weight</span>
-                              <span className="font-bold text-slate-900 font-mono">{ord.cue.weight} oz</span>
+                              <span className="font-bold text-slate-900 font-mono">{formatCueWeight(ord.cue.weight)}</span>
                             </div>
                             <div className="p-3 rounded-xl bg-white border border-slate-200">
                               <span className="text-slate-400 block text-[10px]">Butt Timber</span>

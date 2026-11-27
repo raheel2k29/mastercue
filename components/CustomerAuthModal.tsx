@@ -18,6 +18,7 @@ import {
   Sparkles,
   UserPlus,
 } from 'lucide-react';
+import { formatCueWeight } from '@/lib/cueEngine';
 
 interface CustomerAuthModalProps {
   isOpen: boolean;
@@ -583,7 +584,7 @@ export function CustomerAuthModal({
                     <div className="flex justify-between">
                       <span className="text-slate-400">Length & Weight:</span>
                       <span className="font-semibold text-slate-800">
-                        {trackedOrder.cue.length?.name} • {trackedOrder.cue.weight}oz
+                        {trackedOrder.cue.length?.name} • {formatCueWeight(trackedOrder.cue.weight)}
                       </span>
                     </div>
                     <div className="flex justify-between pt-1 border-t border-slate-200">
