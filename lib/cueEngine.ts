@@ -466,8 +466,7 @@ export function calculatePrice(
 
   const isCustomEngraving =
     cue.namePlate?.allowEngraving !== false &&
-    Boolean(cue.engraving?.trim()) &&
-    cue.engraving.trim().toLowerCase() !== 'custom made';
+    Boolean(cue.engraving?.trim());
   const engravingPrice =
     isCustomEngraving && cue.namePlate?.engravingPrice ? cue.namePlate.engravingPrice : 0;
 
@@ -577,9 +576,9 @@ export function getDefaultCue(): CueConfiguration {
     tipSize: defaultTipSize,
     extensions: [],
     miniButt: defaultMiniButt,
-    namePlate: defaultNamePlate,
-    engraving: 'CUSTOM MADE',
-    font: 'Roboto',
+    namePlate: null,
+    engraving: '',
+    font: '',
     priorityService: false,
     case: null,
   };

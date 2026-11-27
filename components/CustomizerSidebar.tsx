@@ -748,28 +748,26 @@ export const CustomizerSidebar: React.FC<CustomizerSidebarProps> = ({ cue, onCha
           <div className="space-y-5">
             <div>
               <h3 className="text-sm font-semibold text-slate-900 mb-1 flex items-center justify-between">
-                <span>Personalized Nameplate Disc</span>
+                <span>Personalized Nameplate Disc (Optional)</span>
                 <span className="text-xs text-amber-700 font-mono font-bold">
-                  {cue.engraving?.trim() && cue.engraving.trim().toLowerCase() !== 'custom made'
-                    ? '+£19'
-                    : 'Free (CUSTOM MADE)'}
+                  {cue.engraving?.trim() ? '+£19' : 'Optional (+£19)'}
                 </span>
               </h3>
               <p className="text-xs text-slate-500 mb-3">
-                Default text &quot;CUSTOM MADE&quot; is included free. Custom names or text are +£19.
+                Optionally add an engraved disc or nameplate. Leave empty if no personalisation is required.
               </p>
 
               <div className="space-y-3">
                 <div>
                   <label className="text-xs text-slate-600 font-medium block mb-1.5">
-                    Engraving Text (Max 18 chars)
+                    Engraving Text (Optional, max 18 chars)
                   </label>
                   <input
                     type="text"
                     maxLength={18}
                     value={cue.engraving}
                     onChange={(e) => updateCue({ engraving: e.target.value })}
-                    placeholder="CUSTOM MADE"
+                    placeholder="Enter custom text (Optional)"
                     className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-xs focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono uppercase shadow-sm"
                   />
                 </div>

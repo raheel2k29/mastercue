@@ -403,16 +403,23 @@ function CueCustomizerContent() {
 
                     {/* 5. Personalisation (Disc & Engraving Only) */}
                     <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs col-span-2 sm:col-span-1 cursor-default select-none">
-                      <span className="text-[10px] text-slate-400 block font-medium">Personalisation</span>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] text-slate-400 block font-medium">Personalisation</span>
+                        <span className="text-[10px] font-mono text-slate-500 font-semibold">
+                          {cue.namePlate ? (cue.engraving?.trim() ? 'Custom Engraved' : 'Disc Fitted') : 'None'}
+                        </span>
+                      </div>
                       <span className="font-bold text-slate-900 block break-words leading-snug">
-                        {cue.namePlate?.name || 'Standard Disc'}
+                        {cue.namePlate ? cue.namePlate.name : 'No Disc'}
                       </span>
-                      {cue.engraving ? (
+                      {cue.engraving?.trim() ? (
                         <span className="text-[10px] text-amber-700 font-mono font-semibold block mt-0.5 break-words">
-                          &quot;{cue.engraving}&quot; ({cue.font || 'Roboto'})
+                          &quot;{cue.engraving.trim()}&quot; ({cue.font || 'Roboto'})
                         </span>
                       ) : (
-                        <span className="text-[10px] text-slate-400 block mt-0.5">No engraving</span>
+                        <span className="text-[10px] text-slate-400 block mt-0.5">
+                          {cue.namePlate ? 'No custom text' : 'Clean wood finish'}
+                        </span>
                       )}
                     </div>
 
@@ -601,12 +608,15 @@ function CueCustomizerContent() {
                 <div className="flex flex-col min-w-0">
                   <span className="text-slate-500">Personalisation:</span>
                   <span className="font-semibold text-slate-900 break-words text-xs">
-                    {cue.namePlate?.name || 'Standard Disc'}
-                    {cue.engraving ? ` • "${cue.engraving}" (${cue.font || 'Roboto'})` : ''}
+                    {cue.namePlate
+                      ? `${cue.namePlate.name}${cue.engraving?.trim() ? ` • "${cue.engraving.trim()}" (${cue.font || 'Roboto'})` : ' (No text)'}`
+                      : 'None (Clean Wood Finish)'}
                   </span>
                 </div>
                 <span className="font-semibold text-slate-900 shrink-0 text-xs">
-                  {price.engravingPrice > 0 ? `+£${price.engravingPrice}` : 'Included'}
+                  {price.engravingPrice > 0 || price.platePrice > 0
+                    ? `+£${price.engravingPrice + price.platePrice}`
+                    : 'None'}
                 </span>
               </div>
 

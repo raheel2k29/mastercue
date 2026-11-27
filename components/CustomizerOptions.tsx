@@ -1064,21 +1064,28 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                   Name Plates & Discs
                 </label>
                 <select
-                  value={cue.namePlate?.id || catalog.namePlates[0]?.id}
+                  value={cue.namePlate?.id || 'none'}
                   onChange={(e) => {
-                    const selected = catalog.namePlates.find((p) => p.id === e.target.value) || catalog.namePlates[0];
-                    updateCue({ namePlate: selected });
+                    if (e.target.value === 'none') {
+                      updateCue({ namePlate: null, engraving: '', font: '' });
+                      return;
+                    }
+                    const selected = catalog.namePlates.find((p) => p.id === e.target.value);
+                    if (selected) {
+                      updateCue({ namePlate: selected, font: cue.font || 'Roboto' });
+                    }
                   }}
                   className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-xs font-medium focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 shadow-sm cursor-pointer"
                 >
+                  <option value="none">None (No Disc / Clean Wood Finish)</option>
                   {catalog.namePlates.map((plate) => (
                     <option key={plate.id} value={plate.id} disabled={plate.enabled === false}>
-                      {plate.name} {plate.price > 0 ? `(+£${plate.price})` : ''} {!plate.allowEngraving ? '(No Engraving)' : ''} {plate.enabled === false ? '(Unavailable)' : ''}
+                      {plate.name} {plate.price > 0 ? `(+£${plate.price})` : '(Free)'} {!plate.allowEngraving ? '(No Engraving)' : ''} {plate.enabled === false ? '(Unavailable)' : ''}
                     </option>
                   ))}
                 </select>
                 <span className="text-[11px] text-amber-700 font-mono font-bold block">
-                  {cue.namePlate?.price ? `+£${cue.namePlate.price}` : 'Included (£0)'}
+                  {cue.namePlate ? (cue.namePlate.price ? `+£${cue.namePlate.price}` : 'Free') : 'No Disc (£0)'}
                 </span>
               </div>
 
@@ -1089,33 +1096,39 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                     Personalised Engraving?
                   </label>
                   <span className="text-[11px] text-amber-700 font-mono font-bold">
-                    {!cue.namePlate?.allowEngraving
+                    {!cue.namePlate
+                      ? 'Requires Disc'
+                      : !cue.namePlate.allowEngraving
                       ? 'N/A'
-                      : cue.engraving?.trim() && cue.engraving.trim().toLowerCase() !== 'custom made'
+                      : cue.engraving?.trim()
                       ? '+£19'
-                      : 'Free'}
+                      : 'Optional (+£19)'}
                   </span>
                 </div>
                 <input
                   type="text"
                   maxLength={18}
-                  disabled={!cue.namePlate?.allowEngraving}
-                  value={cue.namePlate?.allowEngraving ? cue.engraving : ''}
+                  disabled={!cue.namePlate || !cue.namePlate.allowEngraving}
+                  value={cue.engraving || ''}
                   onChange={(e) => updateCue({ engraving: e.target.value })}
                   placeholder={
-                    cue.namePlate?.allowEngraving
-                      ? 'Enter your message here'
-                      : 'Not available on Brass Disc'
+                    !cue.namePlate
+                      ? 'Select a disc or plate above to add text'
+                      : !cue.namePlate.allowEngraving
+                      ? 'Not available on Brass Disc'
+                      : 'Enter custom text (Optional)'
                   }
                   className={`w-full px-3 py-2.5 rounded-xl border text-xs font-mono uppercase shadow-sm transition ${
-                    !cue.namePlate?.allowEngraving
+                    !cue.namePlate || !cue.namePlate.allowEngraving
                       ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
                       : 'bg-white border-slate-300 text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500'
                   }`}
                 />
                 <span className="text-[11px] text-slate-400 block">
-                  {cue.namePlate?.allowEngraving
-                    ? 'Default is "CUSTOM MADE" (Free). Max 18 characters.'
+                  {!cue.namePlate
+                    ? 'Optional personalisation. Select a disc or plate above to enable.'
+                    : cue.namePlate.allowEngraving
+                    ? 'Leave blank if you prefer no text engraving. Max 18 characters.'
                     : 'Solid Brass Disc does not accept text engraving.'}
                 </span>
               </div>
@@ -1126,11 +1139,11 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                   Font
                 </label>
                 <select
-                  disabled={!cue.namePlate?.allowEngraving}
+                  disabled={!cue.namePlate || !cue.namePlate.allowEngraving}
                   value={cue.font || 'Roboto'}
                   onChange={(e) => updateCue({ font: e.target.value })}
                   className={`w-full px-3 py-2.5 rounded-xl border text-xs font-medium shadow-sm transition cursor-pointer ${
-                    !cue.namePlate?.allowEngraving
+                    !cue.namePlate || !cue.namePlate.allowEngraving
                       ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
                       : 'bg-white border-slate-300 text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500'
                   }`}
@@ -1139,8 +1152,8 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                   <option value="Lora">Lora (Classic Serif)</option>
                   <option value="Alex Brush">Alex Brush (Calligraphy Script)</option>
                 </select>
-                <span className="text-[11px] text-slate-500 block" style={{ fontFamily: cue.font || 'Roboto' }}>
-                  Preview: {cue.engraving || 'CUSTOM MADE'}
+                <span className="text-[11px] text-slate-500 block truncate" style={{ fontFamily: cue.font || 'Roboto' }}>
+                  Preview: {cue.engraving?.trim() ? cue.engraving.trim() : 'No text entered'}
                 </span>
               </div>
             </div>
@@ -1148,9 +1161,32 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
             {/* Visual Plate Selection Cards */}
             <div className="space-y-3 pt-2">
               <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                Select Plate / Disc Style ({catalog.namePlates.length} Options)
+                Select Plate / Disc Style
               </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                {/* Option 0: No Disc */}
+                <button
+                  type="button"
+                  onClick={() => updateCue({ namePlate: null, engraving: '', font: '' })}
+                  className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
+                    !cue.namePlate
+                      ? 'border-amber-500 bg-amber-50/70 ring-1 ring-amber-500 shadow-sm'
+                      : 'border-slate-200 bg-slate-50/50 hover:border-slate-300 hover:bg-white'
+                  }`}
+                >
+                  <div className="w-11 h-11 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 bg-white font-bold text-[11px] shrink-0">
+                    None
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-900 truncate">No Disc</span>
+                      {!cue.namePlate && <Check className="w-3.5 h-3.5 text-amber-600 shrink-0" />}
+                    </div>
+                    <span className="text-[11px] text-slate-500 font-mono font-bold block mt-0.5">£0</span>
+                    <span className="text-[10px] text-slate-400 block truncate">Clean wood finish</span>
+                  </div>
+                </button>
+
                 {catalog.namePlates.map((plate) => {
                   const isSelected = cue.namePlate?.id === plate.id;
                   const isEnabled = plate.enabled !== false;
@@ -1158,8 +1194,8 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                     <button
                       key={plate.id}
                       disabled={!isEnabled}
-                      onClick={() => updateCue({ namePlate: plate })}
-                      className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${
+                      onClick={() => updateCue({ namePlate: plate, font: cue.font || 'Roboto' })}
+                      className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
                         isSelected
                           ? 'border-amber-500 bg-amber-50/70 ring-1 ring-amber-500 shadow-sm'
                           : isEnabled
@@ -1168,7 +1204,7 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                       }`}
                     >
                       <div
-                        className="w-12 h-12 rounded-full border border-slate-300 shadow-inner flex-shrink-0 bg-cover bg-center bg-slate-200"
+                        className="w-11 h-11 rounded-full border border-slate-300 shadow-inner shrink-0 bg-cover bg-center bg-slate-200"
                         style={{
                           backgroundImage: `url('/api/cue-image/layers/${plate.previewImage}.png')`,
                         }}
@@ -1178,13 +1214,13 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                           <span className="text-xs font-bold text-slate-900 truncate">
                             {plate.name}
                           </span>
-                          {isSelected && <Check className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />}
+                          {isSelected && <Check className="w-3.5 h-3.5 text-amber-600 shrink-0" />}
                         </div>
                         <span className="text-[11px] text-amber-700 font-mono font-bold block mt-0.5">
                           {plate.price > 0 ? `+£${plate.price}` : 'Free'}
                         </span>
                         <span className="text-[10px] text-slate-500 block truncate">
-                          {plate.allowEngraving ? 'Custom Engravable' : 'No Engraving'}
+                          {plate.allowEngraving ? 'Engravable' : 'No Engraving'}
                         </span>
                       </div>
                     </button>
