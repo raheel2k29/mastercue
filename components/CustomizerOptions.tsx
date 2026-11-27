@@ -89,45 +89,29 @@ interface CustomizerOptionsProps {
 
 export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onChange, onOpenCheckout }) => {
   const [activeTab, setActiveTab] = useState<TabId>('general');
-  const [reviewedTabs, setReviewedTabs] = useState<string[]>(['general']);
+  // Starts empty by default so progress starts at 0% and tabs are clean
+  const [completedTabs, setCompletedTabs] = useState<string[]>([]);
   const [spliceType, setSpliceType] = useState<'large' | 'small'>('large');
 
   const { catalog, calculateDynamicPrice } = usePricing();
   const price = calculateDynamicPrice(cue);
   const weightRange = getWeightRange(cue);
 
-  const markTabReviewed = (tabId: string) => {
-    setReviewedTabs((prev) => (prev.includes(tabId) ? prev : [...prev, tabId]));
+  const markTabCompleted = (tabId: string) => {
+    setCompletedTabs((prev) => (prev.includes(tabId) ? prev : [...prev, tabId]));
   };
 
   const handleTabClick = (tabId: TabId) => {
     setActiveTab(tabId);
-    markTabReviewed(tabId);
   };
 
   const updateCue = (partial: Partial<CueConfiguration>) => {
     onChange({ ...cue, ...partial });
-    markTabReviewed(activeTab);
+    markTabCompleted(activeTab);
   };
 
   const isTabCompleted = (tabId: string) => {
-    if (reviewedTabs.includes(tabId)) return true;
-    if (tabId === 'general') return Boolean(cue.shaft && cue.length && cue.weight);
-    if (tabId === 'butt') return Boolean(cue.buttTimber && cue.buttJoint);
-    if (tabId === 'splices') return Boolean(cue.largeSpliceMaterial);
-    if (tabId === 'veneers') {
-      const activeVeneers = cue.largeVeneers?.filter((v) => v.name && v.name !== 'None');
-      return Boolean(activeVeneers && activeVeneers.length > 0);
-    }
-    if (tabId === 'tip') return Boolean(cue.ferruleType && cue.tip && cue.tipSize);
-    if (tabId === 'engraving') return Boolean(cue.namePlate && cue.engraving);
-    if (tabId === 'accessories')
-      return Boolean(
-        cue.miniButt ||
-          (cue.extensions && cue.extensions.length > 0) ||
-          (cue.case && cue.case.id !== 'case_none')
-      );
-    return false;
+    return completedTabs.includes(tabId);
   };
 
   const completedCount = TABS.filter((t) => isTabCompleted(t.id)).length;
@@ -150,6 +134,7 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
       }
     }
     onChange(updatedCue);
+    markTabCompleted('tip');
   };
 
   const handleJointChange = (joint: CueJoint) => {
@@ -159,6 +144,7 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
       if (validTimber) updatedCue.buttTimber = validTimber;
     }
     onChange(updatedCue);
+    markTabCompleted('butt');
   };
 
   const handleTimberChange = (timber: CueButtTimber) => {
@@ -168,6 +154,7 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
       if (validJoint) updatedCue.buttJoint = validJoint;
     }
     onChange(updatedCue);
+    markTabCompleted('butt');
   };
 
   return (
@@ -183,9 +170,13 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
               <span className="text-xs font-bold text-slate-900">
                 Step {currentStepIndex + 1} of 7: {currentTabConfig.label}
               </span>
-              {isTabCompleted(activeTab) && (
+              {isTabCompleted(activeTab) ? (
                 <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200">
                   <Check className="w-2.5 h-2.5 stroke-[3]" /> Completed
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-200">
+                  In Progress
                 </span>
               )}
             </div>
@@ -1418,6 +1409,7 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
           <button
             type="button"
             onClick={() => {
+              markTabCompleted(activeTab);
               const nextTab = TABS[currentStepIndex + 1];
               if (nextTab) handleTabClick(nextTab.id);
             }}
@@ -1430,10 +1422,9 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({ cue, onCha
           <button
             type="button"
             onClick={() => {
+              markTabCompleted('accessories');
               if (onOpenCheckout) {
                 onOpenCheckout();
-              } else {
-                const btn = document.querySelector('button');
               }
             }}
             className="flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-black text-white shadow-md transition active:scale-95 uppercase tracking-wider ml-auto"
