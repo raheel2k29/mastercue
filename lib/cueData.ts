@@ -88,6 +88,89 @@ export const CUE_SHAFTS: CueShaft[] = [
   }
 ];
 
+export interface ShaftGradeInfo {
+  id: string;
+  name: string;
+  price: number;
+  badge: string;
+  badgeColor: string;
+  subtitle: string;
+  selection: string;
+  grain: string;
+  flex: string;
+  description: string;
+  bestFor: string;
+}
+
+export const SHAFT_GRADE_DETAILS: Record<string, ShaftGradeInfo> = {
+  'Ash Premium': {
+    id: '4442380b-f55f-e711-9417-901b0e53171f',
+    name: 'Ash Premium',
+    price: 242,
+    badge: 'Standard Selection',
+    badgeColor: 'bg-slate-100 text-slate-700 border-slate-300',
+    subtitle: 'Straight grain • Kiln-seasoned baseline',
+    selection: 'Kiln-Dried North American Ash',
+    grain: 'Clean longitudinal grain with standard arrow chevrons',
+    flex: 'Balanced flex profile & natural feedback',
+    description: 'Carefully seasoned North American Ash offering dependable straightness, balanced flex, and natural cue response. An exceptional standard choice for dedicated club and league players.',
+    bestFor: 'Club & league play, players seeking traditional quality at baseline pricing'
+  },
+  'Ash Premium plus': {
+    id: '4342380b-f55f-e711-9417-901b0e53171f',
+    name: 'Ash Premium plus',
+    price: 394,
+    badge: 'Enhanced Selection',
+    badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
+    subtitle: 'Tighter arrows • Enhanced stiffness',
+    selection: 'Top 15% Hand-Sorted Ash',
+    grain: 'Closer spacing with 2–4 defined forward-facing chevrons',
+    flex: 'Medium-firm stiffness with reduced deflection',
+    description: 'Hand-sorted for tighter grain spacing and more pronounced chevron arrows. Offers reduced cue-ball deflection, firmer power transfer, and increased longitudinal stability.',
+    bestFor: 'Intermediate to advanced players wanting tighter feedback on power shots'
+  },
+  'Ash Executive': {
+    id: '4242380b-f55f-e711-9417-901b0e53171f',
+    name: 'Ash Executive',
+    price: 585,
+    badge: 'Top 5% Selection',
+    badgeColor: 'bg-emerald-50 text-emerald-800 border-emerald-300',
+    subtitle: 'Top 5% timber billet • 4–6 even chevrons',
+    selection: 'Top 5% Seasoned Timber Reserve',
+    grain: 'Dense parallel side grains & 4–6 bold, uniform face chevrons',
+    flex: 'Firm & responsive with minimal tip vibration',
+    description: 'Drawn from the top 5% of seasoned ash stock. Features exceptionally straight side grain and 4–6 bold, uniform face chevrons. Extended air curing delivers superior acoustic hit and minimal tip deflection.',
+    bestFor: 'Competitive tournament players seeking superior consistency and distinct feel'
+  },
+  'Ash Professional': {
+    id: '4142380b-f55f-e711-9417-901b0e53171f',
+    name: 'Ash Professional',
+    price: 924,
+    badge: 'Top 1% Master Reserve',
+    badgeColor: 'bg-amber-50 text-amber-900 border-amber-300',
+    subtitle: 'Top 1% tournament reserve • Ultra-dense, master tested',
+    selection: 'Top 1% Master Craftsman Reserve',
+    grain: 'Ultra-dense micro-growth rings with flawless chevron symmetry',
+    flex: 'Maximum power transfer, zero directional flex bias',
+    description: 'Master craftsman reserve timber from the finest 1% of harvested billets. Perfectly symmetrical grain distribution with zero directional flex bias. Individually tone-tested for maximum power transfer and pinpoint cue-ball positioning.',
+    bestFor: 'Professional tour players and connoisseurs demanding uncompromising precision'
+  },
+  'Maple': {
+    id: '4642380b-f55f-e711-9417-901b0e53171f',
+    name: 'Maple',
+    price: 334,
+    badge: 'Canadian Hard Rock',
+    badgeColor: 'bg-stone-100 text-stone-800 border-stone-300',
+    subtitle: 'Canadian Hard Rock • Dense, silky arrow-free hit',
+    selection: 'Select Eastern Canadian Hard Rock Maple',
+    grain: 'Uniform fine grain with no arrow markings',
+    flex: 'Solid & stiff with smooth hand glide',
+    description: 'Dense Eastern Canadian Hard Rock Maple with a silky-smooth hand glide. Free of chevron arrows for an uncluttered sightline down the cue, providing a firm, solid hit favored in modern pool.',
+    bestFor: 'Players preferring an arrow-free shaft with a firm, solid response'
+  }
+};
+
+
 export const CUE_LENGTHS: CueLength[] = [
   {
     "noButtTimber": true,

@@ -29,6 +29,7 @@ import {
   CUE_PLATES,
   CUE_EXTENSIONS,
   CUE_MINI_BUTTS,
+  SHAFT_GRADE_DETAILS,
 } from '@/lib/cueData';
 
 import {
@@ -170,6 +171,7 @@ export const CustomizerSidebar: React.FC<CustomizerSidebarProps> = ({ cue, onCha
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {CUE_SHAFTS.map((shaft) => {
                   const isSelected = cue.shaft?.id === shaft.id;
+                  const gradeDetails = SHAFT_GRADE_DETAILS[shaft.name];
                   return (
                     <button
                       key={shaft.id}
@@ -180,13 +182,29 @@ export const CustomizerSidebar: React.FC<CustomizerSidebarProps> = ({ cue, onCha
                           : 'border-slate-200 bg-slate-50/60 hover:border-slate-300'
                       }`}
                     >
-                      <div className="flex items-center justify-between w-full mb-1">
-                        <span className="text-xs font-semibold text-slate-900">{shaft.name}</span>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-amber-600" />}
+                      <div className="flex items-start justify-between w-full mb-1 gap-1">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-xs font-semibold text-slate-900">{shaft.name}</span>
+                            {gradeDetails?.badge && (
+                              <span className={`text-[9.5px] font-semibold px-1.5 py-0.5 rounded border leading-tight ${gradeDetails.badgeColor}`}>
+                                {gradeDetails.badge}
+                              </span>
+                            )}
+                          </div>
+                          {gradeDetails?.subtitle && (
+                            <p className="text-[10.5px] text-slate-500 mt-1 line-clamp-1 leading-snug">
+                              {gradeDetails.subtitle}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0 pt-0.5">
+                          <span className="text-xs font-mono font-bold text-amber-700">
+                            £{shaft.price}
+                          </span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-amber-600" />}
+                        </div>
                       </div>
-                      <span className="text-xs font-mono font-bold text-amber-700">
-                        £{shaft.price}
-                      </span>
                     </button>
                   );
                 })}

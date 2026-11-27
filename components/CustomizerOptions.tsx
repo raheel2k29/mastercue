@@ -29,6 +29,7 @@ import {
   CUE_PLATES,
   CUE_EXTENSIONS,
   CUE_MINI_BUTTS,
+  SHAFT_GRADE_DETAILS,
 } from '@/lib/cueData';
 
 import { usePricing } from '@/context/PricingContext';
@@ -70,6 +71,9 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowRight,
+  HelpCircle,
+  Info,
+  X,
 } from 'lucide-react';
 
 const TABS = [
@@ -102,6 +106,7 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
   const [completedTabs, setCompletedTabs] = useState<string[]>([]);
   const [spliceType, setSpliceType] = useState<'large' | 'small'>('large');
   const [isHighlighted, setIsHighlighted] = useState(false);
+  const [showGradeModal, setShowGradeModal] = useState(false);
 
   useEffect(() => {
     if (highlightTrigger && highlightTrigger > 0) {
@@ -281,7 +286,7 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                   : 'bg-transparent'
               }`}
             >
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="text-sm font-bold text-slate-900">Shaft Wood & Grade</h3>
@@ -295,45 +300,106 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                     Premium timber species and straightness grading.
                   </p>
                 </div>
-                <span className="text-xs text-amber-700 font-mono font-bold shrink-0">
-                  {cue.shaft ? `£${cue.shaft.price}` : 'Select to start'}
-                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowGradeModal(true)}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-900 bg-amber-50 hover:bg-amber-100/80 border border-amber-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer shadow-2xs"
+                    title="View side-by-side shaft grade differences"
+                  >
+                    <HelpCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <span>Grade Differences</span>
+                  </button>
+                  <span className="text-xs text-amber-700 font-mono font-bold shrink-0">
+                    {cue.shaft ? `£${cue.shaft.price}` : 'Select to start'}
+                  </span>
+                </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {catalog.shafts.map((shaft) => {
                   const isSelected = cue.shaft?.id === shaft.id;
                   const isEnabled = shaft.enabled !== false;
+                  const gradeDetails = SHAFT_GRADE_DETAILS[shaft.name];
+
                   return (
                     <button
                       key={shaft.id}
                       disabled={!isEnabled}
                       onClick={() => updateCue({ shaft })}
-                      className={`flex items-center justify-between p-3 rounded-xl border text-left transition-all ${
+                      className={`flex flex-col p-3 rounded-xl border text-left transition-all ${
                         isSelected
                           ? 'border-amber-500 bg-amber-50/70 ring-1 ring-amber-500'
                           : isHighlighted
                           ? 'border-amber-300 bg-white hover:border-amber-400 hover:bg-amber-50/60 shadow-xs'
                           : isEnabled
-                          ? 'border-slate-200 bg-slate-50/50 hover:border-slate-300'
+                          ? 'border-slate-200 bg-slate-50/50 hover:border-slate-300 hover:bg-slate-50'
                           : 'border-slate-100 bg-slate-50/20 opacity-50 cursor-not-allowed'
                       }`}
                     >
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-semibold text-slate-900">{shaft.name}</span>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />}
-                        {!isEnabled && (
-                          <span className="text-[10px] text-red-500 bg-red-50 px-1 py-0.5 rounded font-medium">
-                            Unavailable
+                      <div className="flex items-start justify-between w-full gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-xs font-bold text-slate-900">{shaft.name}</span>
+                            {gradeDetails?.badge && (
+                              <span className={`text-[9.5px] font-semibold px-1.5 py-0.5 rounded border leading-tight ${gradeDetails.badgeColor}`}>
+                                {gradeDetails.badge}
+                              </span>
+                            )}
+                          </div>
+                          {gradeDetails?.subtitle && (
+                            <p className="text-[11px] text-slate-500 mt-1 line-clamp-1 leading-snug">
+                              {gradeDetails.subtitle}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
+                          <span className="text-xs font-mono font-bold text-amber-700">
+                            £{shaft.price}
                           </span>
-                        )}
+                          {isSelected && <Check className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />}
+                        </div>
                       </div>
-                      <span className="text-xs font-mono font-bold text-amber-700">
-                        £{shaft.price}
-                      </span>
                     </button>
                   );
                 })}
               </div>
+
+              {/* Selected Grade Contextual Breakdown Card */}
+              {cue.shaft && SHAFT_GRADE_DETAILS[cue.shaft.name] && (
+                <div className="bg-amber-50/50 border border-amber-200/70 rounded-xl p-3.5 text-xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-900 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                      {cue.shaft.name} Grade Breakdown
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowGradeModal(true)}
+                      className="text-[11px] text-amber-800 hover:text-amber-950 underline font-medium cursor-pointer"
+                    >
+                      Compare all 5 grades
+                    </button>
+                  </div>
+                  <p className="text-slate-600 leading-relaxed text-[11.5px]">
+                    {SHAFT_GRADE_DETAILS[cue.shaft.name].description}
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-amber-200/50 text-[11px]">
+                    <div>
+                      <span className="text-slate-400 font-medium">Grain & Arrows: </span>
+                      <span className="text-slate-700 font-semibold">{SHAFT_GRADE_DETAILS[cue.shaft.name].grain}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-medium">Flex & Deflection: </span>
+                      <span className="text-slate-700 font-semibold">{SHAFT_GRADE_DETAILS[cue.shaft.name].flex}</span>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <span className="text-slate-400 font-medium">Best For: </span>
+                      <span className="text-slate-700 font-semibold">{SHAFT_GRADE_DETAILS[cue.shaft.name].bestFor}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Cue Length */}
@@ -1549,6 +1615,139 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
           </button>
         )}
       </div>
+
+      {/* Shaft Grade Differences Modal */}
+      {showGradeModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+          onClick={() => setShowGradeModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-start justify-between p-5 border-b border-slate-100 bg-slate-50/70">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="p-1.5 rounded-lg bg-amber-100 text-amber-800">
+                    <Sparkles className="w-4 h-4" />
+                  </span>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                    Shaft Timber &amp; Grading Comparison
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Understanding why cue shaft prices vary: timber rarity, chevron symmetry, and deflection control.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowGradeModal(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-5 space-y-4 overflow-y-auto flex-1 min-h-0 text-xs">
+              <div className="bg-amber-50/70 border border-amber-200/70 rounded-xl p-3 text-amber-950 flex items-start gap-2.5">
+                <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <p className="leading-relaxed">
+                  Every Master Cue shaft is crafted from genuine slow-cured North American Ash or Eastern Canadian Hard Rock Maple.
+                  The price progression reflects the <strong>rarity of timber harvest selection</strong>, <strong>grain density &amp; chevron symmetry</strong>, and <strong>testing tolerances for deflection &amp; power transfer</strong>.
+                </p>
+              </div>
+
+              {/* Comparison List / Cards */}
+              <div className="space-y-3">
+                {catalog.shafts.map((shaft) => {
+                  const grade = SHAFT_GRADE_DETAILS[shaft.name];
+                  const isCurrent = cue.shaft?.id === shaft.id;
+                  if (!grade) return null;
+
+                  return (
+                    <div
+                      key={shaft.id}
+                      className={`p-4 rounded-xl border transition-all ${
+                        isCurrent
+                          ? 'border-amber-500 bg-amber-50/40 ring-1 ring-amber-500'
+                          : 'border-slate-200 bg-white hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-100">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="text-sm font-bold text-slate-900">{shaft.name}</h4>
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${grade.badgeColor}`}>
+                            {grade.badge}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-mono font-extrabold text-amber-700">
+                            £{shaft.price}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              updateCue({ shaft });
+                              setShowGradeModal(false);
+                            }}
+                            className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all cursor-pointer ${
+                              isCurrent
+                                ? 'bg-amber-600 text-white shadow-xs'
+                                : 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs'
+                            }`}
+                          >
+                            {isCurrent ? '✓ Selected' : `Select £${shaft.price}`}
+                          </button>
+                        </div>
+                      </div>
+
+                      <p className="text-slate-600 my-2.5 leading-relaxed text-xs">
+                        {grade.description}
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 pt-2 text-[11px] bg-slate-50/70 p-2.5 rounded-lg border border-slate-100">
+                        <div>
+                          <div className="text-slate-400 font-medium">Timber Harvest</div>
+                          <div className="text-slate-800 font-semibold mt-0.5">{grade.selection}</div>
+                        </div>
+                        <div>
+                          <div className="text-slate-400 font-medium">Chevrons &amp; Grain</div>
+                          <div className="text-slate-800 font-semibold mt-0.5">{grade.grain}</div>
+                        </div>
+                        <div>
+                          <div className="text-slate-400 font-medium">Flex &amp; Stability</div>
+                          <div className="text-slate-800 font-semibold mt-0.5">{grade.flex}</div>
+                        </div>
+                        <div>
+                          <div className="text-slate-400 font-medium">Best Suited For</div>
+                          <div className="text-slate-800 font-semibold mt-0.5">{grade.bestFor}</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3.5 border-t border-slate-100 bg-slate-50/70 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowGradeModal(false)}
+                className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition-colors cursor-pointer"
+              >
+                Close Guide
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
