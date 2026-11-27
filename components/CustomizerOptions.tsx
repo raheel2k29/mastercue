@@ -594,6 +594,8 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                   </div>
                   <div className="flex gap-1">
                     <button
+                      id="thread-fitted-yes-btn"
+                      type="button"
                       onClick={() => updateCue({ endButtJoin: true })}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                         cue.endButtJoin
@@ -604,6 +606,8 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                       Yes
                     </button>
                     <button
+                      id="thread-fitted-no-btn"
+                      type="button"
                       onClick={() => updateCue({ endButtJoin: false })}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                         !cue.endButtJoin
@@ -628,6 +632,8 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                   </div>
                   <div className="flex gap-1">
                     <button
+                      id="dome-joint-yes-btn"
+                      type="button"
                       onClick={() => updateCue({ dome: true })}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                         cue.dome
@@ -638,6 +644,8 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                       Yes
                     </button>
                     <button
+                      id="dome-joint-no-btn"
+                      type="button"
                       onClick={() => updateCue({ dome: false })}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                         !cue.dome
