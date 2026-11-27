@@ -1355,13 +1355,20 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
             {!extensionCondition.allowed ? (
               <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3 max-w-xl">
                 <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                <div>
+                <div className="space-y-1.5">
                   <span className="text-sm font-bold text-amber-900 block">
-                    Accessories Conditionally Disabled
+                    Extensions &amp; Mini Butt Require Thread Fitting
                   </span>
-                  <span className="text-xs text-amber-800 mt-0.5 block">
-                    {extensionCondition.reason}. Go to the &quot;Butt & Joint&quot; tab and set Butt Joint to &quot;Yes&quot; to enable extensions.
+                  <span className="text-xs text-amber-800 block leading-relaxed">
+                    Screw-in extensions and mini butts require an End Butt Joint thread fitting (+£{catalog.surcharges.buttJointFittingPrice}) at the base of the cue.
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => updateCue({ endButtJoin: true })}
+                    className="mt-2 px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs inline-flex items-center gap-1.5 transition shadow-xs active:scale-95 cursor-pointer"
+                  >
+                    <span>Enable Thread Fitted (+£{catalog.surcharges.buttJointFittingPrice})</span>
+                  </button>
                 </div>
               </div>
             ) : (

@@ -810,13 +810,20 @@ export const CustomizerSidebar: React.FC<CustomizerSidebarProps> = ({ cue, onCha
             {!extensionCondition.allowed ? (
               <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                <div>
+                <div className="space-y-1.5">
                   <span className="text-xs font-bold text-amber-900 block">
-                    Accessories Conditionally Disabled
+                    Extensions &amp; Mini Butt Require Thread Fitting
                   </span>
-                  <span className="text-[11px] text-amber-800 mt-0.5 block">
-                    {extensionCondition.reason}. Go to the &quot;Joint & Butt&quot; tab and set Butt Joint to &quot;Yes&quot; to attach mini butts and extensions.
+                  <span className="text-[11px] text-amber-800 block">
+                    Screw-in extensions and mini butts require an End Butt Joint thread fitting (+£12) at the base of the cue.
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => updateCue({ endButtJoin: true })}
+                    className="mt-2 px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs inline-flex items-center gap-1 transition shadow-xs"
+                  >
+                    <span>Enable Thread Fitted (+£12)</span>
+                  </button>
                 </div>
               </div>
             ) : (

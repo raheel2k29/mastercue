@@ -563,7 +563,7 @@ export function getDefaultCue(): CueConfiguration {
     buttJoint: defaultJoint,
     buttTimber: defaultButtTimber,
     dome: false,
-    endButtJoin: true,
+    endButtJoin: false,
     domeLayer: null,
     weight: 18,
     largeSplices: 0,
