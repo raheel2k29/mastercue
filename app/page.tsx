@@ -324,6 +324,7 @@ function CueCustomizerContent() {
                   )}
                 </div>
                 <button
+                  id="main-order-cue-btn"
                   onClick={() => {
                     if (!cue.shaft) {
                       triggerShaftHighlight();
