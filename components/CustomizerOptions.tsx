@@ -77,6 +77,7 @@ import {
   HelpCircle,
   Info,
   X,
+  Truck,
 } from 'lucide-react';
 
 const TABS = [
@@ -96,6 +97,7 @@ interface CustomizerOptionsProps {
   onChange: (updated: CueConfiguration) => void;
   onOpenCheckout?: () => void;
   highlightTrigger?: number;
+  onOpenLeadTimes?: () => void;
 }
 
 export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
@@ -103,6 +105,7 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
   onChange,
   onOpenCheckout,
   highlightTrigger = 0,
+  onOpenLeadTimes,
 }) => {
   const [activeTab, setActiveTab] = useState<TabId>('general');
   const [completedTabs, setCompletedTabs] = useState<string[]>([]);
@@ -1423,6 +1426,49 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                     +{catalog.surcharges.defaultCurrency || '£'}{catalog.surcharges.priorityCraftingPrice ?? 40} Expedited
                   </span>
                 </button>
+              </div>
+
+              {/* Lead Times & Express Delivery Clarification Box */}
+              <div id="lead-times-clarification-box" className="bg-sky-50/70 border border-sky-200/80 rounded-xl p-3.5 text-xs space-y-2 mt-2">
+                <div className="flex items-center justify-between flex-wrap gap-1">
+                  <span className="font-bold text-sky-950 flex items-center gap-1.5">
+                    <Truck className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                    <span>Lead Times &amp; Express Delivery Clarified</span>
+                  </span>
+                  {onOpenLeadTimes && (
+                    <button
+                      type="button"
+                      id="view-lead-times-modal-btn"
+                      onClick={onOpenLeadTimes}
+                      className="text-[11px] font-semibold text-sky-800 hover:text-sky-950 underline cursor-pointer"
+                    >
+                      View Detailed Schedule →
+                    </button>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-sky-950">
+                  <div className="bg-white/80 p-2.5 rounded-lg border border-sky-100 space-y-1">
+                    <div className="font-bold text-slate-900 flex items-center gap-1">
+                      <span>🔨 Workshop Crafting:</span>
+                      <span className="text-amber-800 font-extrabold">{cue.priorityService ? '6 Weeks' : '10–12 Weeks'}</span>
+                    </div>
+                    <p className="text-slate-600 leading-snug">
+                      Natural hardwood seasoning, progressive taper turning, hand-splicing, and multi-stage oil curing.
+                    </p>
+                  </div>
+                  <div className="bg-white/80 p-2.5 rounded-lg border border-sky-100 space-y-1">
+                    <div className="font-bold text-slate-900 flex items-center gap-1">
+                      <span>🚚 What &quot;Express&quot; Means:</span>
+                      <span className="text-emerald-800 font-extrabold">1–2 Days UK / 3–5 Days World</span>
+                    </div>
+                    <p className="text-slate-600 leading-snug">
+                      &quot;Express&quot; refers strictly to transit courier speed once crafting &amp; acoustic QA testing are complete.
+                    </p>
+                  </div>
+                </div>
+                <p className="text-[10.5px] text-sky-800/80 leading-normal pt-0.5">
+                  🛡️ All cues dispatch in heavy-duty reinforced transit tubes via tracked DPD / DHL Express with signature &amp; full transit insurance included free.
+                </p>
               </div>
             </div>
 

@@ -497,6 +497,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       {(completedOrder.serviceLevel === 'priority' || completedOrder.cue.priorityService) ? '⚡ Priority Service (Within 6 Weeks)' : 'Standard (10–12 Weeks)'}
                     </span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Express Courier:</span>
+                    <span className="font-bold text-emerald-700">Tracked Express (1–2d UK / 3–5d World)</span>
+                  </div>
                   {completedOrder.cue.case && completedOrder.cue.case.id !== 'case_none' && (
                     <div className="flex justify-between">
                       <span className="text-slate-500">Bundled Cue Case:</span>
@@ -678,15 +682,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         <span className="font-semibold text-white">{cue.extensions.map(e => e.name).join(', ')}</span>
                       </div>
                     )}
-                    <div className="flex justify-between pt-1.5 text-emerald-400 font-medium">
-                      <span>Insured Courier Delivery:</span>
-                      <span className="font-bold">FREE</span>
-                    </div>
                     <div className="flex justify-between pt-1.5">
-                      <span className="text-slate-400">Crafting Turnaround:</span>
+                      <span className="text-slate-400">Workshop Crafting:</span>
                       <span className={priorityService ? 'font-bold text-amber-400 flex items-center gap-1' : 'font-semibold text-white'}>
-                        {priorityService ? '⚡ Priority (6 Wks)' : 'Standard (10-12 Wks)'}
+                        {priorityService ? '⚡ Priority Slot (6 Weeks)' : 'Standard Queue (10–12 Weeks)'}
                       </span>
+                    </div>
+                    <div className="flex justify-between pt-1.5 text-emerald-400 font-medium">
+                      <span>Insured Express Courier:</span>
+                      <span className="font-bold">FREE (1–2d UK / 3–5d World)</span>
                     </div>
                     {priorityService && (
                       <div className="flex justify-between pt-1.5 text-amber-400 font-medium">
@@ -721,7 +725,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   </div>
                   <div className="flex items-center gap-2">
                     <Truck className="w-4 h-4 text-sky-600 flex-shrink-0" />
-                    <span>Tracked worldwide delivery with premium hard tube</span>
+                    <span>Insured tracked express courier (1–2d UK / 3–5d Int) once handcrafted</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-amber-600 flex-shrink-0" />
@@ -982,6 +986,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       <div className="text-[11px] font-bold text-amber-800 font-mono mt-1">+£40 Expedited</div>
                     </button>
                   </div>
+                  <p className="text-[10.5px] text-slate-500 mt-1.5 flex items-center gap-1">
+                    <Truck className="w-3 h-3 text-sky-600 shrink-0" />
+                    <span>Express courier dispatch (1–2 days UK / 3–5 days International) begins once handcrafting and quality oil-curing are complete.</span>
+                  </p>
                 </div>
 
 

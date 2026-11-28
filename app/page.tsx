@@ -26,6 +26,9 @@ import {
   User,
   Lock,
   Info,
+  Clock,
+  Zap,
+  X,
 } from 'lucide-react';
 
 function CueCustomizerContent() {
@@ -34,6 +37,7 @@ function CueCustomizerContent() {
   const [isStorageLoaded, setIsStorageLoaded] = useState(false);
   const [restoredBanner, setRestoredBanner] = useState(false);
   const [showSpecsModal, setShowSpecsModal] = useState(false);
+  const [showLeadTimeModal, setShowLeadTimeModal] = useState(false);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [customer, setCustomer] = useState<{ id: string; email: string; fullName: string } | null>(null);
@@ -284,11 +288,22 @@ function CueCustomizerContent() {
                   <span className="font-medium hidden sm:inline">Hand-Spliced Craft</span>
                   <span className="font-medium sm:hidden">Hand-Spliced</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Truck className="w-4 h-4 text-sky-600 flex-shrink-0" />
-                  <span className="font-medium hidden sm:inline">Global Express Delivery</span>
-                  <span className="font-medium sm:hidden">Express</span>
-                </div>
+                <button
+                  type="button"
+                  id="quick-strip-lead-times-btn"
+                  onClick={() => setShowLeadTimeModal(true)}
+                  className="flex items-center gap-1.5 text-xs text-slate-700 hover:text-sky-950 transition cursor-pointer group bg-sky-50/80 hover:bg-sky-100/80 border border-sky-200/70 px-2.5 py-1 rounded-lg"
+                  title="Click to view detailed manufacturing lead times & express delivery breakdown"
+                >
+                  <Truck className="w-4 h-4 text-sky-600 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                  <span className="font-semibold hidden sm:inline">
+                    Express Delivery ({cue.priorityService ? '6 wks craft' : '10–12 wks craft'} + 1–3d courier)
+                  </span>
+                  <span className="font-semibold sm:hidden">
+                    Lead Times ({cue.priorityService ? '6 wks' : '10–12 wks'})
+                  </span>
+                  <Info className="w-3.5 h-3.5 text-sky-500 group-hover:text-sky-700 shrink-0" />
+                </button>
               </div>
 
               {/* Current Price & Order Widget */}
@@ -541,6 +556,7 @@ function CueCustomizerContent() {
               onChange={setCue}
               onOpenCheckout={() => setShowCheckoutModal(true)}
               highlightTrigger={highlightShaftTrigger}
+              onOpenLeadTimes={() => setShowLeadTimeModal(true)}
             />
           </div>
         </div>
@@ -732,6 +748,43 @@ function CueCustomizerContent() {
                   )}
                 </div>
               </div>
+
+              {/* Expected Lead Times & Express Delivery Breakdown */}
+              <div className="pt-2 border-t border-slate-200/80">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Manufacturing &amp; Express Delivery
+                  </span>
+                  <button
+                    type="button"
+                    id="specs-modal-lead-times-link"
+                    onClick={() => {
+                      setShowSpecsModal(false);
+                      setShowLeadTimeModal(true);
+                    }}
+                    className="text-[10.5px] font-semibold text-sky-700 hover:text-sky-900 underline cursor-pointer"
+                  >
+                    Details ℹ️
+                  </button>
+                </div>
+                <div className="space-y-1 text-xs">
+                  <div className="flex items-center justify-between py-0.5">
+                    <span className="text-slate-600">Workshop Crafting:</span>
+                    <span className={`font-semibold shrink-0 ${cue.priorityService ? 'text-amber-700 font-bold' : 'text-slate-900'}`}>
+                      {cue.priorityService ? '⚡ 6 Weeks Priority Slot' : '10–12 Weeks Standard Queue'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-0.5">
+                    <span className="text-slate-600">Insured Express Courier:</span>
+                    <span className="font-semibold text-emerald-700 shrink-0">
+                      1–2d UK / 3–5d Worldwide (Free)
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 italic pt-0.5">
+                    * &quot;Express&quot; refers to courier transit speed once handcrafting and oil curing are completed.
+                  </p>
+                </div>
+              </div>
               <div className="flex justify-between py-2 text-sm font-bold border-t border-slate-200">
                 <span className="text-slate-800">Current Price:</span>
                 {cue.shaft ? (
@@ -764,6 +817,163 @@ function CueCustomizerContent() {
               >
                 <span>{cue.shaft ? 'Proceed to Checkout' : 'Select Shaft First'}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lead Times & Express Delivery Explanatory Modal */}
+      {showLeadTimeModal && (
+        <div
+          id="lead-times-modal-backdrop"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in"
+          onClick={() => setShowLeadTimeModal(false)}
+        >
+          <div
+            id="lead-times-modal-card"
+            className="bg-white rounded-3xl max-w-xl w-full p-6 space-y-5 shadow-2xl border border-slate-200 relative max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center text-sky-700 shrink-0">
+                  <Truck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-950">
+                    Lead Times &amp; Express Delivery Explained
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Complete breakdown of crafting schedules and courier dispatch.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                id="close-lead-times-modal-btn"
+                onClick={() => setShowLeadTimeModal(false)}
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Current Cue Selection Lead Time Banner */}
+            <div id="current-schedule-card" className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2">
+                {cue.priorityService ? (
+                  <Zap className="w-4 h-4 text-amber-600 fill-amber-500 shrink-0" />
+                ) : (
+                  <Clock className="w-4 h-4 text-amber-700 shrink-0" />
+                )}
+                <div>
+                  <span className="font-bold text-slate-900 block">
+                    Your Current Schedule: {cue.priorityService ? '⚡ Priority Fast-Track' : 'Standard Bespoke Queue'}
+                  </span>
+                  <span className="text-slate-600 text-[11px]">
+                    {cue.priorityService
+                      ? '6 weeks workshop crafting + 1–3 days insured courier delivery'
+                      : '10–12 weeks workshop crafting + 1–3 days insured courier delivery'}
+                  </span>
+                </div>
+              </div>
+              <span className="font-mono font-bold px-2.5 py-1 rounded-lg bg-white border border-amber-200 text-amber-900 text-[11px] shrink-0">
+                {cue.priorityService ? '6 WEEKS' : '10–12 WEEKS'}
+              </span>
+            </div>
+
+            {/* Crucial "What Express Refers To" Callout */}
+            <div id="what-express-means-box" className="bg-sky-50 border border-sky-200 rounded-2xl p-4 text-xs space-y-2">
+              <div className="flex items-center gap-2 text-sky-950 font-bold">
+                <Info className="w-4 h-4 text-sky-600 shrink-0" />
+                <span>What Does &quot;Express&quot; Refer To?</span>
+              </div>
+              <p className="text-slate-700 leading-relaxed text-[11.5px]">
+                <strong className="text-slate-900">&quot;Express&quot; refers strictly to the transit speed of our tracked courier partner</strong> (DPD / Royal Mail Special Delivery in the UK, DHL Express Worldwide) <em>once your cue has finished handcrafting, oil curing, and acoustic inspection</em>.
+              </p>
+              <p className="text-slate-600 leading-relaxed text-[11px]">
+                ⚠️ <em>Bespoke pool and snooker cues cannot be manufactured in 2–3 days.</em> Wood timber requires progressive taper turning, internal stress relief between cuts, hand-spliced butt assembly, and slow-cure Danish oil finishing to ensure straightness and lifetime playability.
+              </p>
+            </div>
+
+            {/* 3-Stage Process Timeline */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                Full Production &amp; Delivery Timeline
+              </h4>
+
+              <div className="space-y-2.5 text-xs">
+                {/* Stage 1 */}
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                    1
+                  </div>
+                  <div className="space-y-0.5 min-w-0 flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-900">Stage 1: Workshop Handcrafting</span>
+                      <span className="text-[11px] font-bold text-amber-800 bg-amber-100/60 px-2 py-0.5 rounded">
+                        10–12 Wks (Std) / 6 Wks (Priority)
+                      </span>
+                    </div>
+                    <p className="text-slate-600 text-[11px] leading-snug">
+                      Graded ash or maple timber is turned in multiple stages with resting intervals to avoid warping. Ebony hand-splicing, exotic wood inlays, brass or titanium joints, and weight balance coring are completed by our master craftsman.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Stage 2 */}
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                    2
+                  </div>
+                  <div className="space-y-0.5 min-w-0 flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-900">Stage 2: Multi-Stage Oil Curing &amp; QA Inspection</span>
+                      <span className="text-[11px] font-semibold text-slate-500">
+                        Final 7–10 Days of Crafting
+                      </span>
+                    </div>
+                    <p className="text-slate-600 text-[11px] leading-snug">
+                      Multiple coats of natural slow-cure oil are hand-rubbed and buffed to build a smooth, moisture-resistant finish. Acoustic resonance testing, straightness laser check, and tip dressing are verified before signing off.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Stage 3 */}
+                <div className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200 flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                    3
+                  </div>
+                  <div className="space-y-0.5 min-w-0 flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-emerald-950 flex items-center gap-1">
+                        <Truck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span>Stage 3: Insured Tracked Express Courier Dispatch</span>
+                      </span>
+                      <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                        1–2 Days UK / 3–5 Days World
+                      </span>
+                    </div>
+                    <p className="text-emerald-900/80 text-[11px] leading-snug">
+                      Packed securely inside a heavy-duty reinforced transit cylinder with 100% loss/damage insurance. Real-time courier tracking number sent via SMS and email with signature required on delivery.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-end">
+              <button
+                type="button"
+                id="got-it-lead-times-btn"
+                onClick={() => setShowLeadTimeModal(false)}
+                className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow transition cursor-pointer"
+              >
+                Understood
               </button>
             </div>
           </div>
