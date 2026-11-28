@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { CueConfiguration } from '@/types/cue';
 import { generateLayers } from '@/lib/cueEngine';
-import { Download, ZoomIn, ZoomOut, RotateCcw, Loader2, Sparkles } from 'lucide-react';
+import { Download, ZoomIn, ZoomOut, RotateCcw, Loader2, Sparkles, Info, X, ShieldCheck } from 'lucide-react';
 
 interface CueCanvasPreviewProps {
   cue: CueConfiguration;
@@ -17,6 +17,7 @@ export const CueCanvasPreview: React.FC<CueCanvasPreviewProps> = ({ cue }) => {
   const [isPanning, setIsPanning] = useState(false);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [startPan, setStartPan] = useState({ x: 0, y: 0 });
+  const [showDisclaimerModal, setShowDisclaimerModal] = useState(false);
 
   // In-memory image cache
   const imageCacheRef = useRef<Map<string, HTMLImageElement>>(new Map());
@@ -448,6 +449,122 @@ export const CueCanvasPreview: React.FC<CueCanvasPreviewProps> = ({ cue }) => {
           )}
         </div>
       </div>
+
+      {/* Natural Timber Variation Preview Disclaimer Bar */}
+      <div id="preview-disclaimer-bar" className="px-4 py-2.5 bg-slate-50/95 border-t border-slate-200/90 flex items-center justify-between gap-3 text-xs text-slate-600">
+        <div className="flex items-center gap-2 min-w-0">
+          <Info className="w-4 h-4 text-amber-600 shrink-0" />
+          <p className="text-[11px] leading-snug">
+            <span className="font-bold text-slate-900">Preview Disclaimer:</span> Natural timber grain, colours, and splice patterns may vary from this digital representation.
+          </p>
+        </div>
+        <button
+          type="button"
+          id="preview-disclaimer-btn"
+          onClick={() => setShowDisclaimerModal(true)}
+          className="text-[11px] font-semibold text-amber-700 hover:text-amber-900 underline whitespace-nowrap cursor-pointer shrink-0 transition"
+          title="Click to learn how natural timber differs from the digital studio representation"
+        >
+          Why timber varies →
+        </button>
+      </div>
+
+      {/* Natural Timber Variance Explanation Modal */}
+      {showDisclaimerModal && (
+        <div
+          id="timber-disclaimer-modal-backdrop"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in"
+          onClick={() => setShowDisclaimerModal(false)}
+        >
+          <div
+            id="timber-disclaimer-modal-card"
+            className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-slate-200 relative max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-amber-100/80 flex items-center justify-center text-amber-800 shrink-0">
+                  <Info className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-950">
+                    Natural Timber &amp; Digital Preview
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Why natural wood grain, colours, and patterns vary naturally.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                id="close-disclaimer-modal-btn"
+                onClick={() => setShowDisclaimerModal(false)}
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Core Disclaimer Callout */}
+            <div className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/90 text-xs text-amber-950 space-y-1.5 leading-relaxed">
+              <span className="font-bold flex items-center gap-1.5 text-amber-900">
+                <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
+                100% Genuine Seasoned Timber Guarantee
+              </span>
+              <p className="text-[11.5px] text-slate-700">
+                Every Master Cue is handcrafted from genuine seasoned timber. Natural wood grain, colours, and splice patterns will naturally vary from the digital representation shown on your screen.
+              </p>
+            </div>
+
+            {/* Explanation Points */}
+            <div className="space-y-3 text-xs">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
+                <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                  <span>🌲 Natural Ash &amp; Maple Grain Growth</span>
+                </div>
+                <p className="text-[11px] text-slate-600 leading-snug">
+                  Each tree grows under different soil and climate conditions. Arrow chevrons, growth rings, grain density, and subtle mineral flecks are naturally organic and cannot be duplicated.
+                </p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
+                <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                  <span>🎨 Exotic Hardwood Splices &amp; Colour Depth</span>
+                </div>
+                <p className="text-[11px] text-slate-600 leading-snug">
+                  Dense timbers such as Ebony, Rosewood, Cocobolo, and Purpleheart display natural color gradients and figure curl. Multi-stage hand-rubbed oil curing brings out natural highlights unique to each piece.
+                </p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
+                <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                  <span>📱 Screen Calibration vs. Physical Wood</span>
+                </div>
+                <p className="text-[11px] text-slate-600 leading-snug">
+                  Smartphone, tablet, and computer screens use digital RGB backlighting. Physical cured wood reflects natural lighting in your playing room or arena with rich acoustic luster and tactile warmth.
+                </p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-[11px] text-slate-500 italic">
+                Each cue crafted is uniquely one-of-a-kind.
+              </span>
+              <button
+                type="button"
+                id="got-it-disclaimer-btn"
+                onClick={() => setShowDisclaimerModal(false)}
+                className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow transition cursor-pointer"
+              >
+                Understood
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

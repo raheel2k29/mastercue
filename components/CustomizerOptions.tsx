@@ -374,6 +374,12 @@ export const CustomizerOptions: React.FC<CustomizerOptionsProps> = ({
                 })}
               </div>
 
+              {/* Natural Timber Grain & Colour Note */}
+              <p className="text-[10.5px] text-slate-400 italic pt-0.5 flex items-center gap-1">
+                <Info className="w-3 h-3 text-amber-600/70 shrink-0" />
+                <span>Natural timber grain, colours, and growth arrows vary naturally between individual billets.</span>
+              </p>
+
               {/* Selected Grade Contextual Breakdown Card */}
               {cue.shaft && SHAFT_GRADE_DETAILS[cue.shaft.name] && (
                 <div className="bg-amber-50/50 border border-amber-200/70 rounded-xl p-3.5 text-xs space-y-2">

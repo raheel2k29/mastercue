@@ -546,6 +546,14 @@ function CueCustomizerContent() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Natural Timber Variation Note */}
+                  <div className="pt-2.5 border-t border-slate-200/80 flex items-center gap-1.5 text-[11px] text-slate-500">
+                    <Info className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <span>
+                      <strong className="text-slate-700">Preview Disclaimer:</strong> Natural timber grain, colours, and splice patterns may vary from this digital studio representation.
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -785,6 +793,17 @@ function CueCustomizerContent() {
                   </p>
                 </div>
               </div>
+
+              {/* Natural Timber Disclaimer in Specs Modal */}
+              <div className="pt-2 border-t border-slate-200/80">
+                <div className="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/80 flex items-start gap-2 text-[11px] text-slate-600">
+                  <Info className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                  <p className="leading-snug">
+                    <strong className="text-slate-800">Preview Disclaimer:</strong> Natural timber grain, colours, and splice patterns may vary from this digital studio representation. Every bespoke cue is uniquely individual.
+                  </p>
+                </div>
+              </div>
+
               <div className="flex justify-between py-2 text-sm font-bold border-t border-slate-200">
                 <span className="text-slate-800">Current Price:</span>
                 {cue.shaft ? (

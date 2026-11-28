@@ -22,6 +22,7 @@ import {
   Clock,
   Briefcase,
   Shield,
+  Info,
 } from 'lucide-react';
 import { CueConfiguration, CueCase } from '@/types/cue';
 import { OrderRecord } from '@/types/order';
@@ -509,6 +510,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       </span>
                     </div>
                   )}
+                  <div className="pt-2 border-t border-slate-200 text-[10.5px] text-slate-500 italic">
+                    * Natural timber grain, colours, and patterns may vary from the digital representation.
+                  </div>
                 </div>
               </div>
 
@@ -730,6 +734,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-amber-600 flex-shrink-0" />
                     <span>Custom crafted by Master Craftsman to exact specs</span>
+                  </div>
+                  <div className="flex items-start gap-2 pt-2 border-t border-slate-800 text-[10.5px] text-slate-400 leading-snug">
+                    <Info className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5" />
+                    <span>
+                      <strong className="text-slate-300">Preview Disclaimer:</strong> Natural timber grain, colours, and splice patterns may vary from this digital studio representation.
+                    </span>
                   </div>
                 </div>
               </div>
